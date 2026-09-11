@@ -1,0 +1,85 @@
+# ==========================================
+# Credenciais e Arquivos Locais
+# ==========================================
+credentials.h
+firmware/esp32s3_collector/src/config_local.rs
+.env
+.env.local
+.env.*.local
+!.env_exemplo
+*.pem
+*.key
+*.cert
+
+# Arquivos compactados e binários legados
+*.zip
+*.tar.gz
+*.7z
+
+# Datasets brutos de exportação e legados
+dataset_nuvem_export.csv
+dataset/old/
+
+# Configurações do Antigravity / AI Agent IDE
+.agents/
+skills-lock.json
+
+# ==========================================
+# Sistema Operacional, IDEs e Editores
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# C++ (ESP-IDF / PlatformIO / Arduino IDE)
+# ==========================================
+build/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+
+sdkconfig
+sdkconfig.old
+dependencies.lock
+
+.pio/
+.pioenvs/
+.piolibdeps/
+
+app_config.h
+
+*.o
+*.obj
+*.d
+*.elf
+*.bin
+*.map
+
+# ==========================================
+# Rust (Embedded / ESP32)
+# ==========================================
+target/
+.embuild/
+**/*.rs.bk
+rustc-ice-*.txt
+.probe-rs/
+*.pcode
+
+# ==========================================
+# Python (Scripts e Utilitários)
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+env/
+
+*.log

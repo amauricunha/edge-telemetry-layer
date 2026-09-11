@@ -1,0 +1,64 @@
+services:
+  # === InfluxDB (Time-Series Database) ===
+  influxdb:
+    image: influxdb:2
+    container_name: influx_telemetry
+    restart: always
+    ports:
+      - "8897:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_USER:-telemetry}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD:-telemetry_admin_123}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG:-telemetry_org}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET:-telemetry}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-telemetry-dev-token-secret-123}
+    volumes:
+      - influx_telemetry_data:/var/lib/influxdb2
+      - influx_telemetry_config:/etc/influxdb2
+    networks:
+      - telemetry_net
+
+  # === Telegraf (Consumer MQTT + Decoder Starlark + InfluxDB Writer) ===
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf_telemetry
+    restart: always
+    ports:
+      - "8299:8094"
+    command: telegraf --non-strict-env-handling
+    environment:
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-telemetry-dev-token-secret-123}
+      INFLUX_ORG: ${INFLUX_ORG:-telemetry_org}
+      INFLUX_BUCKET: ${INFLUX_BUCKET:-telemetry}
+      MQTT_BROKER_HOST: ${MQTT_BROKER_HOST:-host.docker.internal}
+      MQTT_USER: ${MQTT_USER:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    networks:
+      - telemetry_net
+
+  # === Grafana (Visualização em Tempo Real de Gráficos e Dashboards) ===
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_telemetry
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana_telemetry_data:/var/lib/grafana
+    networks:
+      - telemetry_net
+
+volumes:
+  influx_telemetry_data:
+  influx_telemetry_config:
+  grafana_telemetry_data:
+
+networks:
+  telemetry_net:
+    driver: bridge

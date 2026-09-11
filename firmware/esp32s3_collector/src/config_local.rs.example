@@ -1,0 +1,17 @@
+#![allow(dead_code)]
+
+//! Exemplo de configurações locais de Wi-Fi e Broker MQTT.
+//! Copie este arquivo para `src/config_local.rs` e preencha com seus dados locais.
+
+pub const WIFI_SSID: &str = "YOUR_WIFI_SSID";
+pub const WIFI_PASSWORD: &str = "YOUR_WIFI_PASSWORD";
+
+pub const MQTT_BROKER_IP: &str = "192.168.1.100";
+pub const MQTT_BROKER_OCTETS: [u8; 4] = [192, 168, 1, 100];
+pub const MQTT_BROKER_PORT: u16 = 1883;
+pub const MQTT_USER: &str = "esp32";
+pub const MQTT_PASSWORD: &str = "esp32s3";
+
+pub const MQTT_TOPIC_COMMAND: &str = "/coach/command";
+pub const MQTT_TOPIC_STATUS: &str = "/system/status";
+pub const MQTT_TOPIC_REPLAY: &str = "/telemetry/replay";
