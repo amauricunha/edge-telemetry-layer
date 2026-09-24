@@ -345,7 +345,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Alternar sequencialmente entre os 6 PIDs suportados, completando um ciclo a cada 600 ms.
 
 ---
-
 ### REQ_OBD_003 — Tratamento de Timeout de Diagnóstico [REQ-SYS-10] [Subsistema 3] [Camada APP]
 - **ID:** `REQ_OBD_003`
 - **Parent Requirement ID:** REQ_SYS_10
@@ -361,7 +360,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Se a resposta 0x7E8 não chegar em 50 ms, declarar timeout e registrar log sem suspender o escalonador.
 
 ---
-
 ### REQ_OBD_004 — Intercalação de Comandos de Bancada no Transmissor [REQ-SYS-05] [Subsistema 3] [Camada APP]
 - **ID:** `REQ_OBD_004`
 - **Parent Requirement ID:** REQ_SYS_05
@@ -379,7 +377,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 4: Estruturação de Dados e Bufferização em Memória
-
 ### REQ_LOG_001 — Serialização Determinística em CSV [REQ-SYS-11] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_001`
 - **Parent Requirement ID:** REQ_SYS_11
@@ -395,7 +392,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Converter cada amostra em linha CSV de 11 colunas utilizando buffer estático de 320 bytes sem alocação dinâmica no heap.
 
 ---
-
 ### REQ_LOG_002 — Integridade Estrutural do Dataset [REQ-SYS-12 / AC-04] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_002`
 - **Parent Requirement ID:** REQ_SYS_12
@@ -411,7 +407,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** 100% dos registros gerados devem conter todos os campos mandatórios (timestamp, source, can_id e label) sem campos nulos indevidos (Critério AC-04).
 
 ---
-
 ### REQ_LOG_003 — Inserção no Buffer Circular em SRAM [REQ-SYS-13] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_003`
 - **Parent Requirement ID:** REQ_SYS_13
@@ -427,7 +422,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Inserir a linha formatada no buffer em anel de 4096 bytes em SRAM sob seção crítica rápida inferior a 50 µs.
 
 ---
-
 ### REQ_LOG_004 — Esvaziamento de Buffer por Limiar de Ocupação [REQ-SYS-14] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_004`
 - **Parent Requirement ID:** REQ_SYS_14
@@ -443,7 +437,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Ao atingir 85% de ocupação (3584 bytes), emitir sinal imediato para a tarefa de gravação descarregar os dados.
 
 ---
-
 ### REQ_LOG_005 — Esvaziamento Periódico de Buffer por Temporizador [REQ-SYS-14] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_005`
 - **Parent Requirement ID:** REQ_SYS_14
@@ -459,7 +452,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** A cada 2 segundos de inatividade de escrita, a tarefa de gravação deve persistir quaisquer bytes pendentes no arquivo.
 
 ---
-
 ### REQ_LOG_006 — Fatiamento em Chunks de 256 Bytes com Preempção [REQ-SYS-15] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_006`
 - **Parent Requirement ID:** REQ_SYS_15
@@ -475,7 +467,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Fracionar a gravação no SD em pedaços de 256 bytes e ceder controle à CPU para manter o bloqueio inferior a 0,76 ms.
 
 ---
-
 ### REQ_LOG_007 — Retenção em Backlog de RAM sob Falha do SD [REQ-SYS-23] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_007`
 - **Parent Requirement ID:** REQ_SYS_23
@@ -491,7 +482,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Se a escrita falhar em modo offline, reter os frames no buffer de contingência em RAM (50 elementos / 16 KB) sem descarte imediato.
 
 ---
-
 ### REQ_LOG_008 — Limite de Consumo de Memória SRAM [REQ-SYS-29 / AC-05] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_008`
 - **Parent Requirement ID:** REQ_SYS_29
@@ -507,7 +497,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** O consumo de memória SRAM alocável deve permanecer estritamente contido abaixo de 200 KB durante operação contínua (Critério AC-05).
 
 ---
-
 ### REQ_LOG_009 — Telemetria de Desempenho HEARTBEAT no SD [REQ-SYS-29] [Subsistema 4] [Camada APP]
 - **ID:** `REQ_LOG_009`
 - **Parent Requirement ID:** REQ_SYS_29
@@ -525,7 +514,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 5: Persistência em Cartão MicroSD e Gestão de Sessões
-
 ### REQ_SD_001 — Montagem do Sistema de Arquivos FAT32 [REQ-SYS-16] [Subsistema 5] [Camada BSW]
 - **ID:** `REQ_SD_001`
 - **Parent Requirement ID:** REQ_SYS_16
@@ -543,7 +531,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Durante o boot, se o módulo leitor SPI estiver operacional e o cartão MicroSD estiver fisicamente inserido, o sistema deve inicializar o barramento e montar a partição FAT32 em até 500 ms, assegurando que a mídia de armazenamento esteja pronta e formatada antes do início da telemetria.
 
 ---
-
 ### REQ_SD_002 — Transição Atômica de Arquivos de Sessão [REQ-SYS-17] [Subsistema 5] [Camada BSW]
 - **ID:** `REQ_SD_002`
 - **Parent Requirement ID:** REQ_SYS_17
@@ -558,7 +545,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Ao girar sessão, esvaziar síncronamente o buffer antigo e abrir o novo arquivo indexado S_XXXX.CSV em até 50 ms.
 
 ---
-
 ### REQ_SD_003 — Injeção de Cabeçalho e Linha BOOT [REQ-SYS-17] [Subsistema 5] [Camada BSW]
 - **ID:** `REQ_SD_003`
 - **Parent Requirement ID:** REQ_SYS_17
@@ -573,7 +559,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Gravar o cabeçalho CSV na linha 1 e o metadado BOOT na linha 2 antes de qualquer amostra de telemetria.
 
 ---
-
 ### REQ_SD_004 — Temporização de Sessão Automática [REQ-SYS-18] [Subsistema 5] [Camada BSW]
 - **ID:** `REQ_SD_004`
 - **Parent Requirement ID:** REQ_SYS_18
@@ -589,7 +574,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Ao atingir a duração programada, injetar SESSION_COMPLETE, forçar flush de encerramento e suspender novas gravações.
 
 ---
-
 ### REQ_SD_005 — Volume Consolidado do Dataset [REQ-SYS-11/17 / AC-08] [Subsistema 5] [Camada BSW]
 - **ID:** `REQ_SD_005`
 - **Parent Requirement ID:** REQ_SYS_18
@@ -606,7 +590,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 6: Conectividade em Nuvem e Telemetria Remota
-
 ### REQ_COM_001 — Conexão Wi-Fi e Pilha TCP/IP [REQ-SYS-19] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_001`
 - **Parent Requirement ID:** REQ_SYS_19
@@ -623,7 +606,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Durante a inicialização, validar as credenciais, conectar a interface sem fio em modo Station e obter endereço IP via DHCP através da pilha embassy-net.
 
 ---
-
 ### REQ_COM_005 — Estabelecimento de Conexão com o Broker MQTT [REQ-SYS-19] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_005`
 - **Parent Requirement ID:** REQ_SYS_19
@@ -640,7 +622,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Condicionado à obtenção do IP, o sistema deve validar as credenciais do MQTT e estabelecer a conexão TCP/IP com o broker em até 5000 ms, concluindo a verificação de rede ativa.
 
 ---
-
 ### REQ_COM_002 — Despacho em Lotes Binários via MQTT [REQ-SYS-20] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_002`
 - **Parent Requirement ID:** REQ_SYS_20
@@ -656,7 +637,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Agrupar frames binários compactos de 18 bytes (até 150 registros) e despachá-los no tópico MQTT em até 200 ms.
 
 ---
-
 ### REQ_COM_003 — Publicação Periódica de Status e Keepalive [REQ-SYS-21] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_003`
 - **Parent Requirement ID:** REQ_SYS_21
@@ -672,7 +652,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** A cada 5 segundos com rede ativa, publicar payload JSON contendo saúde do SD, Wi-Fi, contadores e uptime em /system/status.
 
 ---
-
 ### REQ_COM_004 — Tarefa Periódica de Despacho (BSW Com) [REQ-SYS-20] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_004`
 - **Parent Requirement ID:** REQ_SYS_20
@@ -691,7 +670,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 7: Máquina de Estados de Conectividade e Fallback Offline
-
 ### REQ_FSM_001 — Comutação Automática de Fallback em MicroSD [REQ-SYS-23 / AC-06] [Subsistema 7] [Camada APP]
 - **ID:** `REQ_FSM_001`
 - **Parent Requirement ID:** REQ_SYS_23
@@ -707,7 +685,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Na perda do sinal Wi-Fi, registrar evento DIAG e redirecionar 100% dos dados para o cartão SD em até 5 ms (Critério AC-06).
 
 ---
-
 ### REQ_FSM_002 — Reconexão de Rede e Dreno FIFO de Backlog [REQ-SYS-24] [Subsistema 7] [Camada APP]
 - **ID:** `REQ_FSM_002`
 - **Parent Requirement ID:** REQ_SYS_24
@@ -725,7 +702,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 8: Controle Remoto e Streaming de Replay
-
 ### REQ_CMD_001 — Execução de Comandos Remotos de Bancada [REQ-SYS-25] [Subsistema 8] [Camada BSW]
 - **ID:** `REQ_CMD_001`
 - **Parent Requirement ID:** REQ_SYS_25
@@ -740,7 +716,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Interpretar e executar instruções no tópico /coach/command (STOP, ECO/NOR/SPT, RESET, TIME, LIST_SESSIONS) em até 20 ms.
 
 ---
-
 ### REQ_CMD_002 — Transmissão em Streaming de Replay [REQ-SYS-26] [Subsistema 8] [Camada BSW]
 - **ID:** `REQ_CMD_002`
 - **Parent Requirement ID:** REQ_SYS_26
@@ -757,7 +732,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 9: Supervisão de Falhas, Resiliência e Watchdog
-
 ### REQ_REC_001 — Detecção de Erro de Bus-Off no TWAI [REQ-SYS-27] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_001`
 - **Parent Requirement ID:** REQ_SYS_27
@@ -773,7 +747,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Ao detectar o código de erro crítico de saturação elétrica do TWAI, registrar atomicamente o estado de Bus-Off em até 1 ms.
 
 ---
-
 ### REQ_REC_002 — Pausa Cooperativa das Tarefas de Barramento [REQ-SYS-27] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_002`
 - **Parent Requirement ID:** REQ_SYS_27
@@ -788,7 +761,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** O watchdog deve emitir sinal de pausa cooperativa para task_can_rx e task_obd_poller suspenderem tentativas de acesso ao TWAI.
 
 ---
-
 ### REQ_REC_003 — Janela de Espera de 128 ms da Norma ISO 11898 [REQ-SYS-27 / AC-07] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_003`
 - **Parent Requirement ID:** REQ_SYS_27
@@ -803,7 +775,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Aguardar compulsoriamente os 128 ms normatizados para observação de bits recessivos antes de reabilitar o controlador (Critério AC-07).
 
 ---
-
 ### REQ_REC_004 — Reativação via Registradores PAC sem Reboot [REQ-SYS-27 / AC-07] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_004`
 - **Parent Requirement ID:** REQ_SYS_27
@@ -818,7 +789,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
   - **Rationale (Português):** Limpar a flag de reset no registrador físico via PAC sem reiniciar o processador ESP32-S3 e sem destruir tarefas ativas.
 
 ---
-
 ### REQ_REC_005 — Retomada Operacional e Emissão de BUS_OFF_CLEAR [REQ-SYS-27 / AC-07] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_005`
 - **Parent Requirement ID:** REQ_SYS_27
@@ -833,7 +803,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Concluído o rearmamento, emitir BUS_OFF_CLEAR liberando as tarefas e gravar registro de sucesso no log do cartão SD.
 
 ---
-
 ### REQ_REC_006 — Detecção de Travamento de Tarefa (Logger Stall) [REQ-SYS-28] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_006`
 - **Parent Requirement ID:** REQ_SYS_28
@@ -849,7 +818,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Se nenhum frame foi processado pelo logger em 30 segundos de sessão ativa com SD presente, registrar alerta de stall no SD.
 
 ---
-
 ### REQ_REC_007 — Rearme Periódico do Watchdog de Hardware [REQ-SYS-30] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_007`
 - **Parent Requirement ID:** REQ_SYS_30
