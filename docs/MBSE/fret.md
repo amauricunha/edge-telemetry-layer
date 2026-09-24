@@ -64,19 +64,21 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
 
-### REQ_EMU_001 — Perfil de Condução Padrão na Inicialização [REQ-SYS-01]
+### REQ_EMU_001 — Inicialização do MCP2515 e Perfil Padrão [REQ-SYS-01]
 - **ID:** `REQ_EMU_001`
 - **Parent Requirement ID:** REQ_SYS_01
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_complete the uno_ecu_emulator shall immediately satisfy active_profile = 2
+  in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 100 MILLISECOND satisfy can_bus_operational & active_profile = 2
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
-  - `boot_complete`: **Input** (Boolean) — sinaliza fim da inicialização dos timers
-  - `active_profile`: **Output** (Integer) — Perfil ativo (1=Eco, **2=Normal**, 3=Sport)
-- **Rationale (Português):** Ao concluir a inicialização (setup() do Arduino), o emulador deve definir o perfil ativo como **2 (Normal)** antes de receber qualquer comando CAN 0x010. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`.
+  - `boot_trigger`: **Input** (Boolean) — reinicialização ou energização da placa ATmega328P
+  - `mcp2515_hardware_up`: **Input** (Boolean) — módulo MCP2515 e transceptor energizados e respondendo via SPI
+  - `can_bus_operational`: **Output** (Boolean) — barramento inicializado a 500 kbps (CAN_OK), modo MCP_NORMAL ativo e LED de status D4 aceso
+  - `active_profile`: **Output** (Integer) — Perfil ativo de física (1=Eco, **2=Normal**, 3=Sport)
+- **Rationale (Português):** Durante o setup(), ao detectar o hardware do MCP2515 via SPI, o emulador deve configurar o modo normal a 500 kbps, sinalizar o LED de status operacional e definir o perfil ativo como **2 (Normal)** antes de habilitar os timers de interrupção. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`.
 
 ---
 
@@ -103,7 +105,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0
+  in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -115,7 +117,8 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
   - `throttle_pct`: **Output** (Double) — Posição do acelerador (%)
   - `load_pct`: **Output** (Double) — Carga calculada do motor (%)
   - `maf_g_s`: **Output** (Double) — Fluxo de ar MAF (g/s)
-- **Rationale (Português):** A cada ciclo de 50 ms do Timer1 sob perfil ativo válido (`active_profile >= 1`), a CPU do emulador deve calcular as grandezas físicas simuladas do motor (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`) a partir da tabela senoidal modulada pelo perfil em menos de 1 ms de tempo de execução da ISR, assegurando invariantes válidos.
+  - `coolant_temp_c`: **Output** (Double) — Temperatura do líquido de arrefecimento (°C, nominal 87°C)
+- **Rationale (Português):** A cada ciclo de 50 ms do Timer1 sob perfil ativo válido (`active_profile >= 1`), a CPU do emulador deve calcular as 6 grandezas físicas simuladas do motor (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`, `coolant_temp_c`) a partir da tabela senoidal modulada pelo perfil em menos de 1 ms de tempo de execução da ISR, assegurando invariantes válidos.
 
 ---
 
@@ -125,14 +128,15 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session when active_profile >= 1 upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
+  in active_session when active_profile >= 1 & can_bus_operational upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `active_profile`: **Input** (Integer) — Perfil ativo selecionado
+  - `can_bus_operational`: **Input** (Boolean) — Barramento CAN operacional e inicializado
   - `physics_model_updated`: **Input** (Boolean) — Gerado após a conclusão do cálculo físico em REQ_EMU_003
   - `dbc_frames_emitted`: **Output** (Boolean)
-- **Rationale (Português):** Após a conclusão do cálculo do modelo de física (`physics_model_updated`), o emulador deve codificar e transmitir os frames CAN periódicos conforme a DBC (0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms) via SPI/MCP2515 em até 2 ms.
+- **Rationale (Português):** Após a conclusão do cálculo do modelo de física (`physics_model_updated`), com o barramento CAN operacional, o emulador deve codificar e transmitir os frames CAN periódicos conforme a DBC (0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms) via SPI/MCP2515 em até 2 ms.
 
 ---
 
@@ -142,12 +146,13 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  upon timer2_1ms_tick the uno_ecu_emulator shall within 50 MICROSECOND satisfy mcp2515_rx_polled
+  when can_bus_operational upon timer2_1ms_tick the uno_ecu_emulator shall within 50 MICROSECOND satisfy mcp2515_rx_polled
   ```
 - **Variable Mapping:**
+  - `can_bus_operational`: **Input** (Boolean) — Barramento CAN operacional
   - `timer2_1ms_tick`: **Input** (Boolean)
   - `mcp2515_rx_polled`: **Output** (Boolean)
-- **Rationale (Português):** O Timer2 a cada 1 ms deve verificar a chegada de mensagens no MCP2515 sem bloquear a CPU por mais de 50 µs.
+- **Rationale (Português):** Estando o barramento operacional, o Timer2 a cada 1 ms deve verificar a chegada de mensagens no MCP2515 sem bloquear a CPU por mais de 50 µs.
 
 ---
 
