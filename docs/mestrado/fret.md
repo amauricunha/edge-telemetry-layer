@@ -95,8 +95,26 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
   - `commanded_profile`: **Input** (Integer) — Byte 0 do comando CAN (1=Eco, 2=Normal, 3=Sport)
   - `active_profile`: **Output** (Integer) — Perfil ativo de física (1=Eco, 2=Normal, 3=Sport)
 - **Rationale (Português):** Ao receber o comando CAN 0x010, o emulador deve atualizar o perfil de simulação ativo (`active_profile = commanded_profile`, onde 1=Econômico, 2=Normal, 3=Esportivo) no próximo ciclo de física do Timer1 (50 ms).
+- **Nota sobre senoide:** Os valores físicos derivados do perfil (speed_kmh, rpm, throttle_pct etc.) são calculados por tabela senoidal em PROGMEM — esse cálculo é implementação interna e **não é modelado no FRET** (NuSMV/JKind não suportam funções trigonométricas). O que o FRET modela é o contrato de comutação: `active_profile = commanded_profile within 50 MILLISECOND`.
 
 ---
+
+### REQ_EMU_007 — Perfil de Condução Padrão na Inicialização [REQ-SYS-01]
+- **ID:** `REQ_EMU_007`
+- **Parent Requirement ID:** REQ_SYS_01
+- **Component:** `uno_ecu_emulator`
+- **FRETish Text:**
+  ```text
+  in boot_mode upon boot_complete the uno_ecu_emulator shall immediately satisfy active_profile = 2
+  ```
+- **Variable Mapping:**
+  - `boot_mode`: **Internal** (Boolean)
+  - `boot_complete`: **Input** (Boolean) — sinaliza fim da inicialização dos timers
+  - `active_profile`: **Output** (Integer) — Perfil ativo (1=Eco, **2=Normal**, 3=Sport)
+- **Rationale (Português):** ⚠️ **Gap identificado — não coberto explicitamente no SRS.** Ao concluir a inicialização (setup() do Arduino), o emulador deve definir o perfil ativo como **2 (Normal)** antes de receber qualquer comando CAN 0x010. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`. O SRS cobre a *comutação* (REQ-SYS-01), mas não declara o *valor default* — este requisito preenche esse gap para rastreabilidade formal.
+
+---
+
 
 ### REQ_EMU_003 — Processamento de Interrupção de Alta Frequência [REQ-SYS-02]
 - **ID:** `REQ_EMU_003`
