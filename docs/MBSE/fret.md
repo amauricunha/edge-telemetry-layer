@@ -62,6 +62,20 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 
 ---
 
+```
+[SISTEMA: Edge Telemetry Layer]
+   │
+   ├── [COMPONENTE 1: uno_ecu_emulator] (8 requisitos)
+   │     └── Nó Emulador de ECU (ATmega328P + MCP2515)
+   │
+   └── [COMPONENTE 2: esp32s3_collector] (39 requisitos)
+         └── Nó Coletor e Gateway de Borda Integrado
+               ├── [Subsistema 2] [Camada MCAL] (TWAI, SPI2)
+               ├── [Subsistema 3] [Camada BSW] (Memória, Com/WiFi, Diag/Watchdog)
+               ├── [Subsistema 4] [Camada RTE] (Canais estáticos)
+               └── [Subsistema 5] [Camada Aplicação] (Logger, OBD Poller, Decoder)
+```
+
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
 
 ### REQ_EMU_001 — Inicialização do MCP2515 e Perfil Padrão [REQ-SYS-01]
@@ -205,7 +219,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 2: Aquisição e Recepção Passiva CAN (ESP32-S3 TWAI)
-
 ### REQ_CAN_001 — Inicialização e Sincronismo do TWAI [REQ-SYS-03]
 - **ID:** `REQ_CAN_001`
 - **Parent Requirement ID:** `REQ_SYS_03`
@@ -222,7 +235,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Durante o boot, se o gatilho de inicialização e o periférico TWAI estiverem ativos, o sistema integrado deve confirmar o modo assíncrono habilitado em até 50 ms.
 
 ---
-
 ### REQ_CAN_002 — Captura e Marcação Temporal de Frames [REQ-SYS-03]
 - **ID:** `REQ_CAN_002`
 - **Parent Requirement ID:** REQ_SYS_03
@@ -238,7 +250,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Ao receber um frame físico no TWAI, registrar imediatamente o carimbo temporal do sistema em microssegundos/milissegundos.
 
 ---
-
 ### REQ_CAN_003 — Conversão de Grandezas Físicas DBC [REQ-SYS-03]
 - **ID:** `REQ_CAN_003`
 - **Parent Requirement ID:** REQ_SYS_03
@@ -253,7 +264,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** O decodificador deve aplicar as equações de escala e offset da DBC nos bytes brutos sem alocação dinâmica em menos de 100 µs.
 
 ---
-
 ### REQ_CAN_004 — Inserção no Canal Assíncrono da RTE [REQ-SYS-03]
 - **ID:** `REQ_CAN_004`
 - **Parent Requirement ID:** REQ_SYS_03
@@ -269,7 +279,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** Ao concluir o parse de um frame de telemetria, postar a estrutura no canal bounded da RTE em até 1 ms.
 
 ---
-
 ### REQ_CAN_005 — Cumprimento da Taxa de Recepção [REQ-SYS-04 / AC-01]
 - **ID:** `REQ_CAN_005`
 - **Parent Requirement ID:** REQ_SYS_04
@@ -285,7 +294,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** A taxa de perda de quadros deve ser mantida estritamente abaixo de 1%, assegurando recepção de no mínimo 99% (Critério AC-01).
 
 ---
-
 ### REQ_CAN_006 — Tratamento Não-Bloqueante de Saturação da RTE [REQ-SYS-03]
 - **ID:** `REQ_CAN_006`
 - **Parent Requirement ID:** REQ_SYS_03
@@ -303,7 +311,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 # Subsistema 3: Diagnóstico Ativo OBD-II ISO 15765-4
-
 ### REQ_OBD_001 — Polling Cíclico de Diagnóstico a 10 Hz [REQ-SYS-05]
 - **ID:** `REQ_OBD_001`
 - **Parent Requirement ID:** REQ_SYS_05
