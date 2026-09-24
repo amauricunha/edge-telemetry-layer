@@ -1,23 +1,51 @@
 # Guia de Cadastramento e Sentenças FRETish (NASA FRET)
 ## Projeto: Edge Telemetry Layer (ESP32-S3 & Arduino UNO R3)
 
-Este documento estabelece **100% de paridade e rastreabilidade com a Especificação de Requisitos de Sistema (`docs/srs.md`)**, contendo todos os 30 requisitos do sistema (REQ-SYS-01 a REQ-SYS-30), os critérios de aceitação AC-01 a AC-08 e os fluxos das quatro threads principais da arquitetura.
+Este documento estabelece **100% de paridade e rastreabilidade com a Especificação de Requisitos de Sistema (`docs/mestrado/srs.md`)**, contendo todos os 30 requisitos do sistema (REQ-SYS-01 a REQ-SYS-30), os critérios de aceitação AC-01 a AC-08 e os fluxos das quatro threads principais da arquitetura.
 
-Cada requisito está formalizado na gramática **FRETish (em inglês normatizado)** aceita pelo editor da ferramenta **NASA FRET**, com nomes de componentes higienizados (sem `::`) e com o mapeamento tipado de variáveis para a aba **Variable Mapping**.
+Cada requisito está formalizado na gramática **FRETish (em inglês normatizado)** aceita pelo parser ANTLR 4 da ferramenta **NASA FRET**, com nomes de componentes higienizados (sem `::`) e com o mapeamento tipado de variáveis.
+
+---
+
+## Regras Essenciais de Sintaxe FRETish (ANTLR 4)
+
+> **Unidades de tempo:** O parser exige os tokens lexicais completos em maiúsculas:
+> `MILLISECOND`, `MICROSECOND`, `SECOND`, `MINUTE`, `HOUR`, `TICK`.
+> Abreviações como `ms`, `us`, `s` causam erro `mismatched input 'ms' expecting {...}`.
+
+> **Predicados Booleanos:** Para variáveis `Boolean` no `satisfy`, **nunca** escreva `= TRUE`, `= FALSE` ou `= "TRUE"`.
+> O parser trata `TRUE` como uma variável desconhecida adicional, não como literal.
+> **Correto:** `satisfy sd_fallback_active` | **Errado:** `satisfy sd_fallback_active = TRUE`
+
+> **Nomes de componentes:** Proibido `::`. Use `_` como separador: `mcal_twai`, não `mcal::twai`.
+
+> **Parent Requirement ID:** O campo espera o **Req ID exato de um requisito já existente no projeto**, com **underscores** (não hífens). `REQ_SYS_01` é válido; `REQ-SYS-01` causa erro de parse. O campo não afeta a verificação de realizabilidade — serve apenas para rastreabilidade hierárquica no relatório.
 
 ---
 
 ## Como cadastrar cada requisito no FRET:
-1. Abra a ferramenta FRET e acesse o projeto (ex: `EdgeTelemetry`).
-2. Clique no botão **`+ New Requirement`**.
-3. Preencha os campos exatamente com os valores deste prontuário:
-   - **Req ID:** Cole o valor de `ID`.
-   - **Component:** Cole o valor de `Component`.
-   - **Requirement Text:** Cole **exclusivamente** o código da caixa `FRETish Text`.
-4. Clique em **Save**:
-   - O editor colorirá a sintaxe e gerará automaticamente a **Fórmula LTL** e o **Diagrama FSM**.
-5. Abra a aba **`Variable Mapping`** e configure o **Role** (`Input`, `Output` ou `Internal`) e o **Type** (`Boolean`, `Integer`, `Double`) conforme detalhado em cada bloco.
-6. Clique em **`Realizability`** para executar a prova formal sem deadlocks (resultado **Realizable: True**).
+1. Abra o FRET e acesse/crie o projeto **`EdgeTelemetryLayer`**.
+2. Clique em **`CREATE`** no menu superior.
+3. No modal:
+   - **Requirement ID:** Cole o valor de `ID` (use underscores, sem hífens).
+   - **Parent Requirement ID:** Cole `REQ_SYS_XX` somente se o requisito pai JÁ existir no projeto (recomendado: crie os stubs `REQ_SYS_01`...`REQ_SYS_30` primeiro).
+   - **Rationale and Comments:** Cole o texto em Português do campo `Rationale`.
+4. No campo **Requirement Description**, cole **apenas** o texto da caixa `FRETish Text`.
+   - O editor colorirá automaticamente: **vermelho** (Scope), **laranja** (Condition), **verde** (Component), **azul** (Timing), **roxo** (Response).
+   - Texto sem coloração = erro de sintaxe. Consulte as Regras acima.
+5. Clique em **`CREATE`**.
+6. Abra a aba **`Variable Mapping`** e configure o **Role** (`Input`, `Output` ou `Internal`) e o **Type** (`Boolean`, `Integer`, `Double`) conforme detalhado em cada bloco.
+7. Clique em **`Realizability`** para executar a prova formal (resultado esperado: **`Realizable: True`**).
+
+---
+
+## Sobre Variáveis de Valores Físicos Calculados (Perfis e Senoide)
+
+O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s` a partir de uma tabela senoidal pré-computada em `PROGMEM`, modulada pelo `active_profile`. Esses valores calculados **não são formalizados diretamente no FRET** porque:
+1. Os model checkers (NuSMV/JKind) não suportam funções trigonométricas — a prova seria indecidível.
+2. Os valores físicos são detalhes de implementação; o FRET modela o **contrato temporal e de comutação de estado**.
+
+O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutação do perfil (`active_profile = commanded_profile within 50 MILLISECOND`) e os limites mensuráveis de aceitação (latência OBD-II, taxa de perda de frames, consumo de SRAM, volume do dataset).
 
 ---
 
@@ -30,7 +58,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon timer1_50ms_tick the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `timer1_50ms_tick`: **Input** (Boolean)
@@ -46,7 +74,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 50 MILLISECOND satisfy active_profile = commanded_profile
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `profile_cmd_0x010_received`: **Input** (Boolean)
@@ -63,7 +91,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon timer2_1ms_tick the uno_ecu_emulator shall within 50 MICROSECOND satisfy mcp2515_rx_polled
-```
+  ```
 - **Variable Mapping:**
   - `timer2_1ms_tick`: **Input** (Boolean)
   - `mcp2515_rx_polled`: **Output** (Boolean)
@@ -78,7 +106,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon obd_request_0x7df_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy obd_response_0x7e8_sent
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `obd_request_0x7df_received`: **Input** (Boolean)
@@ -94,7 +122,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `obd_benchmark_running`: **Input** (Boolean)
@@ -110,7 +138,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `obd_benchmark_running`: **Input** (Boolean)
@@ -121,14 +149,14 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 
 # Subsistema 2: Aquisição e Recepção Passiva CAN (ESP32-S3 TWAI)
 
-### REQ_CAN_001 — Inicialização e Sincronismo do TWAI
+### REQ_CAN_001 — Inicialização e Sincronismo do TWAI [REQ-SYS-03]
 - **ID:** `REQ_CAN_001`
-- **Parent Requirement ID:** REQ_SYS_09
+- **Parent Requirement ID:** `REQ_SYS_03`
 - **Component:** `mcal_twai`
 - **FRETish Text:**
   ```text
   in boot_mode upon boot_trigger the mcal_twai shall within 50 MILLISECOND satisfy twai_async_enabled
-```
+  ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
   - `boot_trigger`: **Input** (Boolean)
@@ -144,7 +172,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon can_frame_arrived the task_can_rx shall within 2 MILLISECOND satisfy frame_timestamp_captured
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `can_frame_arrived`: **Input** (Boolean)
@@ -160,7 +188,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon raw_can_frame_ready the app_can_decoder shall within 100 MICROSECOND satisfy engineering_values_scaled
-```
+  ```
 - **Variable Mapping:**
   - `raw_can_frame_ready`: **Input** (Boolean)
   - `engineering_values_scaled`: **Output** (Boolean)
@@ -175,7 +203,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon telemetry_frame_parsed the task_can_rx shall within 1 MILLISECOND satisfy rte_channel_pushed
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `telemetry_frame_parsed`: **Input** (Boolean)
@@ -191,7 +219,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session when can_bus_healthy the task_can_rx shall always satisfy frame_loss_percentage <= 1
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `can_bus_healthy`: **Input** (Boolean)
@@ -207,7 +235,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon rte_channel_overflow the task_can_rx shall immediately satisfy overflow_logged_and_dropped
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `rte_channel_overflow`: **Input** (Boolean)
@@ -225,7 +253,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon obd_timer_100ms_expired the task_obd_poller shall immediately satisfy obd_request_0x7df_transmitted
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `obd_timer_100ms_expired`: **Input** (Boolean)
@@ -241,7 +269,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon obd_tx_cycle_completed the task_obd_poller shall within 1 MILLISECOND satisfy pid_index_incremented
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `obd_tx_cycle_completed`: **Input** (Boolean)
@@ -257,7 +285,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon obd_timeout_50ms_elapsed the task_obd_poller shall immediately satisfy obd_timeout_recorded
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `obd_timeout_50ms_elapsed`: **Input** (Boolean)
@@ -273,7 +301,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon can_cmd_received_in_queue the task_obd_poller shall within 10 MILLISECOND satisfy can_cmd_interleaved
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `can_cmd_received_in_queue`: **Input** (Boolean)
@@ -291,7 +319,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon telemetry_frame_received the task_logger shall within 1 MILLISECOND satisfy csv_line_formatted
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `telemetry_frame_received`: **Input** (Boolean)
@@ -307,7 +335,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session when dataset_recording the task_logger shall always satisfy null_mandatory_fields = 0
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `dataset_recording`: **Input** (Boolean)
@@ -323,7 +351,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon csv_line_available the bsw_mem shall within 50 MICROSECOND satisfy sd_buffer_pushed
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `csv_line_available`: **Input** (Boolean)
@@ -339,7 +367,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session when buffer_occupancy >= 3584 the bsw_mem shall immediately satisfy flush_signal_emitted
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `buffer_occupancy`: **Internal** (Integer)
@@ -355,7 +383,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon flush_timer_2s_expired the task_sd_writer shall within 100 MILLISECOND satisfy pending_bytes_flushed
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `flush_timer_2s_expired`: **Input** (Boolean)
@@ -371,7 +399,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon sector_write_chunk the task_sd_writer shall within 1 MILLISECOND satisfy chunk_preemption_yielded
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `sector_write_chunk`: **Input** (Boolean)
@@ -387,7 +415,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in offline_mode upon sd_write_failed the task_logger shall within 2 MILLISECOND satisfy ram_backlog_retained
-```
+  ```
 - **Variable Mapping:**
   - `offline_mode`: **Internal** (Boolean)
   - `sd_write_failed`: **Input** (Boolean)
@@ -403,7 +431,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session when memory_supervision_active the bsw_diag shall always satisfy sram_usage_kb < 200
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `memory_supervision_active`: **Input** (Boolean)
@@ -419,7 +447,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon heartbeat_timer_60s the bsw_diag shall within 100 MILLISECOND satisfy heartbeat_diag_logged
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `heartbeat_timer_60s`: **Input** (Boolean)
@@ -437,7 +465,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in boot_mode upon sd_card_inserted the mcal_spi_sd shall within 500 MILLISECOND satisfy fat32_filesystem_mounted
-```
+  ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
   - `sd_card_inserted`: **Input** (Boolean)
@@ -453,7 +481,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon session_rotate_command the bsw_mem shall within 50 MILLISECOND satisfy session_file_rotated_atomically
-```
+  ```
 - **Variable Mapping:**
   - `session_rotate_command`: **Input** (Boolean)
   - `session_file_rotated_atomically`: **Output** (Boolean)
@@ -468,7 +496,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon new_file_opened the task_logger shall immediately satisfy header_and_boot_lines_written
-```
+  ```
 - **Variable Mapping:**
   - `new_file_opened`: **Input** (Boolean)
   - `header_and_boot_lines_written`: **Output** (Boolean)
@@ -483,7 +511,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon session_duration_reached the task_logger shall within 10 MILLISECOND satisfy session_stopped_and_flushed
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `session_duration_reached`: **Input** (Boolean)
@@ -499,7 +527,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon benchmark_completion the pipeline_telemetria shall satisfy total_dataset_samples >= 72000
-```
+  ```
 - **Variable Mapping:**
   - `benchmark_completion`: **Input** (Boolean)
   - `total_dataset_samples`: **Output** (Integer)
@@ -516,7 +544,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in boot_mode upon wifi_credentials_configured the bsw_com shall within 10000 MILLISECOND satisfy ip_dhcp_assigned
-```
+  ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
   - `wifi_credentials_configured`: **Input** (Boolean)
@@ -532,7 +560,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in connected_mode upon binary_batch_full the bsw_com shall within 200 MILLISECOND satisfy mqtt_batch_published
-```
+  ```
 - **Variable Mapping:**
   - `connected_mode`: **Internal** (Boolean)
   - `binary_batch_full`: **Input** (Boolean)
@@ -548,7 +576,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in connected_mode upon status_timer_5s the bsw_com shall within 500 MILLISECOND satisfy status_json_published
-```
+  ```
 - **Variable Mapping:**
   - `connected_mode`: **Internal** (Boolean)
   - `status_timer_5s`: **Input** (Boolean)
@@ -564,7 +592,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon dispatch_cycle_50ms the task_tx_dispatch shall within 2500 MICROSECOND satisfy data_packets_dispatched
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `dispatch_cycle_50ms`: **Input** (Boolean)
@@ -582,7 +610,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon wifi_disconnected the task_logger shall within 5 MILLISECOND satisfy sd_fallback_active
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `wifi_disconnected`: **Input** (Boolean)
@@ -598,7 +626,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon wifi_reconnected the task_logger shall within 10 MILLISECOND satisfy backlog_fifo_drained
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `wifi_reconnected`: **Input** (Boolean)
@@ -616,7 +644,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon remote_command_received the bsw_com shall within 20 MILLISECOND satisfy command_executed_ack
-```
+  ```
 - **Variable Mapping:**
   - `remote_command_received`: **Input** (Boolean)
   - `command_executed_ack`: **Output** (Boolean)
@@ -631,7 +659,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon replay_command_triggered the bsw_com shall within 100 MILLISECOND satisfy replay_streaming_active
-```
+  ```
 - **Variable Mapping:**
   - `replay_command_triggered`: **Input** (Boolean)
   - `replay_streaming_active`: **Output** (Boolean)
@@ -648,7 +676,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon bus_off_error_detected the task_can_rx shall within 1 MILLISECOND satisfy bus_off_flag_set
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `bus_off_error_detected`: **Input** (Boolean)
@@ -664,7 +692,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon bus_off_flag_active the task_watchdog shall within 10 MILLISECOND satisfy bus_off_pause_signaled
-```
+  ```
 - **Variable Mapping:**
   - `bus_off_flag_active`: **Input** (Boolean)
   - `bus_off_pause_signaled`: **Output** (Boolean)
@@ -679,7 +707,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon bus_off_pause_started the task_watchdog shall after 128 MILLISECOND satisfy recovery_window_elapsed
-```
+  ```
 - **Variable Mapping:**
   - `bus_off_pause_started`: **Input** (Boolean)
   - `recovery_window_elapsed`: **Output** (Boolean)
@@ -694,7 +722,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon recovery_window_elapsed the mcal_twai shall within 1 MILLISECOND satisfy twai_reset_mode_cleared
-```
+  ```
 - **Variable Mapping:**
   - `recovery_window_elapsed`: **Input** (Boolean)
   - `twai_reset_mode_cleared`: **Output** (Boolean)
@@ -709,7 +737,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   upon twai_reset_mode_cleared the task_watchdog shall within 5 MILLISECOND satisfy bus_off_clear_signaled
-```
+  ```
 - **Variable Mapping:**
   - `twai_reset_mode_cleared`: **Input** (Boolean)
   - `bus_off_clear_signaled`: **Output** (Boolean)
@@ -724,7 +752,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   in active_session upon logger_stall_30s_detected the task_watchdog shall within 100 MILLISECOND satisfy stall_diag_logged
-```
+  ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `logger_stall_30s_detected`: **Input** (Boolean)
@@ -740,7 +768,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 - **FRETish Text:**
   ```text
   when system_tasks_healthy the task_watchdog shall within 2000 MILLISECOND satisfy hw_watchdog_fed
-```
+  ```
 - **Variable Mapping:**
   - `system_tasks_healthy`: **Input** (Boolean)
   - `hw_watchdog_fed`: **Output** (Boolean)
