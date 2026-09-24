@@ -55,45 +55,28 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 
 ## Sobre Variáveis de Valores Físicos Calculados (Perfis e Senoide)
 
-O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s` a partir de uma tabela senoidal pré-computada em `PROGMEM`, modulada pelo `active_profile`. Esses valores calculados **não são formalizados diretamente no FRET** porque:
-1. Os model checkers (NuSMV/JKind) não suportam funções trigonométricas — a prova seria indecidível.
-2. Os valores físicos são detalhes de implementação; o FRET modela o **contrato temporal e de comutação de estado**.
-
-O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutação do perfil (`active_profile = commanded_profile within 50 MILLISECOND`) e os limites mensuráveis de aceitação (latência OBD-II, taxa de perda de frames, consumo de SRAM, volume do dataset).
+O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s` a partir de uma tabela senoidal pré-computada em `PROGMEM`, modulada pelo `active_profile`.
+1. **As equações trigonométricas contínuas não entram no FRET** porque os model checkers (NuSMV/JKind) operam sobre lógica proposicional e aritmética linear finita.
+2. **As grandezas físicas e invariantes de segurança ENTRAM no FRET:** As variáveis (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`) são formalizadas em [`REQ_EMU_003`] através de contratos de invariantes de faixa física válida (`>= 0`) e deadline de CPU (`within 1 MILLISECOND`).
+3. O `active_profile` governa tanto a dinâmica física em [`REQ_EMU_003`] quanto a emissão dos frames DBC em [`REQ_EMU_004`] (`when active_profile >= 1`).
 
 ---
 
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
 
-### REQ_EMU_008 — Atualização do Modelo Físico da ECU [REQ-SYS-01]
-- **ID:** `REQ_EMU_008`
-- **Parent Requirement ID:** REQ_SYS_01
-- **Component:** `uno_ecu_emulator`
-- **FRETish Text:**
-  ```text
-  in active_session upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated
-  ```
-- **Variable Mapping:**
-  - `active_session`: **Internal** (Boolean)
-  - `timer1_50ms_tick`: **Input** (Boolean)
-  - `physics_model_updated`: **Output** (Boolean)
-- **Rationale (Português):** A cada ciclo de 50 ms do Timer1, a CPU do emulador deve calcular as grandezas físicas simuladas do motor (`v_speed_kmh`, `v_rpm`, `v_throttle_pct`, `v_load_pct`, `v_maf_g_s`) a partir da tabela senoidal modulada pelo perfil ativo em menos de 1 ms de tempo de CPU da ISR.
-
----
-
-### REQ_EMU_001 — Emissão Cíclica de Grandezas do Motor DBC [REQ-SYS-01]
+### REQ_EMU_001 — Perfil de Condução Padrão na Inicialização [REQ-SYS-01]
 - **ID:** `REQ_EMU_001`
 - **Parent Requirement ID:** REQ_SYS_01
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
+  in boot_mode upon boot_complete the uno_ecu_emulator shall immediately satisfy active_profile = 2
   ```
 - **Variable Mapping:**
-  - `active_session`: **Internal** (Boolean)
-  - `physics_model_updated`: **Input** (Boolean) — Gerado pelo cálculo de física em REQ_EMU_008
-  - `dbc_frames_emitted`: **Output** (Boolean)
-- **Rationale (Português):** Após a atualização das variáveis físicas do motor, o emulador deve codificar e transmitir os frames CAN periódicos conforme a DBC (0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms) via SPI/MCP2515 em até 2 ms.
+  - `boot_mode`: **Internal** (Boolean)
+  - `boot_complete`: **Input** (Boolean) — sinaliza fim da inicialização dos timers
+  - `active_profile`: **Output** (Integer) — Perfil ativo (1=Eco, **2=Normal**, 3=Sport)
+- **Rationale (Português):** Ao concluir a inicialização (setup() do Arduino), o emulador deve definir o perfil ativo como **2 (Normal)** antes de receber qualquer comando CAN 0x010. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`. O SRS cobre a *comutação* (REQ-SYS-01), mas não declarava o *valor default* — este requisito estabelece o estado inicial formal.
 
 ---
 
@@ -111,29 +94,50 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
   - `commanded_profile`: **Input** (Integer) — Byte 0 do comando CAN (1=Eco, 2=Normal, 3=Sport)
   - `active_profile`: **Output** (Integer) — Perfil ativo de física (1=Eco, 2=Normal, 3=Sport)
 - **Rationale (Português):** Ao receber o comando CAN 0x010, o emulador deve atualizar o perfil de simulação ativo (`active_profile = commanded_profile`, onde 1=Econômico, 2=Normal, 3=Esportivo) no próximo ciclo de física do Timer1 (50 ms).
-- **Nota sobre senoide:** Os valores físicos derivados do perfil (speed_kmh, rpm, throttle_pct etc.) são calculados por tabela senoidal em PROGMEM — esse cálculo é implementação interna e **não é modelado no FRET** (NuSMV/JKind não suportam funções trigonométricas). O que o FRET modela é o contrato de comutação: `active_profile = commanded_profile within 50 MILLISECOND`.
 
 ---
 
-### REQ_EMU_007 — Perfil de Condução Padrão na Inicialização [REQ-SYS-01]
-- **ID:** `REQ_EMU_007`
+### REQ_EMU_003 — Atualização do Modelo Físico da ECU [REQ-SYS-01]
+- **ID:** `REQ_EMU_003`
 - **Parent Requirement ID:** REQ_SYS_01
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_complete the uno_ecu_emulator shall immediately satisfy active_profile = 2
+  in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0
   ```
 - **Variable Mapping:**
-  - `boot_mode`: **Internal** (Boolean)
-  - `boot_complete`: **Input** (Boolean) — sinaliza fim da inicialização dos timers
-  - `active_profile`: **Output** (Integer) — Perfil ativo (1=Eco, **2=Normal**, 3=Sport)
-- **Rationale (Português):** ⚠️ **Gap identificado — não coberto explicitamente no SRS.** Ao concluir a inicialização (setup() do Arduino), o emulador deve definir o perfil ativo como **2 (Normal)** antes de receber qualquer comando CAN 0x010. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`. O SRS cobre a *comutação* (REQ-SYS-01), mas não declara o *valor default* — este requisito preenche esse gap para rastreabilidade formal.
+  - `active_session`: **Internal** (Boolean)
+  - `active_profile`: **Input** (Integer) — Perfil de condução ativo (1=Eco, 2=Normal, 3=Sport)
+  - `timer1_50ms_tick`: **Input** (Boolean) — Interrupção periódica do Timer1 a cada 50 ms
+  - `physics_model_updated`: **Output** (Boolean) — Flag de conclusão do cálculo
+  - `speed_kmh`: **Output** (Double) — Velocidade simulada (km/h)
+  - `rpm`: **Output** (Integer) — Rotação do motor (RPM)
+  - `throttle_pct`: **Output** (Double) — Posição do acelerador (%)
+  - `load_pct`: **Output** (Double) — Carga calculada do motor (%)
+  - `maf_g_s`: **Output** (Double) — Fluxo de ar MAF (g/s)
+- **Rationale (Português):** A cada ciclo de 50 ms do Timer1 sob perfil ativo válido (`active_profile >= 1`), a CPU do emulador deve calcular as grandezas físicas simuladas do motor (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`) a partir da tabela senoidal modulada pelo perfil em menos de 1 ms de tempo de execução da ISR, assegurando invariantes válidos.
 
 ---
 
+### REQ_EMU_004 — Emissão Cíclica de Grandezas do Motor DBC [REQ-SYS-01]
+- **ID:** `REQ_EMU_004`
+- **Parent Requirement ID:** REQ_SYS_01
+- **Component:** `uno_ecu_emulator`
+- **FRETish Text:**
+  ```text
+  in active_session when active_profile >= 1 upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
+  ```
+- **Variable Mapping:**
+  - `active_session`: **Internal** (Boolean)
+  - `active_profile`: **Input** (Integer) — Perfil ativo selecionado
+  - `physics_model_updated`: **Input** (Boolean) — Gerado após a conclusão do cálculo físico em REQ_EMU_003
+  - `dbc_frames_emitted`: **Output** (Boolean)
+- **Rationale (Português):** Após a conclusão do cálculo do modelo de física (`physics_model_updated`), o emulador deve codificar e transmitir os frames CAN periódicos conforme a DBC (0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms) via SPI/MCP2515 em até 2 ms.
 
-### REQ_EMU_003 — Processamento de Interrupção de Alta Frequência [REQ-SYS-02]
-- **ID:** `REQ_EMU_003`
+---
+
+### REQ_EMU_005 — Processamento de Interrupção de Alta Frequência [REQ-SYS-02]
+- **ID:** `REQ_EMU_005`
 - **Parent Requirement ID:** REQ_SYS_02
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
@@ -147,8 +151,8 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
 
 ---
 
-### REQ_EMU_004 — Codificação e Emissão de Resposta OBD-II [REQ-SYS-07]
-- **ID:** `REQ_EMU_004`
+### REQ_EMU_006 — Codificação e Emissão de Resposta OBD-II [REQ-SYS-07]
+- **ID:** `REQ_EMU_006`
 - **Parent Requirement ID:** REQ_SYS_07
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
@@ -163,8 +167,8 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
 
 ---
 
-### REQ_EMU_005 — Latência Média de Resposta OBD-II [REQ-SYS-08 / AC-02]
-- **ID:** `REQ_EMU_005`
+### REQ_EMU_007 — Latência Média de Resposta OBD-II [REQ-SYS-08 / AC-02]
+- **ID:** `REQ_EMU_007`
 - **Parent Requirement ID:** REQ_SYS_08
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
@@ -179,8 +183,8 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
 
 ---
 
-### REQ_EMU_006 — Estabilidade Temporal e Jitter de Resposta [REQ-SYS-09 / AC-03]
-- **ID:** `REQ_EMU_006`
+### REQ_EMU_008 — Estabilidade Temporal e Jitter de Resposta [REQ-SYS-09 / AC-03]
+- **ID:** `REQ_EMU_008`
 - **Parent Requirement ID:** REQ_SYS_09
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
