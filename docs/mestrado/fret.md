@@ -24,15 +24,29 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 ---
 
 ## Como cadastrar cada requisito no FRET:
+
+> **Atenção:** O FRET **não possui campo "Título"**. Os campos reais do modal são:
+> `Requirement ID`, `Parent Requirement ID`, `Project`, `Rationale`, `Comments` e `Requirement Description`.
+> O título descritivo vai dentro do campo **Rationale**, junto com o texto em Português.
+
 1. Abra o FRET e acesse/crie o projeto **`EdgeTelemetryLayer`**.
 2. Clique em **`CREATE`** no menu superior.
-3. No modal:
-   - **Requirement ID:** Cole o valor de `ID` (use underscores, sem hífens).
-   - **Parent Requirement ID:** Cole `REQ_SYS_XX` somente se o requisito pai JÁ existir no projeto (recomendado: crie os stubs `REQ_SYS_01`...`REQ_SYS_30` primeiro).
-   - **Rationale and Comments:** Cole o texto em Português do campo `Rationale`.
-4. No campo **Requirement Description**, cole **apenas** o texto da caixa `FRETish Text`.
+3. No modal, preencha:
+   - **Requirement ID:** Cole o valor de `ID` (ex: `REQ_EMU_005`) — underscores, sem hífens.
+   - **Parent Requirement ID:** Deixe vazio (a rastreabilidade com o SRS é feita pela tag `[REQ-SYS-XX]` no Rationale).
+   - **Project:** `EdgeTelemetryLayer`
+   - **Rationale:** Cole o título descritivo + texto em Português no seguinte formato:
+     ```
+     [REQ-SYS-08 / AC-02] Latência Média de Resposta OBD-II
+
+     O emulador deve responder com latência média estritamente menor que 10 ms (Critério de Aceitação AC-02).
+     ```
+4. No campo **Requirement Description**, cole **apenas** o texto da caixa `FRETish Text`:
+   ```
+   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10
+   ```
    - O editor colorirá automaticamente: **vermelho** (Scope), **laranja** (Condition), **verde** (Component), **azul** (Timing), **roxo** (Response).
-   - Texto sem coloração = erro de sintaxe. Consulte as Regras acima.
+   - Texto sem coloração = erro de sintaxe — consulte as Regras acima.
 5. Clique em **`CREATE`**.
 6. Abra a aba **`Variable Mapping`** e configure o **Role** (`Input`, `Output` ou `Internal`) e o **Type** (`Boolean`, `Integer`, `Double`) conforme detalhado em cada bloco.
 7. Clique em **`Realizability`** para executar a prova formal (resultado esperado: **`Realizable: True`**).
