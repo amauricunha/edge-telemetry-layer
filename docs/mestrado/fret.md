@@ -76,7 +76,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
   - `boot_mode`: **Internal** (Boolean)
   - `boot_complete`: **Input** (Boolean) — sinaliza fim da inicialização dos timers
   - `active_profile`: **Output** (Integer) — Perfil ativo (1=Eco, **2=Normal**, 3=Sport)
-- **Rationale (Português):** Ao concluir a inicialização (setup() do Arduino), o emulador deve definir o perfil ativo como **2 (Normal)** antes de receber qualquer comando CAN 0x010. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`. O SRS cobre a *comutação* (REQ-SYS-01), mas não declarava o *valor default* — este requisito estabelece o estado inicial formal.
+- **Rationale (Português):** Ao concluir a inicialização (setup() do Arduino), o emulador deve definir o perfil ativo como **2 (Normal)** antes de receber qualquer comando CAN 0x010. Confirmado no firmware: `volatile uint8_t perfil_atual = 2`.
 
 ---
 
@@ -207,13 +207,14 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `mcal_twai`
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_trigger the mcal_twai shall within 50 MILLISECOND satisfy twai_async_enabled
+  in boot_mode upon boot_trigger & mcal_twai_up the esp32s3_collector shall within 50 MILLISECOND satisfy twai_async_enabled
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
   - `boot_trigger`: **Input** (Boolean)
+  - `mcal_twai_up`: **Input** (Boolean)
   - `twai_async_enabled`: **Output** (Boolean)
-- **Rationale (Português):** Durante o boot, o driver MCAL deve configurar o periférico TWAI a 500 kbps em modo assíncrono em até 50 ms.
+- **Rationale (Português):** Durante o boot, se o gatilho de inicialização e o periférico TWAI estiverem ativos, o sistema integrado deve confirmar o modo assíncrono habilitado em até 50 ms.
 
 ---
 
@@ -223,7 +224,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_can_rx`
 - **FRETish Text:**
   ```text
-  in active_session upon can_frame_arrived the task_can_rx shall within 2 MILLISECOND satisfy frame_timestamp_captured
+  in active_session upon can_frame_arrived the esp32s3_collector shall within 2 MILLISECOND satisfy frame_timestamp_captured
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -239,7 +240,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `app_can_decoder`
 - **FRETish Text:**
   ```text
-  upon raw_can_frame_ready the app_can_decoder shall within 100 MICROSECOND satisfy engineering_values_scaled
+  upon raw_can_frame_ready the esp32s3_collector shall within 100 MICROSECOND satisfy engineering_values_scaled
   ```
 - **Variable Mapping:**
   - `raw_can_frame_ready`: **Input** (Boolean)
@@ -254,7 +255,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_can_rx`
 - **FRETish Text:**
   ```text
-  in active_session upon telemetry_frame_parsed the task_can_rx shall within 1 MILLISECOND satisfy rte_channel_pushed
+  in active_session upon telemetry_frame_parsed the esp32s3_collector shall within 1 MILLISECOND satisfy rte_channel_pushed
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -270,7 +271,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_can_rx`
 - **FRETish Text:**
   ```text
-  in active_session when can_bus_healthy the task_can_rx shall always satisfy frame_loss_percentage <= 1
+  in active_session when can_bus_healthy the esp32s3_collector shall always satisfy frame_loss_percentage <= 1
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -286,7 +287,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_can_rx`
 - **FRETish Text:**
   ```text
-  in active_session upon rte_channel_overflow the task_can_rx shall immediately satisfy overflow_logged_and_dropped
+  in active_session upon rte_channel_overflow the esp32s3_collector shall immediately satisfy overflow_logged_and_dropped
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -304,7 +305,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_obd_poller`
 - **FRETish Text:**
   ```text
-  in active_session upon obd_timer_100ms_expired the task_obd_poller shall immediately satisfy obd_request_0x7df_transmitted
+  in active_session upon obd_timer_100ms_expired the esp32s3_collector shall immediately satisfy obd_request_0x7df_transmitted
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -320,7 +321,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_obd_poller`
 - **FRETish Text:**
   ```text
-  in active_session upon obd_tx_cycle_completed the task_obd_poller shall within 1 MILLISECOND satisfy pid_index_incremented
+  in active_session upon obd_tx_cycle_completed the esp32s3_collector shall within 1 MILLISECOND satisfy pid_index_incremented
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -336,7 +337,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_obd_poller`
 - **FRETish Text:**
   ```text
-  in active_session upon obd_timeout_50ms_elapsed the task_obd_poller shall immediately satisfy obd_timeout_recorded
+  in active_session upon obd_timeout_50ms_elapsed the esp32s3_collector shall immediately satisfy obd_timeout_recorded
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -352,7 +353,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_obd_poller`
 - **FRETish Text:**
   ```text
-  in active_session upon can_cmd_received_in_queue the task_obd_poller shall within 10 MILLISECOND satisfy can_cmd_interleaved
+  in active_session upon can_cmd_received_in_queue the esp32s3_collector shall within 10 MILLISECOND satisfy can_cmd_interleaved
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -370,7 +371,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  in active_session upon telemetry_frame_received the task_logger shall within 1 MILLISECOND satisfy csv_line_formatted
+  in active_session upon telemetry_frame_received the esp32s3_collector shall within 1 MILLISECOND satisfy csv_line_formatted
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -386,7 +387,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  in active_session when dataset_recording the task_logger shall always satisfy null_mandatory_fields = 0
+  in active_session when dataset_recording the esp32s3_collector shall always satisfy null_mandatory_fields = 0
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -402,7 +403,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_mem`
 - **FRETish Text:**
   ```text
-  in active_session upon csv_line_available the bsw_mem shall within 50 MICROSECOND satisfy sd_buffer_pushed
+  in active_session upon csv_line_available the esp32s3_collector shall within 50 MICROSECOND satisfy sd_buffer_pushed
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -418,7 +419,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_mem`
 - **FRETish Text:**
   ```text
-  in active_session when buffer_occupancy >= 3584 the bsw_mem shall immediately satisfy flush_signal_emitted
+  in active_session when buffer_occupancy >= 3584 the esp32s3_collector shall immediately satisfy flush_signal_emitted
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -434,7 +435,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_sd_writer`
 - **FRETish Text:**
   ```text
-  in active_session upon flush_timer_2s_expired the task_sd_writer shall within 100 MILLISECOND satisfy pending_bytes_flushed
+  in active_session upon flush_timer_2s_expired the esp32s3_collector shall within 100 MILLISECOND satisfy pending_bytes_flushed
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -450,7 +451,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_sd_writer`
 - **FRETish Text:**
   ```text
-  in active_session upon sector_write_chunk the task_sd_writer shall within 1 MILLISECOND satisfy chunk_preemption_yielded
+  in active_session upon sector_write_chunk the esp32s3_collector shall within 1 MILLISECOND satisfy chunk_preemption_yielded
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -466,7 +467,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  in offline_mode upon sd_write_failed the task_logger shall within 2 MILLISECOND satisfy ram_backlog_retained
+  in offline_mode upon sd_write_failed the esp32s3_collector shall within 2 MILLISECOND satisfy ram_backlog_retained
   ```
 - **Variable Mapping:**
   - `offline_mode`: **Internal** (Boolean)
@@ -482,7 +483,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_diag`
 - **FRETish Text:**
   ```text
-  in active_session when memory_supervision_active the bsw_diag shall always satisfy sram_usage_kb < 200
+  in active_session when memory_supervision_active the esp32s3_collector shall always satisfy sram_usage_kb < 200
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -498,7 +499,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_diag`
 - **FRETish Text:**
   ```text
-  in active_session upon heartbeat_timer_60s the bsw_diag shall within 100 MILLISECOND satisfy heartbeat_diag_logged
+  in active_session upon heartbeat_timer_60s the esp32s3_collector shall within 100 MILLISECOND satisfy heartbeat_diag_logged
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -516,13 +517,14 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `mcal_spi_sd`
 - **FRETish Text:**
   ```text
-  in boot_mode upon sd_card_inserted the mcal_spi_sd shall within 500 MILLISECOND satisfy fat32_filesystem_mounted
+  in boot_mode upon boot_trigger & sd_card_inserted the esp32s3_collector shall within 500 MILLISECOND satisfy fat32_filesystem_mounted
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
+  - `boot_trigger`: **Input** (Boolean)
   - `sd_card_inserted`: **Input** (Boolean)
   - `fat32_filesystem_mounted`: **Output** (Boolean)
-- **Rationale (Português):** Inicializar o cartão MicroSD via SPI2 no boot e montar a partição FAT32 em até 500 ms.
+- **Rationale (Português):** Durante o boot, se o cartão MicroSD estiver fisicamente inserido, o sistema deve inicializar o SPI2 e montar a partição FAT32 em até 500 ms, assegurando que o periférico de armazenamento esteja pronto e formatado antes do início da telemetria.
 
 ---
 
@@ -532,7 +534,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_mem`
 - **FRETish Text:**
   ```text
-  upon session_rotate_command the bsw_mem shall within 50 MILLISECOND satisfy session_file_rotated_atomically
+  upon session_rotate_command the esp32s3_collector shall within 50 MILLISECOND satisfy session_file_rotated_atomically
   ```
 - **Variable Mapping:**
   - `session_rotate_command`: **Input** (Boolean)
@@ -547,7 +549,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  upon new_file_opened the task_logger shall immediately satisfy header_and_boot_lines_written
+  upon new_file_opened the esp32s3_collector shall immediately satisfy header_and_boot_lines_written
   ```
 - **Variable Mapping:**
   - `new_file_opened`: **Input** (Boolean)
@@ -562,7 +564,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  in active_session upon session_duration_reached the task_logger shall within 10 MILLISECOND satisfy session_stopped_and_flushed
+  in active_session upon session_duration_reached the esp32s3_collector shall within 10 MILLISECOND satisfy session_stopped_and_flushed
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -578,7 +580,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `pipeline_telemetria`
 - **FRETish Text:**
   ```text
-  upon benchmark_completion the pipeline_telemetria shall satisfy total_dataset_samples >= 72000
+  upon benchmark_completion the esp32s3_collector shall satisfy total_dataset_samples >= 72000
   ```
 - **Variable Mapping:**
   - `benchmark_completion`: **Input** (Boolean)
@@ -595,13 +597,31 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  in boot_mode upon wifi_credentials_configured the bsw_com shall within 10000 MILLISECOND satisfy ip_dhcp_assigned
+  in boot_mode upon boot_trigger & wifi_credentials_configured the esp32s3_collector shall within 10000 MILLISECOND satisfy ip_dhcp_assigned
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
+  - `boot_trigger`: **Input** (Boolean)
   - `wifi_credentials_configured`: **Input** (Boolean)
   - `ip_dhcp_assigned`: **Output** (Boolean)
-- **Rationale (Português):** Conectar a interface sem fio em modo Station e obter endereço IP via DHCP através da pilha embassy-net.
+- **Rationale (Português):** Durante a inicialização, validar as credenciais, conectar a interface sem fio em modo Station e obter endereço IP via DHCP através da pilha embassy-net.
+
+---
+
+### REQ_COM_005 — Estabelecimento de Conexão com o Broker MQTT [REQ-SYS-19]
+- **ID:** `REQ_COM_005`
+- **Parent Requirement ID:** REQ_SYS_19
+- **Component:** `esp32s3_collector`
+- **FRETish Text:**
+  ```text
+  in boot_mode upon ip_dhcp_assigned & mqtt_credentials_valid the esp32s3_collector shall within 5000 MILLISECOND satisfy mqtt_broker_connected
+  ```
+- **Variable Mapping:**
+  - `boot_mode`: **Internal** (Boolean)
+  - `ip_dhcp_assigned`: **Input** (Boolean)
+  - `mqtt_credentials_valid`: **Input** (Boolean)
+  - `mqtt_broker_connected`: **Output** (Boolean)
+- **Rationale (Português):** Condicionado à obtenção do IP, o sistema deve validar as credenciais do MQTT e estabelecer a conexão TCP/IP com o broker em até 5000 ms, concluindo a verificação de rede ativa.
 
 ---
 
@@ -611,7 +631,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  in connected_mode upon binary_batch_full the bsw_com shall within 200 MILLISECOND satisfy mqtt_batch_published
+  in connected_mode upon binary_batch_full the esp32s3_collector shall within 200 MILLISECOND satisfy mqtt_batch_published
   ```
 - **Variable Mapping:**
   - `connected_mode`: **Internal** (Boolean)
@@ -627,7 +647,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  in connected_mode upon status_timer_5s the bsw_com shall within 500 MILLISECOND satisfy status_json_published
+  in connected_mode upon status_timer_5s the esp32s3_collector shall within 500 MILLISECOND satisfy status_json_published
   ```
 - **Variable Mapping:**
   - `connected_mode`: **Internal** (Boolean)
@@ -643,7 +663,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  in active_session upon dispatch_cycle_50ms the bsw_com shall within 2500 MICROSECOND satisfy data_packets_dispatched
+  in active_session upon dispatch_cycle_50ms the esp32s3_collector shall within 2500 MICROSECOND satisfy data_packets_dispatched
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -662,7 +682,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  in active_session upon wifi_disconnected the task_logger shall within 5 MILLISECOND satisfy sd_fallback_active
+  in active_session upon wifi_disconnected the esp32s3_collector shall within 5 MILLISECOND satisfy sd_fallback_active
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -678,7 +698,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_logger`
 - **FRETish Text:**
   ```text
-  in active_session upon wifi_reconnected the task_logger shall within 10 MILLISECOND satisfy backlog_fifo_drained
+  in active_session upon wifi_reconnected the esp32s3_collector shall within 10 MILLISECOND satisfy backlog_fifo_drained
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -696,7 +716,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  upon remote_command_received the bsw_com shall within 20 MILLISECOND satisfy command_executed_ack
+  upon remote_command_received the esp32s3_collector shall within 20 MILLISECOND satisfy command_executed_ack
   ```
 - **Variable Mapping:**
   - `remote_command_received`: **Input** (Boolean)
@@ -711,7 +731,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  upon replay_command_triggered the bsw_com shall within 100 MILLISECOND satisfy replay_streaming_active
+  upon replay_command_triggered the esp32s3_collector shall within 100 MILLISECOND satisfy replay_streaming_active
   ```
 - **Variable Mapping:**
   - `replay_command_triggered`: **Input** (Boolean)
@@ -728,7 +748,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_can_rx`
 - **FRETish Text:**
   ```text
-  in active_session upon bus_off_error_detected the task_can_rx shall within 1 MILLISECOND satisfy bus_off_flag_set
+  in active_session upon bus_off_error_detected the esp32s3_collector shall within 1 MILLISECOND satisfy bus_off_flag_set
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -744,7 +764,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_watchdog`
 - **FRETish Text:**
   ```text
-  upon bus_off_flag_active the task_watchdog shall within 10 MILLISECOND satisfy bus_off_pause_signaled
+  upon bus_off_flag_active the esp32s3_collector shall within 10 MILLISECOND satisfy bus_off_pause_signaled
   ```
 - **Variable Mapping:**
   - `bus_off_flag_active`: **Input** (Boolean)
@@ -759,7 +779,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_watchdog`
 - **FRETish Text:**
   ```text
-  upon bus_off_pause_started the task_watchdog shall after 128 MILLISECOND satisfy recovery_window_elapsed
+  upon bus_off_pause_started the esp32s3_collector shall after 128 MILLISECOND satisfy recovery_window_elapsed
   ```
 - **Variable Mapping:**
   - `bus_off_pause_started`: **Input** (Boolean)
@@ -774,7 +794,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `mcal_twai`
 - **FRETish Text:**
   ```text
-  upon recovery_window_elapsed the mcal_twai shall within 1 MILLISECOND satisfy twai_reset_mode_cleared
+  upon recovery_window_elapsed the esp32s3_collector shall within 1 MILLISECOND satisfy twai_reset_mode_cleared
   ```
 - **Variable Mapping:**
   - `recovery_window_elapsed`: **Input** (Boolean)
@@ -789,7 +809,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_watchdog`
 - **FRETish Text:**
   ```text
-  upon twai_reset_mode_cleared the task_watchdog shall within 5 MILLISECOND satisfy bus_off_clear_signaled
+  upon twai_reset_mode_cleared the esp32s3_collector shall within 5 MILLISECOND satisfy bus_off_clear_signaled
   ```
 - **Variable Mapping:**
   - `twai_reset_mode_cleared`: **Input** (Boolean)
@@ -804,7 +824,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_watchdog`
 - **FRETish Text:**
   ```text
-  in active_session upon logger_stall_30s_detected the task_watchdog shall within 100 MILLISECOND satisfy stall_diag_logged
+  in active_session upon logger_stall_30s_detected the esp32s3_collector shall within 100 MILLISECOND satisfy stall_diag_logged
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -820,7 +840,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `task_watchdog`
 - **FRETish Text:**
   ```text
-  when system_tasks_healthy the task_watchdog shall within 2000 MILLISECOND satisfy hw_watchdog_fed
+  when system_tasks_healthy the esp32s3_collector shall within 2000 MILLISECOND satisfy hw_watchdog_fed
   ```
 - **Variable Mapping:**
   - `system_tasks_healthy`: **Input** (Boolean)
