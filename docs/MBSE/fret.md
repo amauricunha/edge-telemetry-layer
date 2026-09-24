@@ -1,6 +1,5 @@
 # Guia de Cadastramento e Sentenças FRETish (NASA FRET)
-## Projeto: Edge Telemetry Layer (ESP32-S3 & Arduino UNO R3)
-
+## Projetos FRET: EdgeTelemetry_UNO e EdgeTelemetry_ESP32
 Este documento estabelece **100% de paridade e rastreabilidade com a Especificação de Requisitos de Sistema (`docs/mestrado/srs.md`)**, contendo todos os 30 requisitos do sistema (REQ-SYS-01 a REQ-SYS-30), os critérios de aceitação AC-01 a AC-08 e os fluxos das quatro threads principais da arquitetura.
 
 Cada requisito está formalizado na gramática **FRETish (em inglês normatizado)** aceita pelo parser ANTLR 4 da ferramenta **NASA FRET**, com nomes de componentes higienizados (sem `::`) e com o mapeamento tipado de variáveis.
@@ -29,12 +28,12 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 > `Requirement ID`, `Parent Requirement ID`, `Project`, `Rationale`, `Comments` e `Requirement Description`.
 > O título descritivo vai dentro do campo **Rationale**, junto com o texto em Português.
 
-1. Abra o FRET e acesse/crie o projeto **`EdgeTelemetryLayer`**.
+1. Abra o FRET e acesse/crie os projetos **`EdgeTelemetry_UNO`** e **`EdgeTelemetry_ESP32`**.
 2. Clique em **`CREATE`** no menu superior.
 3. No modal, preencha:
    - **Requirement ID:** Cole o valor de `ID` (ex: `REQ_EMU_005`) — underscores, sem hífens.
    - **Parent Requirement ID:** Deixe vazio (a rastreabilidade com o SRS é feita pela tag `[REQ-SYS-XX]` no Rationale).
-   - **Project:** `EdgeTelemetryLayer`
+   - **Project:** Selecione `EdgeTelemetry_UNO` (para requisitos do emulador) ou `EdgeTelemetry_ESP32` (para o coletor).
    - **Rationale:** Cole o título descritivo + texto em Português no seguinte formato:
      ```
      [REQ-SYS-08 / AC-02] Latência Média de Resposta OBD-II
@@ -331,7 +330,6 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Rationale (Português):** A cada 100 ms, emitir solicitação funcional Modo 01 em 0x7DF para o próximo PID programado.
 
 ---
-
 ### REQ_OBD_002 — Escalonamento Circular Round-Robin dos PIDs [REQ-SYS-06] [Subsistema 3] [Camada APP]
 - **ID:** `REQ_OBD_002`
 - **Parent Requirement ID:** REQ_SYS_06

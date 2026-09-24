@@ -17,4 +17,7 @@
     - No firmware real do Arduino (`firmware/uno_ecu_emulator/src/main.cpp`), o perfil padrão é **Normal (2)** (`volatile uint8_t perfil_atual = 2`), e não econômico.
     - O requisito formal criado foi:
       `in boot_mode upon boot_complete the uno_ecu_emulator shall immediately satisfy active_profile = 2`
-    - Comutação dinâmica via comando CAN 0x010 é coberta por [`REQ_EMU_002`](file:///c:/workspace/can-obd-telemetry/docs/mestrado/fret.md#L100-L115) (`active_profile = commanded_profile within 50 MILLISECOND`).
+    - Comutação dinâmica via comando CAN 0x010 é coberta por [`REQ_EMU_002`](file:///c:/workspace/can-obd-telemetry/docs/mestrado/fret.md#L100-L115) (`active_profile = commanded_profile within 50 MILLISECOND`).
+
+
+## emulador e coletor tem que estar em projetos separados? eles se integram de alguma forma ou precisam estar no mesmo projeto só componentes separados?

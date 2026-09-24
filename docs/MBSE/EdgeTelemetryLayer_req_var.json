@@ -3,7 +3,7 @@
         {
             "reqid": "REQ_CAN_001",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Inicialização e Sincronismo do TWAI [REQ-SYS-03][Subsistema 2] [Camada MCAL]\nDurante o boot, se o gatilho de inicialização e o periférico TWAI estiverem ativos, o sistema integrado deve confirmar o modo assíncrono habilitado em até 50 ms.",
             "comments": "",
             "fulltext": "in boot_mode upon boot_trigger & mcal_twai_up the esp32s3_collector shall within 50 MILLISECOND satisfy twai_async_enabled",
@@ -89,7 +89,7 @@
         {
             "reqid": "REQ_CAN_006",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Tratamento Não-Bloqueante de Saturação da RTE [REQ-SYS-03][Subsistema 2] [Camada MCAL]\nCaso o canal da RTE esteja cheio (32 amostras), descartar o pacote excedente e registrar advertência sem travar a recepção.",
             "comments": "",
             "fulltext": "in active_session upon rte_channel_overflow the esp32s3_collector shall immediately satisfy overflow_logged_and_dropped",
@@ -173,7 +173,7 @@
         {
             "reqid": "REQ_EMU_001",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Inicialização do MCP2515 e Perfil Padrão [REQ-SYS-01]\nDurante o setup(), ao detectar o hardware do MCP2515 via SPI, o emulador deve configurar o modo normal a 500 kbps, sinalizar o LED de status operacional e definir o perfil ativo como 2 (Normal) antes de habilitar os timers de interrupção.",
             "comments": "",
             "fulltext": "in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 100 MILLISECOND satisfy can_bus_operational & active_profile = 2",
@@ -260,7 +260,7 @@
         {
             "reqid": "REQ_EMU_007",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Latência Média de Resposta OBD-II [REQ-SYS-08 / AC-02]\nO emulador deve responder com latência média estritamente menor que 10 ms (Critério de Aceitação AC-02).",
             "comments": "",
             "fulltext": "in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10",
@@ -344,7 +344,7 @@
         {
             "reqid": "REQ_EMU_002",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Comutação de Perfil de Condução Simulada [REQ-SYS-01]\nAo receber o comando CAN 0x010, o emulador deve atualizar o perfil de simulação ativo (`active_profile = commanded_profile`, onde 1=Econômico, 2=Normal, 3=Esportivo) no próximo ciclo de física do Timer1 (50 ms).",
             "comments": "",
             "fulltext": " in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 50 MILLISECOND satisfy active_profile = commanded_profile",
@@ -430,7 +430,7 @@
         {
             "reqid": "REQ_CAN_002",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Captura e Marcação Temporal de Frames [REQ-SYS-03][Subsistema 2] [Camada MCAL]\nAo receber um frame físico no TWAI, registrar imediatamente o carimbo temporal do sistema em microssegundos/milissegundos.",
             "comments": "",
             "fulltext": "in active_session upon can_frame_arrived the esp32s3_collector shall within 2 MILLISECOND satisfy frame_timestamp_captured",
@@ -515,7 +515,7 @@
         {
             "reqid": "REQ_EMU_008",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Estabilidade Temporal e Jitter de Resposta [REQ-SYS-09 / AC-03]\nO desvio padrão da latência de resposta OBD-II deve permanecer inferior a 3 ms durante os ensaios (Critério AC-03).",
             "comments": "",
             "fulltext": "in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3",
@@ -597,9 +597,93 @@
             "_id": "811af860-b832-11f1-a4da-197ba71217d8"
         },
         {
+            "reqid": "REQ_OBD_001",
+            "parent_reqid": "",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
+            "rationale": "Polling Cíclico de Diagnóstico a 10 Hz [REQ-SYS-05] [Subsistema 3] [Camada APP]\nA cada 100 ms, emitir solicitação funcional Modo 01 em 0x7DF para o próximo PID programado.",
+            "comments": "",
+            "fulltext": "in active_session upon obd_timer_100ms_expired the esp32s3_collector shall immediately satisfy obd_request_0x7df_transmitted",
+            "status": "in progress",
+            "semantics": {
+                "type": "nasa",
+                "scope": {
+                    "type": "in"
+                },
+                "condition": "regular",
+                "probability": "null",
+                "timing": "immediately",
+                "response": "satisfaction",
+                "variables": [
+                    "active_session",
+                    "obd_timer_100ms_expired",
+                    "obd_request_0x7df_transmitted"
+                ],
+                "scope_mode": "active_session",
+                "scopeTextRange": [
+                    0,
+                    16
+                ],
+                "qualifier_word": "upon",
+                "pre_condition": "(obd_timer_100ms_expired)",
+                "regular_condition": "(obd_timer_100ms_expired)",
+                "conditionTextRange": [
+                    18,
+                    45
+                ],
+                "component_name": "esp32s3_collector",
+                "componentTextRange": [
+                    47,
+                    67
+                ],
+                "timingTextRange": [
+                    75,
+                    85
+                ],
+                "post_condition": "(obd_request_0x7df_transmitted)",
+                "responseTextRange": [
+                    87,
+                    123
+                ],
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(obd_timer_100ms_expired)</i></b>, Response = <b><i>(obd_request_0x7df_transmitted)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_timer_100ms_expired)</i></b> is true and any point in the interval where <b><i>(obd_timer_100ms_expired)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, if trigger holds then <b><i>(obd_request_0x7df_transmitted)</i></b> also holds at the same time point.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_timer_100ms_expired)</i></b> is true and any point in the interval where <b><i>(obd_timer_100ms_expired)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, if trigger holds then <b><i>(obd_request_0x7df_transmitted)</i></b> also holds at the same time point.",
+                "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_immediately_satisfaction.svg",
+                "scope_mode_pt": "active_session",
+                "scope_mode_ft": "active_session",
+                "scope_mode_pctl": "active_session",
+                "regular_condition_unexp_pt": "obd_timer_100ms_expired",
+                "regular_condition_unexp_ft": "obd_timer_100ms_expired",
+                "regular_condition_unexp_pctl": "obd_timer_100ms_expired",
+                "regular_condition_SMV_pt": "obd_timer_100ms_expired",
+                "regular_condition_SMV_ft": "obd_timer_100ms_expired",
+                "regular_condition_MLTL_ft": "obd_timer_100ms_expired",
+                "regular_condition_PRISM_pctl": "obd_timer_100ms_expired",
+                "post_condition_unexp_pt": "obd_request_0x7df_transmitted",
+                "post_condition_unexp_ft": "obd_request_0x7df_transmitted",
+                "post_condition_unexp_pctl": "obd_request_0x7df_transmitted",
+                "post_condition_SMV_pt": "obd_request_0x7df_transmitted",
+                "post_condition_SMV_ft": "obd_request_0x7df_transmitted",
+                "post_condition_MLTL_ft": "obd_request_0x7df_transmitted",
+                "post_condition_PRISM_pctl": "obd_request_0x7df_transmitted",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! obd_timer_100ms_expired) & ((! LAST) & ((X obd_timer_100ms_expired) & (! (Lin_active_session | LAST))))) -> ((X obd_request_0x7df_transmitted) & (! (Lin_active_session | LAST))))) & (obd_timer_100ms_expired -> obd_request_0x7df_transmitted))))) & (active_session -> (((Lin_active_session | LAST) V (((! obd_timer_100ms_expired) & ((! LAST) & ((X obd_timer_100ms_expired) & (! (Lin_active_session | LAST))))) -> ((X obd_request_0x7df_transmitted) & (! (Lin_active_session | LAST))))) & (obd_timer_100ms_expired -> obd_request_0x7df_transmitted))))",
+                "pt": "((H (Lin_active_session -> (Y (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | Fin_active_session)) -> obd_request_0x7df_transmitted) S (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | Fin_active_session)) -> obd_request_0x7df_transmitted) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | Fin_active_session)) -> obd_request_0x7df_transmitted) S (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | Fin_active_session)) -> obd_request_0x7df_transmitted) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! obd_timer_100ms_expired) & ((X obd_timer_100ms_expired) & (! Lin_active_session))) => ((X (P>=1[obd_request_0x7df_transmitted])) & (! Lin_active_session)))) & (obd_timer_100ms_expired => (P>=1[obd_request_0x7df_transmitted])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! obd_timer_100ms_expired) & ((X obd_timer_100ms_expired) & (! Lin_active_session))) => ((X (P>=1[obd_request_0x7df_transmitted])) & (! Lin_active_session)))) & (obd_timer_100ms_expired => (P>=1[obd_request_0x7df_transmitted]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | (active_session & (Z (! active_session))))) -> obd_request_0x7df_transmitted) S (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | (active_session & (Z (! active_session))))) -> obd_request_0x7df_transmitted) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | (active_session & (Z (! active_session))))) -> obd_request_0x7df_transmitted) S (((obd_timer_100ms_expired & ((Y (! obd_timer_100ms_expired)) | (active_session & (Z (! active_session))))) -> obd_request_0x7df_transmitted) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),((obd_timer_100ms_expired and (YtoPre(not (obd_timer_100ms_expired)) or (active_session and ZtoPre(not (active_session))))) => obd_request_0x7df_transmitted))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),((obd_timer_100ms_expired and (YtoPre(not (obd_timer_100ms_expired)) or (active_session and ZtoPre(not (active_session))))) => obd_request_0x7df_transmitted))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_timer_100ms_expired) & ((! LAST) & ((X obd_timer_100ms_expired) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X obd_request_0x7df_transmitted) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_timer_100ms_expired -> obd_request_0x7df_transmitted))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_timer_100ms_expired) & ((! LAST) & ((X obd_timer_100ms_expired) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X obd_request_0x7df_transmitted) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_timer_100ms_expired -> obd_request_0x7df_transmitted))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! obd_timer_100ms_expired) & ((X obd_timer_100ms_expired) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[obd_request_0x7df_transmitted])) & (! (active_session & (X (! active_session))))))) & (obd_timer_100ms_expired => (P>=1[obd_request_0x7df_transmitted])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! obd_timer_100ms_expired) & ((X obd_timer_100ms_expired) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[obd_request_0x7df_transmitted])) & (! (active_session & (X (! active_session))))))) & (obd_timer_100ms_expired => (P>=1[obd_request_0x7df_transmitted]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! obd_timer_100ms_expired) & ((X obd_timer_100ms_expired) & (! (active_session & (X (! active_session)))))) -> ((X obd_request_0x7df_transmitted) & (! (active_session & (X (! active_session))))))) & (obd_timer_100ms_expired -> obd_request_0x7df_transmitted))))) & (active_session -> (((active_session & (X (! active_session))) V (((! obd_timer_100ms_expired) & ((X obd_timer_100ms_expired) & (! (active_session & (X (! active_session)))))) -> ((X obd_request_0x7df_transmitted) & (! (active_session & (X (! active_session))))))) & (obd_timer_100ms_expired -> obd_request_0x7df_transmitted))))",
+                "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> (F[1,1] p2)) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> p2))))) & ((p0 & p1) -> p2))",
+                "WESTMapping": "p0: active_session<br/>p1: obd_timer_100ms_expired<br/>p2: obd_request_0x7df_transmitted",
+                "R2U2Code": "((((active_session && ((! obd_timer_100ms_expired) && ((F[1,1] obd_timer_100ms_expired) && (F[1,1] active_session)))) -> (F[1,1] obd_request_0x7df_transmitted)) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (obd_timer_100ms_expired -> obd_request_0x7df_transmitted)))) && (((TAU == 0) && (active_session && obd_timer_100ms_expired)) -> obd_request_0x7df_transmitted))",
+                "component": "esp32s3_collector"
+            },
+            "_id": "9c2b5f40-b83d-11f1-a4da-197ba71217d8"
+        },
+        {
             "reqid": "REQ_CAN_003",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Conversão de Grandezas Físicas DBC [REQ-SYS-03][Subsistema 2][Camada MCAL]\nO decodificador deve aplicar as equações de escala e offset da DBC nos bytes brutos sem alocação dinâmica em menos de 100 µs.",
             "comments": "",
             "fulltext": "upon raw_can_frame_ready the esp32s3_collector shall within 100 MICROSECOND satisfy engineering_values_scaled",
@@ -677,7 +761,7 @@
         {
             "reqid": "REQ_EMU_003",
             "parent_reqid": "REQ_SYS_01",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Atualização do Modelo Físico da ECU [REQ-SYS-01]\nA cada ciclo de 50 ms do Timer1 sob perfil ativo válido (`active_profile >= 1`), a CPU do emulador deve calcular as 6 grandezas físicas simuladas do motor (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`, `coolant_temp_c`) a partir da tabela senoidal modulada pelo perfil em menos de 1 ms de tempo de execução da ISR, assegurando invariantes válidos.",
             "comments": "",
             "fulltext": "in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40",
@@ -767,9 +851,94 @@
             "_id": "afc18680-b831-11f1-a4da-197ba71217d8"
         },
         {
+            "reqid": "REQ_OBD_002",
+            "parent_reqid": "",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
+            "rationale": "Escalonamento Circular Round-Robin dos PIDs [REQ-SYS-06] [Subsistema 3] [Camada APP]\nAlternar sequencialmente entre os 6 PIDs suportados, completando um ciclo a cada 600 ms.",
+            "comments": "",
+            "fulltext": "in active_session upon obd_tx_cycle_completed the esp32s3_collector shall within 1 MILLISECOND satisfy pid_index_incremented",
+            "status": "in progress",
+            "semantics": {
+                "type": "nasa",
+                "scope": {
+                    "type": "in"
+                },
+                "condition": "regular",
+                "probability": "null",
+                "timing": "within",
+                "response": "satisfaction",
+                "variables": [
+                    "active_session",
+                    "obd_tx_cycle_completed",
+                    "pid_index_incremented"
+                ],
+                "scope_mode": "active_session",
+                "scopeTextRange": [
+                    0,
+                    16
+                ],
+                "qualifier_word": "upon",
+                "pre_condition": "(obd_tx_cycle_completed)",
+                "regular_condition": "(obd_tx_cycle_completed)",
+                "conditionTextRange": [
+                    18,
+                    44
+                ],
+                "component_name": "esp32s3_collector",
+                "componentTextRange": [
+                    46,
+                    66
+                ],
+                "duration": "1",
+                "timingTextRange": [
+                    74,
+                    93
+                ],
+                "post_condition": "(pid_index_incremented)",
+                "responseTextRange": [
+                    95,
+                    123
+                ],
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(obd_tx_cycle_completed)</i></b>,  n = <b><i>1</i></b>, Response = <b><i>(pid_index_incremented)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_tx_cycle_completed)</i></b> is true and any point in the interval where <b><i>(obd_tx_cycle_completed)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(pid_index_incremented)</i></b> must hold at some point with distance <= <b><i>1</i></b> from the trigger (i.e., at trigger, trigger+1, ..., or trigger+<b><i>1</i></b>). If the interval ends sooner than trigger+<b><i>1</i></b>, then <b><i>(pid_index_incremented)</i></b> need not hold.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_tx_cycle_completed)</i></b> is true and any point in the interval where <b><i>(obd_tx_cycle_completed)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(pid_index_incremented)</i></b> must hold at some point with distance <= <b><i>1</i></b> from the trigger (i.e., at trigger, trigger+1, ..., or trigger+<b><i>1</i></b>). If the interval ends sooner than trigger+<b><i>1</i></b>, then <b><i>(pid_index_incremented)</i></b> need not hold.",
+                "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_within_satisfaction.svg",
+                "scope_mode_pt": "active_session",
+                "scope_mode_ft": "active_session",
+                "scope_mode_pctl": "active_session",
+                "regular_condition_unexp_pt": "obd_tx_cycle_completed",
+                "regular_condition_unexp_ft": "obd_tx_cycle_completed",
+                "regular_condition_unexp_pctl": "obd_tx_cycle_completed",
+                "regular_condition_SMV_pt": "obd_tx_cycle_completed",
+                "regular_condition_SMV_ft": "obd_tx_cycle_completed",
+                "regular_condition_MLTL_ft": "obd_tx_cycle_completed",
+                "regular_condition_PRISM_pctl": "obd_tx_cycle_completed",
+                "post_condition_unexp_pt": "pid_index_incremented",
+                "post_condition_unexp_ft": "pid_index_incremented",
+                "post_condition_unexp_pctl": "pid_index_incremented",
+                "post_condition_SMV_pt": "pid_index_incremented",
+                "post_condition_SMV_ft": "pid_index_incremented",
+                "post_condition_MLTL_ft": "pid_index_incremented",
+                "post_condition_PRISM_pctl": "pid_index_incremented",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! obd_tx_cycle_completed) & ((! LAST) & ((X obd_tx_cycle_completed) & (! (Lin_active_session | LAST))))) -> ((X ((F[<=1] pid_index_incremented) | (F[<1] (Lin_active_session | LAST)))) & (! (Lin_active_session | LAST))))) & (obd_tx_cycle_completed -> ((F[<=1] pid_index_incremented) | (F[<1] (Lin_active_session | LAST)))))))) & (active_session -> (((Lin_active_session | LAST) V (((! obd_tx_cycle_completed) & ((! LAST) & ((X obd_tx_cycle_completed) & (! (Lin_active_session | LAST))))) -> ((X ((F[<=1] pid_index_incremented) | (F[<1] (Lin_active_session | LAST)))) & (! (Lin_active_session | LAST))))) & (obd_tx_cycle_completed -> ((F[<=1] pid_index_incremented) | (F[<1] (Lin_active_session | LAST)))))))",
+                "pt": "((H (Lin_active_session -> (Y (((O[=1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | Fin_active_session)) & (! pid_index_incremented))) -> (O[<1] (Fin_active_session | pid_index_incremented))) S (((O[=1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | Fin_active_session)) & (! pid_index_incremented))) -> (O[<1] (Fin_active_session | pid_index_incremented))) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> (((O[=1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | Fin_active_session)) & (! pid_index_incremented))) -> (O[<1] (Fin_active_session | pid_index_incremented))) S (((O[=1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | Fin_active_session)) & (! pid_index_incremented))) -> (O[<1] (Fin_active_session | pid_index_incremented))) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! obd_tx_cycle_completed) & ((X obd_tx_cycle_completed) & (! Lin_active_session))) => ((X (P>=1[(F<=1 pid_index_incremented)])) & (! Lin_active_session)))) & (obd_tx_cycle_completed => (P>=1[(F[<=1] pid_index_incremented)])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! obd_tx_cycle_completed) & ((X obd_tx_cycle_completed) & (! Lin_active_session))) => ((X (P>=1[(F[<=1] pid_index_incremented)])) & (! Lin_active_session)))) & (obd_tx_cycle_completed => (P>=1[(F[<=1] pid_index_incremented)]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y (((O[1,1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | (active_session & (Z (! active_session))))) & (! pid_index_incremented))) -> (O[0,0] ((active_session & (Z (! active_session))) | pid_index_incremented))) S (((O[1,1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | (active_session & (Z (! active_session))))) & (! pid_index_incremented))) -> (O[0,0] ((active_session & (Z (! active_session))) | pid_index_incremented))) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> (((O[1,1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | (active_session & (Z (! active_session))))) & (! pid_index_incremented))) -> (O[0,0] ((active_session & (Z (! active_session))) | pid_index_incremented))) S (((O[1,1] ((obd_tx_cycle_completed & ((Y (! obd_tx_cycle_completed)) | (active_session & (Z (! active_session))))) & (! pid_index_incremented))) -> (O[0,0] ((active_session & (Z (! active_session))) | pid_index_incremented))) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(OT(1, 1, ((obd_tx_cycle_completed and (YtoPre(not (obd_tx_cycle_completed)) or (active_session and ZtoPre(not (active_session))))) and not (pid_index_incremented))) => OT(0, 0, ((active_session and ZtoPre(not (active_session))) or pid_index_incremented))))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(OT(1, 1, ((obd_tx_cycle_completed and (YtoPre(not (obd_tx_cycle_completed)) or (active_session and ZtoPre(not (active_session))))) and not (pid_index_incremented))) => OT(0, 0, ((active_session and ZtoPre(not (active_session))) or pid_index_incremented))))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_tx_cycle_completed) & ((! LAST) & ((X obd_tx_cycle_completed) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((F[0,1] pid_index_incremented) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_tx_cycle_completed -> ((F[0,1] pid_index_incremented) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_tx_cycle_completed) & ((! LAST) & ((X obd_tx_cycle_completed) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((F[0,1] pid_index_incremented) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_tx_cycle_completed -> ((F[0,1] pid_index_incremented) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! obd_tx_cycle_completed) & ((X obd_tx_cycle_completed) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[(F<=1 pid_index_incremented)])) & (! (active_session & (X (! active_session))))))) & (obd_tx_cycle_completed => (P>=1[(F[<=1] pid_index_incremented)])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! obd_tx_cycle_completed) & ((X obd_tx_cycle_completed) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[(F[<=1] pid_index_incremented)])) & (! (active_session & (X (! active_session))))))) & (obd_tx_cycle_completed => (P>=1[(F[<=1] pid_index_incremented)]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! obd_tx_cycle_completed) & ((X obd_tx_cycle_completed) & (! (active_session & (X (! active_session)))))) -> ((X ((F[0,1] pid_index_incremented) | (F[0,0] (active_session & (X (! active_session)))))) & (! (active_session & (X (! active_session))))))) & (obd_tx_cycle_completed -> ((F[0,1] pid_index_incremented) | (F[0,0] (active_session & (X (! active_session)))))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! obd_tx_cycle_completed) & ((X obd_tx_cycle_completed) & (! (active_session & (X (! active_session)))))) -> ((X ((F[0,1] pid_index_incremented) | (F[0,0] (active_session & (X (! active_session)))))) & (! (active_session & (X (! active_session))))))) & (obd_tx_cycle_completed -> ((F[0,1] pid_index_incremented) | (F[0,0] (active_session & (X (! active_session)))))))))",
+                "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> ((F[1,2] p2) | (F[2,2] (! p0)))) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> ((F[0,1] p2) | (F[1,1] (! p0)))))))) & ((p0 & p1) -> ((F[0,1] p2) | (F[1,1] (! p0)))))",
+                "WESTMapping": "p0: active_session<br/>p1: obd_tx_cycle_completed<br/>p2: pid_index_incremented",
+                "R2U2Code": "((((active_session && ((! obd_tx_cycle_completed) && ((F[1,1] obd_tx_cycle_completed) && (F[1,1] active_session)))) -> ((F[1,2] pid_index_incremented) || (F[2,2] (! active_session)))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (obd_tx_cycle_completed -> ((F[0,1] pid_index_incremented) || (F[1,1] (! active_session))))))) && (((TAU == 0) && (active_session && obd_tx_cycle_completed)) -> ((F[0,1] pid_index_incremented) || (F[1,1] (! active_session)))))",
+                "component": "esp32s3_collector"
+            },
+            "_id": "beda7620-b83d-11f1-a4da-197ba71217d8"
+        },
+        {
             "reqid": "REQ_EMU_004",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Emissão Cíclica de Grandezas do Motor DBC [REQ-SYS-01]\nApós a conclusão do cálculo do modelo de física (`physics_model_updated`), com o barramento CAN operacional, o emulador deve codificar e transmitir os frames CAN periódicos conforme a DBC (0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms) via SPI/MCP2515 em até 2 ms.",
             "comments": "",
             "fulltext": "in active_session when active_profile >= 1 & can_bus_operational upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted",
@@ -856,7 +1025,7 @@
         {
             "reqid": "REQ_CAN_004",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Inserção no Canal Assíncrono da RTE [REQ-SYS-03][Subsistema 2] [Camada MCAL]\nAo concluir o parse de um frame de telemetria, postar a estrutura no canal bounded da RTE em até 1 ms.",
             "comments": "",
             "fulltext": "in active_session upon telemetry_frame_parsed the esp32s3_collector shall within 1 MILLISECOND satisfy rte_channel_pushed",
@@ -941,7 +1110,7 @@
         {
             "reqid": "REQ_EMU_005",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Processamento de Interrupção de Alta Frequência [REQ-SYS-02]\nEstando o barramento operacional, o Timer2 a cada 1 ms deve verificar a chegada de mensagens no MCP2515 sem bloquear a CPU por mais de 50 µs.",
             "comments": "",
             "fulltext": "when can_bus_operational upon timer2_1ms_tick the uno_ecu_emulator shall within 50 MICROSECOND satisfy mcp2515_rx_polled",
@@ -1020,7 +1189,7 @@
         {
             "reqid": "REQ_EMU_006",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Codificação e Emissão de Resposta OBD-II [REQ-SYS-07]\nAo receber requisição Modo 01 em 0x7DF, o emulador deve codificar o PID e transmitir o frame de resposta 0x7E8.",
             "comments": "",
             "fulltext": "in active_session upon obd_request_0x7df_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy obd_response_0x7e8_sent",
@@ -1105,7 +1274,7 @@
         {
             "reqid": "REQ_CAN_005",
             "parent_reqid": "",
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Cumprimento da Taxa de Recepção [REQ-SYS-04 / AC-01][Subsistema 2] [Camada MCAL]\nA taxa de perda de quadros deve ser mantida estritamente abaixo de 1%, assegurando recepção de no mínimo 99% (Critério AC-01).",
             "comments": "",
             "fulltext": "in active_session when can_bus_healthy the esp32s3_collector shall always satisfy frame_loss_percentage <= 1",
@@ -1189,14 +1358,16 @@
     ],
     "variables": [
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "active_session",
             "reqs": [
+                "3f466260-b839-11f1-a4da-197ba71217d8",
                 "7b7328a0-b838-11f1-a4da-197ba71217d8",
+                "9c2b5f40-b83d-11f1-a4da-197ba71217d8",
+                "beda7620-b83d-11f1-a4da-197ba71217d8",
                 "cd268890-b838-11f1-a4da-197ba71217d8",
-                "fb2a0370-b838-11f1-a4da-197ba71217d8",
-                "3f466260-b839-11f1-a4da-197ba71217d8"
+                "fb2a0370-b838-11f1-a4da-197ba71217d8"
             ],
             "dataType": "",
             "idType": "",
@@ -1209,10 +1380,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectoractive_session"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoractive_session"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "boot_mode",
             "reqs": [
@@ -1229,10 +1400,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorboot_mode"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorboot_mode"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "boot_trigger",
             "reqs": [
@@ -1249,10 +1420,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorboot_trigger"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorboot_trigger"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "can_bus_healthy",
             "reqs": [
@@ -1269,10 +1440,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorcan_bus_healthy"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_bus_healthy"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "can_frame_arrived",
             "reqs": [
@@ -1289,10 +1460,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorcan_frame_arrived"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_frame_arrived"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "engineering_values_scaled",
             "reqs": [
@@ -1309,10 +1480,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorengineering_values_scaled"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorengineering_values_scaled"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "frame_loss_percentage",
             "reqs": [
@@ -1329,10 +1500,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorframe_loss_percentage"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorframe_loss_percentage"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "frame_timestamp_captured",
             "reqs": [
@@ -1349,10 +1520,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorframe_timestamp_captured"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorframe_timestamp_captured"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "mcal_twai_up",
             "reqs": [
@@ -1369,10 +1540,70 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectormcal_twai_up"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormcal_twai_up"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
+            "component_name": "esp32s3_collector",
+            "variable_name": "obd_request_0x7df_transmitted",
+            "reqs": [
+                "9c2b5f40-b83d-11f1-a4da-197ba71217d8"
+            ],
+            "dataType": "",
+            "idType": "",
+            "moduleName": "",
+            "description": "",
+            "assignment": "",
+            "copilotAssignment": "",
+            "modeRequirement": "",
+            "modeldoc": false,
+            "modelComponent": "",
+            "modeldoc_id": "",
+            "completed": false,
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_request_0x7df_transmitted"
+        },
+        {
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
+            "component_name": "esp32s3_collector",
+            "variable_name": "obd_timer_100ms_expired",
+            "reqs": [
+                "9c2b5f40-b83d-11f1-a4da-197ba71217d8"
+            ],
+            "dataType": "",
+            "idType": "",
+            "moduleName": "",
+            "description": "",
+            "assignment": "",
+            "copilotAssignment": "",
+            "modeRequirement": "",
+            "modeldoc": false,
+            "modelComponent": "",
+            "modeldoc_id": "",
+            "completed": false,
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timer_100ms_expired"
+        },
+        {
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
+            "component_name": "esp32s3_collector",
+            "variable_name": "obd_tx_cycle_completed",
+            "reqs": [
+                "beda7620-b83d-11f1-a4da-197ba71217d8"
+            ],
+            "dataType": "",
+            "idType": "",
+            "moduleName": "",
+            "description": "",
+            "assignment": "",
+            "copilotAssignment": "",
+            "modeRequirement": "",
+            "modeldoc": false,
+            "modelComponent": "",
+            "modeldoc_id": "",
+            "completed": false,
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_tx_cycle_completed"
+        },
+        {
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "overflow_logged_and_dropped",
             "reqs": [
@@ -1389,10 +1620,30 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectoroverflow_logged_and_dropped"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoroverflow_logged_and_dropped"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
+            "component_name": "esp32s3_collector",
+            "variable_name": "pid_index_incremented",
+            "reqs": [
+                "beda7620-b83d-11f1-a4da-197ba71217d8"
+            ],
+            "dataType": "",
+            "idType": "",
+            "moduleName": "",
+            "description": "",
+            "assignment": "",
+            "copilotAssignment": "",
+            "modeRequirement": "",
+            "modeldoc": false,
+            "modelComponent": "",
+            "modeldoc_id": "",
+            "completed": false,
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorpid_index_incremented"
+        },
+        {
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "raw_can_frame_ready",
             "reqs": [
@@ -1409,10 +1660,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorraw_can_frame_ready"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorraw_can_frame_ready"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "rte_channel_overflow",
             "reqs": [
@@ -1429,10 +1680,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorrte_channel_overflow"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrte_channel_overflow"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "rte_channel_pushed",
             "reqs": [
@@ -1449,10 +1700,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectorrte_channel_pushed"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrte_channel_pushed"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "telemetry_frame_parsed",
             "reqs": [
@@ -1469,10 +1720,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectortelemetry_frame_parsed"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortelemetry_frame_parsed"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "component_name": "esp32s3_collector",
             "variable_name": "twai_async_enabled",
             "reqs": [
@@ -1489,10 +1740,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeresp32s3_collectortwai_async_enabled"
+            "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortwai_async_enabled"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "active_profile",
             "reqs": [
@@ -1512,19 +1763,19 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatoractive_profile"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatoractive_profile"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "active_session",
             "reqs": [
+                "68170250-b832-11f1-a4da-197ba71217d8",
                 "6e925c70-b831-11f1-a4da-197ba71217d8",
+                "811af860-b832-11f1-a4da-197ba71217d8",
                 "afc18680-b831-11f1-a4da-197ba71217d8",
                 "cbfd7610-b831-11f1-a4da-197ba71217d8",
-                "f52e8150-b831-11f1-a4da-197ba71217d8",
-                "68170250-b832-11f1-a4da-197ba71217d8",
-                "811af860-b832-11f1-a4da-197ba71217d8"
+                "f52e8150-b831-11f1-a4da-197ba71217d8"
             ],
             "dataType": "",
             "idType": "",
@@ -1537,10 +1788,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatoractive_session"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatoractive_session"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "boot_mode",
             "reqs": [
@@ -1557,10 +1808,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorboot_mode"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorboot_mode"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "boot_trigger",
             "reqs": [
@@ -1577,10 +1828,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorboot_trigger"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorboot_trigger"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "can_bus_operational",
             "reqs": [
@@ -1599,10 +1850,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorcan_bus_operational"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcan_bus_operational"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "commanded_profile",
             "reqs": [
@@ -1619,10 +1870,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorcommanded_profile"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcommanded_profile"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "coolant_temp_c",
             "reqs": [
@@ -1639,10 +1890,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorcoolant_temp_c"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcoolant_temp_c"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "dbc_frames_emitted",
             "reqs": [
@@ -1659,10 +1910,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatordbc_frames_emitted"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatordbc_frames_emitted"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "latency_jitter_std_ms",
             "reqs": [
@@ -1679,10 +1930,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorlatency_jitter_std_ms"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorlatency_jitter_std_ms"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "load_pct",
             "reqs": [
@@ -1699,10 +1950,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorload_pct"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorload_pct"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "maf_g_s",
             "reqs": [
@@ -1719,10 +1970,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatormaf_g_s"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormaf_g_s"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "mcp2515_hardware_up",
             "reqs": [
@@ -1739,10 +1990,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatormcp2515_hardware_up"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormcp2515_hardware_up"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "mcp2515_rx_polled",
             "reqs": [
@@ -1759,10 +2010,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatormcp2515_rx_polled"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormcp2515_rx_polled"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "mean_obd_latency_ms",
             "reqs": [
@@ -1779,10 +2030,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatormean_obd_latency_ms"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormean_obd_latency_ms"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "obd_benchmark_running",
             "reqs": [
@@ -1800,10 +2051,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorobd_benchmark_running"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_benchmark_running"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "obd_request_0x7df_received",
             "reqs": [
@@ -1820,10 +2071,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorobd_request_0x7df_received"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_request_0x7df_received"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "obd_response_0x7e8_sent",
             "reqs": [
@@ -1840,10 +2091,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorobd_response_0x7e8_sent"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_response_0x7e8_sent"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "physics_model_updated",
             "reqs": [
@@ -1861,10 +2112,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorphysics_model_updated"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorphysics_model_updated"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "profile_cmd_0x010_received",
             "reqs": [
@@ -1881,10 +2132,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorprofile_cmd_0x010_received"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorprofile_cmd_0x010_received"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "rpm",
             "reqs": [
@@ -1901,10 +2152,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorrpm"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorrpm"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "speed_kmh",
             "reqs": [
@@ -1921,10 +2172,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorspeed_kmh"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorspeed_kmh"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "throttle_pct",
             "reqs": [
@@ -1941,10 +2192,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatorthrottle_pct"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorthrottle_pct"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "timer1_50ms_tick",
             "reqs": [
@@ -1961,10 +2212,10 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatortimer1_50ms_tick"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatortimer1_50ms_tick"
         },
         {
-            "project": "EdgeTelemetryLayer",
+            "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "component_name": "uno_ecu_emulator",
             "variable_name": "timer2_1ms_tick",
             "reqs": [
@@ -1981,7 +2232,7 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": false,
-            "_id": "EdgeTelemetryLayeruno_ecu_emulatortimer2_1ms_tick"
+            "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatortimer2_1ms_tick"
         }
     ]
 }
