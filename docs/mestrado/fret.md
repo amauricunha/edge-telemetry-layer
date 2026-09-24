@@ -65,19 +65,35 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
 
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
 
+### REQ_EMU_008 — Atualização do Modelo Físico da ECU [REQ-SYS-01]
+- **ID:** `REQ_EMU_008`
+- **Parent Requirement ID:** REQ_SYS_01
+- **Component:** `uno_ecu_emulator`
+- **FRETish Text:**
+  ```text
+  in active_session upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated
+  ```
+- **Variable Mapping:**
+  - `active_session`: **Internal** (Boolean)
+  - `timer1_50ms_tick`: **Input** (Boolean)
+  - `physics_model_updated`: **Output** (Boolean)
+- **Rationale (Português):** A cada ciclo de 50 ms do Timer1, a CPU do emulador deve calcular as grandezas físicas simuladas do motor (`v_speed_kmh`, `v_rpm`, `v_throttle_pct`, `v_load_pct`, `v_maf_g_s`) a partir da tabela senoidal modulada pelo perfil ativo em menos de 1 ms de tempo de CPU da ISR.
+
+---
+
 ### REQ_EMU_001 — Emissão Cíclica de Grandezas do Motor DBC [REQ-SYS-01]
 - **ID:** `REQ_EMU_001`
 - **Parent Requirement ID:** REQ_SYS_01
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session upon timer1_50ms_tick the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
+  in active_session upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
-  - `timer1_50ms_tick`: **Input** (Boolean)
+  - `physics_model_updated`: **Input** (Boolean) — Gerado pelo cálculo de física em REQ_EMU_008
   - `dbc_frames_emitted`: **Output** (Boolean)
-- **Rationale (Português):** O emulador deve emitir os frames CAN periódicos conforme a DBC: 0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms via Timer1.
+- **Rationale (Português):** Após a atualização das variáveis físicas do motor, o emulador deve codificar e transmitir os frames CAN periódicos conforme a DBC (0x200 a cada 50 ms, 0x100 a cada 100 ms e 0x300 a cada 1000 ms) via SPI/MCP2515 em até 2 ms.
 
 ---
 
@@ -617,19 +633,20 @@ O que **É** modelado: o prazo de emissão (`within 2 MILLISECOND`), a comutaç�
 
 ---
 
-### REQ_COM_004 — Tarefa Periódica de Despacho (task_tx_dispatch) [REQ-SYS-20]
+### REQ_COM_004 — Tarefa Periódica de Despacho (BSW Com) [REQ-SYS-20]
 - **ID:** `REQ_COM_004`
 - **Parent Requirement ID:** REQ_SYS_20
-- **Component:** `task_tx_dispatch`
+- **Component:** `bsw_com`
 - **FRETish Text:**
   ```text
-  in active_session upon dispatch_cycle_50ms the task_tx_dispatch shall within 2500 MICROSECOND satisfy data_packets_dispatched
+  in active_session upon dispatch_cycle_50ms the bsw_com shall within 2500 MICROSECOND satisfy data_packets_dispatched
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `dispatch_cycle_50ms`: **Input** (Boolean)
   - `data_packets_dispatched`: **Output** (Boolean)
-- **Rationale (Português):** A cada 50 ms, a thread de despacho deve arbitrar o encaminhamento físico entre o soquete MQTT e o descritor de arquivo do SD.
+- **Rationale (Português):** A cada ciclo de despacho de telemetria, a camada de comunicação (`bsw_com`) deve arbitrar e despachar os lotes binários acumulados no canal MQTT sem exceder 2,5 ms de tempo de execução da CPU.
+- **Nota de Implementação:** No firmware em Rust (`firmware/esp32s3_collector/src/bsw/bsw_com.rs`), o despacho é executado pela tarefa assíncrona `task_wifi`, consumindo frames do canal estático `MQTT_TX_CHANNEL` (capacidade 500) em lotes de até 150 registros.
 
 ---
 
