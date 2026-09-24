@@ -67,21 +67,18 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
    │
    ├── [COMPONENTE 1: uno_ecu_emulator] (8 requisitos)
    │     └── Nó Emulador de ECU (ATmega328P + MCP2515 Bare-Metal C++)
-   │           └── Subsistema 1: Emulação Dinâmica e Física DBC [REQ_EMU_001 a 008]
+   │           └── [Subsistema 1] [Emulador ECU] Emulação Dinâmica e Física DBC [REQ_EMU_001 a REQ_EMU_008]
    │
    └── [COMPONENTE 2: esp32s3_collector] (40 requisitos)
          └── Nó Coletor e Gateway de Borda Integrado (Firmware Rust no_std Embassy)
-               ├── Camada MCAL / RTE (Aquisição de Baixo Nível):
-               │     └── Subsistema 2: Aquisição e Recepção Passiva TWAI [REQ_CAN_001 a 006]
-               ├── Camada de Aplicação (APP):
-               │     ├── Subsistema 3: Diagnóstico Ativo OBD-II ISO 15765-4 [REQ_OBD_001 a 004]
-               │     ├── Subsistema 4: Estruturação Tabular CSV e Buffers [REQ_LOG_001 a 009]
-               │     └── Subsistema 7: FSM de Conectividade e Fallback Offline [REQ_FSM_001 a 002]
-               └── Camada de Serviços Básicos e Drivers (BSW / MCAL):
-                     ├── Subsistema 5: Persistência em MicroSD FAT32 via SPI2 [REQ_SD_001 a 005]
-                     ├── Subsistema 6: Conectividade em Nuvem Wi-Fi e MQTT [REQ_COM_001 a 005]
-                     ├── Subsistema 8: Controle Remoto e Streaming Replay [REQ_CMD_001 a 002]
-                     └── Subsistema 9: Resiliência Bus-Off e Watchdog [REQ_REC_001 a 007]
+               ├── [Subsistema 2] [Camada MCAL] Aquisição e Recepção Passiva TWAI [REQ_CAN_001 a REQ_CAN_006]
+               ├── [Subsistema 3] [Camada APP] Diagnóstico Ativo OBD-II ISO 15765-4 [REQ_OBD_001 a REQ_OBD_004]
+               ├── [Subsistema 4] [Camada APP] Estruturação Tabular CSV e Buffers SRAM [REQ_LOG_001 a REQ_LOG_009]
+               ├── [Subsistema 5] [Camada BSW] Persistência em MicroSD FAT32 via SPI2 [REQ_SD_001 a REQ_SD_005]
+               ├── [Subsistema 6] [Camada BSW] Conectividade em Nuvem Wi-Fi e MQTT [REQ_COM_001 a REQ_COM_005]
+               ├── [Subsistema 7] [Camada APP] FSM de Conectividade e Fallback Offline [REQ_FSM_001 a REQ_FSM_002]
+               ├── [Subsistema 8] [Camada BSW] Controle Remoto de Bancada e Replay [REQ_CMD_001 a REQ_CMD_002]
+               └── [Subsistema 9] [Camada BSW] Resiliência Bus-Off e Watchdog [REQ_REC_001 a REQ_REC_007]
 ```
 
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
