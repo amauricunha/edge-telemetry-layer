@@ -63,17 +63,25 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ---
 
 ```
-[SISTEMA: Edge Telemetry Layer]
+[SISTEMA: Edge Telemetry Layer] (Total: 48 Requisitos)
    │
    ├── [COMPONENTE 1: uno_ecu_emulator] (8 requisitos)
-   │     └── Nó Emulador de ECU (ATmega328P + MCP2515)
+   │     └── Nó Emulador de ECU (ATmega328P + MCP2515 Bare-Metal C++)
+   │           └── Subsistema 1: Emulação Dinâmica e Física DBC [REQ_EMU_001 a 008]
    │
-   └── [COMPONENTE 2: esp32s3_collector] (39 requisitos)
-         └── Nó Coletor e Gateway de Borda Integrado
-               ├── [Subsistema 2] [Camada MCAL] (TWAI, SPI2)
-               ├── [Subsistema 3] [Camada BSW] (Memória, Com/WiFi, Diag/Watchdog)
-               ├── [Subsistema 4] [Camada RTE] (Canais estáticos)
-               └── [Subsistema 5] [Camada Aplicação] (Logger, OBD Poller, Decoder)
+   └── [COMPONENTE 2: esp32s3_collector] (40 requisitos)
+         └── Nó Coletor e Gateway de Borda Integrado (Firmware Rust no_std Embassy)
+               ├── Camada MCAL / RTE (Aquisição de Baixo Nível):
+               │     └── Subsistema 2: Aquisição e Recepção Passiva TWAI [REQ_CAN_001 a 006]
+               ├── Camada de Aplicação (APP):
+               │     ├── Subsistema 3: Diagnóstico Ativo OBD-II ISO 15765-4 [REQ_OBD_001 a 004]
+               │     ├── Subsistema 4: Estruturação Tabular CSV e Buffers [REQ_LOG_001 a 009]
+               │     └── Subsistema 7: FSM de Conectividade e Fallback Offline [REQ_FSM_001 a 002]
+               └── Camada de Serviços Básicos e Drivers (BSW / MCAL):
+                     ├── Subsistema 5: Persistência em MicroSD FAT32 via SPI2 [REQ_SD_001 a 005]
+                     ├── Subsistema 6: Conectividade em Nuvem Wi-Fi e MQTT [REQ_COM_001 a 005]
+                     ├── Subsistema 8: Controle Remoto e Streaming Replay [REQ_CMD_001 a 002]
+                     └── Subsistema 9: Resiliência Bus-Off e Watchdog [REQ_REC_001 a 007]
 ```
 
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
