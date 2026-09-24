@@ -4029,17 +4029,17 @@
                 "90b9dfe0-b849-11f1-a4da-197ba71217d8",
                 "a311cee0-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Guarda de modo indicando que a sessão de captura e gravação de telemetria está ativa.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoractive_session"
         },
         {
@@ -4049,17 +4049,17 @@
             "reqs": [
                 "37f51cd0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Esvaziamento completo da fila de backlog em RAM e envio dos dados pendentes via MQTT concluído.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbacklog_fifo_drained"
         },
         {
@@ -4069,17 +4069,17 @@
             "reqs": [
                 "4cb19aa0-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Evento de conclusão da rodada formal de testes e benchmark de desempenho da telemetria.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbenchmark_completion"
         },
         {
@@ -4089,17 +4089,17 @@
             "reqs": [
                 "93effa10-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinalizador indicando lote de telemetria acumulado em memória atingindo o limite de 150 registros.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbinary_batch_full"
         },
         {
@@ -4112,17 +4112,17 @@
                 "5fa63440-b848-11f1-a4da-197ba71217d8",
                 "858a1050-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Guarda de modo da fase de boot, energização e configuração dos periféricos MCAL no ESP32-S3.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorboot_mode"
         },
         {
@@ -4134,17 +4134,17 @@
                 "bbb81bf0-b847-11f1-a4da-197ba71217d8",
                 "5fa63440-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Gatilho de inicialização ou reinício a frio da placa ESP32-S3.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorboot_trigger"
         },
         {
@@ -4154,17 +4154,17 @@
             "reqs": [
                 "4267be40-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "integer",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Volume instantâneo em bytes ocupado no buffer circular de gravação em MicroSD (capacidade 4096 B).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbuffer_occupancy"
         },
         {
@@ -4174,17 +4174,17 @@
             "reqs": [
                 "737febd0-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinal emitido liberando as tarefas do barramento CAN após recuperação bem-sucedida de Bus-Off.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_clear_signaled"
         },
         {
@@ -4194,17 +4194,17 @@
             "reqs": [
                 "90b9dfe0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Interrupção de hardware do periférico TWAI sinalizando ocorrência de condição de erro Bus-Off.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_error_detected"
         },
         {
@@ -4214,17 +4214,17 @@
             "reqs": [
                 "9fdfbe40-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Estado em que a flag de sinalização de Bus-Off permanece ativa no sistema.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_flag_active"
         },
         {
@@ -4234,17 +4234,17 @@
             "reqs": [
                 "90b9dfe0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Flag interna sinalizada pelo driver TWAI registrando a falha de Bus-Off para recuperação.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_flag_set"
         },
         {
@@ -4254,17 +4254,17 @@
             "reqs": [
                 "9fdfbe40-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinal de pausa cooperativa emitido para as tarefas task_can_rx e task_obd_poller suspenderem o TWAI.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_pause_signaled"
         },
         {
@@ -4274,17 +4274,17 @@
             "reqs": [
                 "b3fcab40-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Evento indicando início da janela compulsória de espera e observação de bits recessivos.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_pause_started"
         },
         {
@@ -4294,17 +4294,17 @@
             "reqs": [
                 "fb2a0370-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Integridade elétrica e lógica do barramento CAN atestada sem presença de condição de Bus-Off.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_bus_healthy"
         },
         {
@@ -4314,17 +4314,17 @@
             "reqs": [
                 "0a8780b0-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Comando CAN de bancada intercalado com sucesso entre janelas de polling OBD sem violar a periodicidade.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_cmd_interleaved"
         },
         {
@@ -4334,17 +4334,17 @@
             "reqs": [
                 "0a8780b0-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Comando de atuação CAN recebido na fila interna de transmissão prioritária.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_cmd_received_in_queue"
         },
         {
@@ -4354,17 +4354,17 @@
             "reqs": [
                 "7b7328a0-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Interrupção de hardware do TWAI indicando novo frame CAN disponível no FIFO de recepção.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_frame_arrived"
         },
         {
@@ -4374,17 +4374,17 @@
             "reqs": [
                 "60d5f720-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Preempção voluntária da CPU liberada pela tarefa de escrita do SD entre blocos consecutivos de 512 B.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorchunk_preemption_yielded"
         },
         {
@@ -4394,17 +4394,17 @@
             "reqs": [
                 "4e3537f0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Mensagem de confirmação (ACK) de execução de comando remoto publicada no tópico MQTT.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcommand_executed_ack"
         },
         {
@@ -4415,17 +4415,17 @@
                 "93effa10-b848-11f1-a4da-197ba71217d8",
                 "ad8c3880-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Guarda de modo indicando interface Wi-Fi autenticada e conexão com broker MQTT operacional.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorconnected_mode"
         },
         {
@@ -4435,17 +4435,17 @@
             "reqs": [
                 "c6e935f0-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Linha de telemetria em formato CSV pronta na memória para enfileiramento de gravação.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcsv_line_available"
         },
         {
@@ -4455,17 +4455,17 @@
             "reqs": [
                 "541c7a50-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Frame de telemetria convertido e formatado como registro de texto CSV delimitado por vírgula.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcsv_line_formatted"
         },
         {
@@ -4475,17 +4475,17 @@
             "reqs": [
                 "cd6fac40-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Pacotes de telemetria arbitrados e despachados no canal MQTT pela camada bsw_com em até 2,5 ms de CPU.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectordata_packets_dispatche"
         },
         {
@@ -4495,17 +4495,17 @@
             "reqs": [
                 "a7ad25c0-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sessão experimental de gravação de dataset de telemetria em execução ativa.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectordataset_recording"
         },
         {
@@ -4515,17 +4515,17 @@
             "reqs": [
                 "cd6fac40-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinalizador do ciclo de 50 ms da tarefa periódica de despacho de comunicação bsw_com.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectordispatch_cycle_50ms"
         },
         {
@@ -4535,17 +4535,17 @@
             "reqs": [
                 "a20b1270-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Conversão de grandezas físicas do frame CAN concluída com aplicação de escala e offset da base DBC.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorengineering_values_scaled"
         },
         {
@@ -4555,17 +4555,17 @@
             "reqs": [
                 "bbb81bf0-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sistema de arquivos FAT32 do cartão MicroSD montado e validado operacional via interface SPI2.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorfat32_filesystem_mounted"
         },
         {
@@ -4575,17 +4575,17 @@
             "reqs": [
                 "4267be40-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinal de descarga (flush) emitido para forçar gravação física no MicroSD ao atingir 3072 B no buffer.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorflush_signal_emitted"
         },
         {
@@ -4595,17 +4595,17 @@
             "reqs": [
                 "517b4d20-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Expiração do temporizador periódico de 2 segundos para sincronização forçada do buffer de gravação do SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorflush_timer_2s_expired"
         },
         {
@@ -4615,17 +4615,17 @@
             "reqs": [
                 "fb2a0370-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Taxa percentual de perda de frames CAN medida durante o ensaio experimental (critério AC-01 <= 1%).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorframe_loss_percentage"
         },
         {
@@ -4635,17 +4635,17 @@
             "reqs": [
                 "7b7328a0-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Captura e vinculação de timestamp de 64 bits em microssegundos ao frame CAN recebido na interrupção.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorframe_timestamp_captured"
         },
         {
@@ -4655,17 +4655,17 @@
             "reqs": [
                 "dd454810-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Cabeçalho formal CSV e evento inicial de boot persistidos atomicamente no novo arquivo de sessão do SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorheader_and_boot_lines_written"
         },
         {
@@ -4675,17 +4675,17 @@
             "reqs": [
                 "a3d4d820-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Registro de telemetria interna (heartbeat, saúde das tarefas e uptime) persistido no SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorheartbeat_diag_logged"
         },
         {
@@ -4695,17 +4695,17 @@
             "reqs": [
                 "a3d4d820-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Expiração do temporizador periódico de 60 segundos para emissão de diagnóstico heartbeat.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorheartbeat_timer_60s"
         },
         {
@@ -4715,17 +4715,17 @@
             "reqs": [
                 "c9abb480-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Pulso de rearme periódico emitido para o Watchdog de Hardware em intervalo inferior a 2 s.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorhw_watchdog_fed"
         },
         {
@@ -4736,17 +4736,17 @@
                 "5fa63440-b848-11f1-a4da-197ba71217d8",
                 "858a1050-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Atribuição bem-sucedida de endereço IP local via DHCP pela pilha TCP/IP do Wi-Fi.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorip_dhcp_assigned"
         },
         {
@@ -4756,17 +4756,17 @@
             "reqs": [
                 "a311cee0-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Detecção de ausência de processamento de novos frames de telemetria pelo logger por 30 segundos.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorlogger_stall_30s_detected"
         },
         {
@@ -4776,17 +4776,17 @@
             "reqs": [
                 "bbb81bf0-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Barramento periférico SPI2 e transceptor do cartão MicroSD inicializados e respondendo.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormcal_spi_sd_up"
         },
         {
@@ -4796,17 +4796,17 @@
             "reqs": [
                 "3236fd60-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Periférico TWAI de comunicação CAN configurado e inicializado operacional a 500 kbps.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormcal_twai_up"
         },
         {
@@ -4816,17 +4816,17 @@
             "reqs": [
                 "97dce120-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Rotina de contabilidade e supervisão de consumo de memória SRAM em execução ativa.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormemory_supervision_active"
         },
         {
@@ -4836,17 +4836,17 @@
             "reqs": [
                 "93effa10-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Lote binário de telemetria compacta despachado com sucesso para o broker MQTT no tópico de dados.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormqtt_batch_published"
         },
         {
@@ -4856,17 +4856,17 @@
             "reqs": [
                 "858a1050-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sessão TCP e handshake de protocolo estabelecidos com sucesso com o broker MQTT remoto.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormqtt_broker_connected"
         },
         {
@@ -4876,17 +4876,17 @@
             "reqs": [
                 "858a1050-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Parâmetros de endereço, porta e credenciais de autenticação do broker MQTT validados no sistema.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormqtt_credentials_valid"
         },
         {
@@ -4896,17 +4896,17 @@
             "reqs": [
                 "dd454810-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Novo arquivo de sessão criado e aberto para escrita no sistema de arquivos do cartão MicroSD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectornew_file_opened"
         },
         {
@@ -4916,17 +4916,17 @@
             "reqs": [
                 "a7ad25c0-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "integer",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Contagem de campos obrigatórios nulos detectados nas linhas do dataset (invariante: deve ser 0).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectornull_mandatory_fields"
         },
         {
@@ -4936,17 +4936,17 @@
             "reqs": [
                 "9c2b5f40-b83d-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Requisição padrão funcional OBD-II transmitida no barramento CAN com identificador 0x7DF.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_request_0x7df_transmitted"
         },
         {
@@ -4956,17 +4956,17 @@
             "reqs": [
                 "cf684f50-b845-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Expiração da janela limite de 50 ms sem recepção de resposta OBD-II 0x7E8 da ECU.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timeout_50ms_elapsed"
         },
         {
@@ -4976,17 +4976,17 @@
             "reqs": [
                 "cf684f50-b845-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Ocorrência de timeout de resposta OBD-II contabilizada nas métricas de integridade e diagnóstico.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timeout_recorded"
         },
         {
@@ -4996,17 +4996,17 @@
             "reqs": [
                 "9c2b5f40-b83d-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Expiração do temporizador cíclico de 100 ms (10 Hz) para disparo de nova consulta OBD-II.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timer_100ms_expired"
         },
         {
@@ -5016,17 +5016,17 @@
             "reqs": [
                 "beda7620-b83d-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Ciclo de transmissão de requisição e recepção de resposta OBD-II finalizado com sucesso.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_tx_cycle_completed"
         },
         {
@@ -5036,17 +5036,17 @@
             "reqs": [
                 "76a66080-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Guarda de modo indicando desconexão de rede Wi-Fi e comutação para armazenamento local no SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoroffline_mode"
         },
         {
@@ -5056,17 +5056,17 @@
             "reqs": [
                 "3f466260-b839-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Ocorrência de estouro de canal RTE estático registrada em diagnóstico com descarte controlado de frame.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoroverflow_logged_and_dropped"
         },
         {
@@ -5076,17 +5076,17 @@
             "reqs": [
                 "517b4d20-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Gravação física de todos os bytes pendentes no buffer circular do SD e sincronização do arquivo concluída.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorpending_bytes_flushed"
         },
         {
@@ -5096,17 +5096,17 @@
             "reqs": [
                 "beda7620-b83d-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Índice sequencial do próximo parâmetro PID (velocidade, rotação, carga, etc.) incrementado no poller.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorpid_index_incremented"
         },
         {
@@ -5116,17 +5116,17 @@
             "reqs": [
                 "76a66080-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Frames de telemetria retidos no buffer FIFO em RAM durante indisponibilidade transiente do MicroSD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorram_backlog_retained"
         },
         {
@@ -5136,17 +5136,17 @@
             "reqs": [
                 "a20b1270-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Frame CAN bruto disponível na fila de recepção para decodificação de sinais.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorraw_can_frame_ready"
         },
         {
@@ -5157,17 +5157,17 @@
                 "b3fcab40-b849-11f1-a4da-197ba71217d8",
                 "1d5841d0-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Janela normativa de espera de 128 ms decorrida autorizando o reinício do controlador TWAI.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrecovery_window_elapsed"
         },
         {
@@ -5177,17 +5177,17 @@
             "reqs": [
                 "4e3537f0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Comando de controle ou configuração recebido através de subscrição no tópico de comando MQTT.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorremote_command_received"
         },
         {
@@ -5197,17 +5197,17 @@
             "reqs": [
                 "63c36830-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Comando de retransmissão (replay) de dados históricos do cartão SD validado e disparado.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorreplay_command_triggered"
         },
         {
@@ -5217,17 +5217,17 @@
             "reqs": [
                 "63c36830-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sessão de streaming de registros históricos do MicroSD ativa para envio contínuo via MQTT.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorreplay_streaming_active"
         },
         {
@@ -5237,17 +5237,17 @@
             "reqs": [
                 "3f466260-b839-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Detecção de fila cheia ou tentativa de inserção em canal estático RTE com capacidade máxima esgotada.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrte_channel_overflow"
         },
         {
@@ -5257,17 +5257,17 @@
             "reqs": [
                 "cd268890-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Frame de telemetria decodificado inserido com sucesso no canal estático RTE de comunicação inter-tarefas.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrte_channel_pushed"
         },
         {
@@ -5277,17 +5277,17 @@
             "reqs": [
                 "c6e935f0-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Linha de telemetria inserida com sucesso no buffer circular em RAM da tarefa de gravação do SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_buffer_pushed"
         },
         {
@@ -5297,17 +5297,17 @@
             "reqs": [
                 "bbb81bf0-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Presença física do cartão de memória MicroSD detectada e comunicação SPI operacional.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_card_inserted"
         },
         {
@@ -5317,17 +5317,17 @@
             "reqs": [
                 "2205b9c0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Modo de contingência com armazenamento exclusivo no cartão MicroSD ativado após queda de rede Wi-Fi.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_fallback_active"
         },
         {
@@ -5337,17 +5337,17 @@
             "reqs": [
                 "76a66080-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Detecção de erro de I/O na tentativa de escrita de bloco físico no cartão MicroSD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_write_failed"
         },
         {
@@ -5357,17 +5357,17 @@
             "reqs": [
                 "60d5f720-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Bloco de dados alinhado ao setor de 512 bytes pronto para gravação em lote no MicroSD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsector_write_chunk"
         },
         {
@@ -5377,17 +5377,17 @@
             "reqs": [
                 "ed3ca740-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Duração limite configurada para a sessão de ensaio de telemetria atingida.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_duration_reached"
         },
         {
@@ -5397,17 +5397,17 @@
             "reqs": [
                 "ca8468a0-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Arquivo de log anterior sincronizado e fechado com abertura atômica de novo arquivo sequencial no SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_file_rotated_atomically"
         },
         {
@@ -5417,17 +5417,17 @@
             "reqs": [
                 "ca8468a0-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Comando explícito recebido requisitando a rotação imediata do arquivo de telemetria em gravação.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_rotate_command"
         },
         {
@@ -5437,17 +5437,17 @@
             "reqs": [
                 "ed3ca740-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sessão finalizada com descarregamento de todos os buffers e fechamento seguro do arquivo no SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_stopped_and_flushed"
         },
         {
@@ -5457,17 +5457,17 @@
             "reqs": [
                 "97dce120-b847-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Consumo total de memória RAM estática e dinâmica medido em kilobytes (critério AC-05 < 200 KB).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsram_usage_kb"
         },
         {
@@ -5477,17 +5477,17 @@
             "reqs": [
                 "a311cee0-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Alerta diagnóstico de travamento da tarefa logger persistido no log de eventos do SD.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorstall_diag_logged"
         },
         {
@@ -5497,17 +5497,17 @@
             "reqs": [
                 "ad8c3880-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Mensagem JSON contendo status operacional, telemetria interna e uptime publicada no tópico MQTT.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorstatus_json_published"
         },
         {
@@ -5517,17 +5517,17 @@
             "reqs": [
                 "ad8c3880-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Expiração do temporizador periódico de 5 segundos para publicação de status operacional.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorstatus_timer_5s"
         },
         {
@@ -5537,17 +5537,17 @@
             "reqs": [
                 "c9abb480-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinalizador confirmando que todas as tarefas essenciais do sistema estão ativas e sem travamento.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsystem_tasks_healthy"
         },
         {
@@ -5557,17 +5557,17 @@
             "reqs": [
                 "cd268890-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Frame CAN bruto decodificado e validado pronto para ser despachado no canal RTE correspondente.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortelemetry_frame_parsed"
         },
         {
@@ -5577,17 +5577,17 @@
             "reqs": [
                 "541c7a50-b846-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Estrutura de dados de telemetria recebida na fila de processamento da tarefa de gravação.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortelemetry_frame_received"
         },
         {
@@ -5597,17 +5597,17 @@
             "reqs": [
                 "4cb19aa0-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "integer",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Número acumulado total de amostras de telemetria registradas no ensaio (critério AC-08 >= 72000).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortotal_dataset_samples"
         },
         {
@@ -5617,17 +5617,17 @@
             "reqs": [
                 "3236fd60-b838-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Modo assíncrono do controlador TWAI configurado com interrupções e filas habilitadas.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortwai_async_enabled"
         },
         {
@@ -5638,17 +5638,17 @@
                 "1d5841d0-b84a-11f1-a4da-197ba71217d8",
                 "737febd0-b84a-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Flag de reset no registrador de controle físico do TWAI desmarcada via PAC sem reboot da CPU.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortwai_reset_mode_cleared"
         },
         {
@@ -5658,17 +5658,17 @@
             "reqs": [
                 "5fa63440-b848-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Parâmetros de rede Wi-Fi (SSID e senha) configurados e disponíveis na memória do sistema.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorwifi_credentials_configured"
         },
         {
@@ -5678,17 +5678,17 @@
             "reqs": [
                 "2205b9c0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Evento sinalizando perda de conexão ou desconexão física da interface de rede Wi-Fi.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorwifi_disconnected"
         },
         {
@@ -5698,17 +5698,17 @@
             "reqs": [
                 "37f51cd0-b849-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Restabelecimento bem-sucedido da conexão Wi-Fi com obtenção de endereço IP.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorwifi_reconnected"
         },
         {
@@ -5721,17 +5721,17 @@
                 "afc18680-b831-11f1-a4da-197ba71217d8",
                 "cbfd7610-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "integer",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Perfil ativo de dinâmica veicular no emulador de ECU (1=Eco, 2=Normal, 3=Sport).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatoractive_profile"
         },
         {
@@ -5746,17 +5746,17 @@
                 "cbfd7610-b831-11f1-a4da-197ba71217d8",
                 "f52e8150-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Guarda de estado indicando sessão ativa de geração e transmissão de telemetria no emulador.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatoractive_session"
         },
         {
@@ -5766,17 +5766,17 @@
             "reqs": [
                 "51020070-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Internal",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Guarda de modo da fase de boot e inicialização do microcontrolador ATmega328P.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorboot_mode"
         },
         {
@@ -5786,17 +5786,17 @@
             "reqs": [
                 "51020070-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Gatilho de energização ou reinicialização da placa Arduino Uno (ATmega328P).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorboot_trigger"
         },
         {
@@ -5808,17 +5808,17 @@
                 "cbfd7610-b831-11f1-a4da-197ba71217d8",
                 "e23505b0-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Controlador MCP2515 em modo normal a 500 kbps e LED D4 aceso indicando barramento operacional.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcan_bus_operational"
         },
         {
@@ -5828,17 +5828,17 @@
             "reqs": [
                 "6e925c70-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "integer",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Perfil de condução comandado remotamente via frame CAN ID 0x010 byte 0 (1=Eco, 2=Normal, 3=Sport).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcommanded_profile"
         },
         {
@@ -5848,17 +5848,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Temperatura do líquido de arrefecimento do motor em graus Celsius simulada pelo modelo físico.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcoolant_temp_c"
         },
         {
@@ -5868,17 +5868,17 @@
             "reqs": [
                 "cbfd7610-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Emissão cíclica concluída dos frames CAN de telemetria proprietária DBC dentro da janela do Timer1.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatordbc_frames_emitted"
         },
         {
@@ -5888,17 +5888,17 @@
             "reqs": [
                 "811af860-b832-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Desvio padrão do jitter de latência round-trip das consultas OBD-II em milissegundos (critério AC-03 < 3 ms).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorlatency_jitter_std_ms"
         },
         {
@@ -5908,17 +5908,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Carga calculada do motor em percentual (0 a 100%) gerada pela simulação senoidal.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorload_pct"
         },
         {
@@ -5928,17 +5928,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Vazão de massa de ar admitida (MAF) em gramas por segundo calculada pelo modelo físico.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormaf_g_s"
         },
         {
@@ -5948,17 +5948,17 @@
             "reqs": [
                 "51020070-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Módulo MCP2515 e transceptor CAN energizados e respondendo à comunicação SPI.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormcp2515_hardware_up"
         },
         {
@@ -5968,17 +5968,17 @@
             "reqs": [
                 "e23505b0-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Varredura periódica por polling do registrador de recepção do MCP2515 concluída.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormcp2515_rx_polled"
         },
         {
@@ -5988,17 +5988,17 @@
             "reqs": [
                 "68170250-b832-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Latência média round-trip de resposta às consultas diagnósticas OBD-II em ms (critério AC-02 < 10 ms).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormean_obd_latency_ms"
         },
         {
@@ -6009,17 +6009,17 @@
                 "68170250-b832-11f1-a4da-197ba71217d8",
                 "811af860-b832-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Sinalizador indicando que a rotina formal de benchmark de desempenho OBD-II está em execução.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_benchmark_running"
         },
         {
@@ -6029,17 +6029,17 @@
             "reqs": [
                 "f52e8150-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Detecção de requisição OBD-II funcional broadcast no ID CAN 0x7DF.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_request_0x7df_received"
         },
         {
@@ -6049,17 +6049,17 @@
             "reqs": [
                 "f52e8150-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Resposta diagnóstica OBD-II transmitida no ID CAN 0x7E8 dentro do deadline de 2 ms.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_response_0x7e8_sent"
         },
         {
@@ -6070,17 +6070,17 @@
                 "afc18680-b831-11f1-a4da-197ba71217d8",
                 "cbfd7610-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Atualização cíclica das variáveis físicas moduladas pela curva senoidal em PROGMEM concluída.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorphysics_model_updated"
         },
         {
@@ -6090,17 +6090,17 @@
             "reqs": [
                 "6e925c70-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Recepção de novo comando CAN com ID 0x010 para troca de perfil de condução.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorprofile_cmd_0x010_received"
         },
         {
@@ -6110,17 +6110,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Rotação instantânea do motor a combustão (RPM) gerada pelo modelo de física.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorrpm"
         },
         {
@@ -6130,17 +6130,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Velocidade calculada do veículo em quilômetros por hora (km/h).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorspeed_kmh"
         },
         {
@@ -6150,17 +6150,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "double",
-            "idType": "Output",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Posição relativa da borboleta de aceleração em percentual (0 a 100%).",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorthrottle_pct"
         },
         {
@@ -6170,17 +6170,17 @@
             "reqs": [
                 "afc18680-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Interrupção periódica do Timer1 de hardware a cada 50 ms (20 Hz) para disparo dos frames DBC.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatortimer1_50ms_tick"
         },
         {
@@ -6190,17 +6190,17 @@
             "reqs": [
                 "e23505b0-b831-11f1-a4da-197ba71217d8"
             ],
-            "dataType": "boolean",
-            "idType": "Input",
+            "dataType": "",
+            "idType": "",
             "moduleName": "",
-            "description": "Interrupção periódica do Timer2 de hardware a cada 1 ms (1 kHz) para polling do controlador CAN.",
+            "description": "",
             "assignment": "",
             "copilotAssignment": "",
             "modeRequirement": "",
             "modeldoc": false,
             "modelComponent": "",
             "modeldoc_id": "",
-            "completed": true,
+            "completed": false,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatortimer2_1ms_tick"
         }
     ]
