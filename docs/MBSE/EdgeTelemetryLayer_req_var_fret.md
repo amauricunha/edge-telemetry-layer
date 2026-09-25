@@ -85,7 +85,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_001 — Inicialização do MCP2515 e Perfil Padrão [REQ-SYS-01] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_001`
 - **Parent Requirement ID:** REQ_SYS_01
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 100 MILLISECOND satisfy can_bus_operational & active_profile = 2
@@ -103,7 +103,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_002 — Comutação de Perfil de Condução Simulada [REQ-SYS-01] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_002`
 - **Parent Requirement ID:** REQ_SYS_01
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 50 MILLISECOND satisfy active_profile = commanded_profile
@@ -120,7 +120,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_003 — Atualização do Modelo Físico da ECU [REQ-SYS-01] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_003`
 - **Parent Requirement ID:** REQ_SYS_01
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0
@@ -143,7 +143,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_004 — Emissão Cíclica de Grandezas do Motor DBC [REQ-SYS-01] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_004`
 - **Parent Requirement ID:** REQ_SYS_01
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in active_session when active_profile >= 1 & can_bus_operational upon physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
@@ -161,7 +161,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_005 — Processamento de Interrupção de Alta Frequência [REQ-SYS-02] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_005`
 - **Parent Requirement ID:** REQ_SYS_02
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   when can_bus_operational upon timer2_1ms_tick the uno_ecu_emulator shall within 50 MICROSECOND satisfy mcp2515_rx_polled
@@ -177,7 +177,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_006 — Codificação e Emissão de Resposta OBD-II [REQ-SYS-07] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_006`
 - **Parent Requirement ID:** REQ_SYS_07
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in active_session upon obd_request_0x7df_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy obd_response_0x7e8_sent
@@ -193,7 +193,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_007 — Latência Média de Resposta OBD-II [REQ-SYS-08 / AC-02] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_007`
 - **Parent Requirement ID:** REQ_SYS_08
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0
@@ -209,7 +209,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 ### REQ_EMU_008 — Estabilidade Temporal e Jitter de Resposta [REQ-SYS-09 / AC-03] [Subsistema 1] [Emulador ECU]
 - **ID:** `REQ_EMU_008`
 - **Parent Requirement ID:** REQ_SYS_09
-- **Component:** `uno_ecu_emulator`
+- **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3.0
