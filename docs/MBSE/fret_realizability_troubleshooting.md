@@ -83,12 +83,15 @@ Este documento registra os diagnósticos, lições aprendidas, correções de so
 
 - **A Solução Arquitetural Canônica (Granularidade de Componentes no MBSE):**
   - Em sistemas operacionais de tempo real (FreeRTOS) e padrões aeroespaciais (ARP4754A / ISO 26262), o firmware do ESP32-S3 não é um monólito indiferenciado, mas uma coleção de **Tarefas / Componentes Funcionais Desacoplados**:
-    - `esp32_twai_driver`: Driver CAN / TWAI (`REQ_CAN_001` a `REQ_CAN_006`) — Delays: 1 a 50 ms.
-    - `esp32_obd_poller`: Poller de PIDs OBD-II (`REQ_OBD_001` a `REQ_OBD_004`) — Delays: 10 ms.
-    - `esp32_sd_logger`: Gravador MicroSD (`REQ_SD_001` a `REQ_SD_005`) — Delays: 500 ms.
-    - `esp32_fsm_coordinator`: Máquina de Estados Global (`REQ_FSM_001`, `REQ_FSM_002`) — Delays: 10 ms.
-    - `esp32_telemetry_client`: Comunicação Wi-Fi / MQTT (`REQ_COM_001` a `REQ_COM_005`) — Delays longos (2.500 a 10.000 ms).
-    - `esp32_bus_recovery`: Recuperação de Bus-Off (`REQ_REC_001` a `REQ_REC_007`).
+    - `esp32_twai`: Driver CAN / TWAI (`REQ_CAN_001` a `REQ_CAN_006`) — Delays: 1 a 50 ms.
+    - `esp32_obd`: Poller de PIDs OBD-II (`REQ_OBD_001` a `REQ_OBD_004`) — Delays: 10 ms.
+    - `esp32_sd`: Gravador MicroSD (`REQ_SD_001` a `REQ_SD_005`) — Delays: 500 ms.
+    - `esp32_fsm`: Máquina de Estados Global (`REQ_FSM_001`, `REQ_FSM_002`) — Delays: 10 ms.
+    - `esp32_cmd`: Processamento de Comandos Remotos (`REQ_CMD_001`, `REQ_CMD_002`) — Delays: 100 ms.
+    - `esp32_logger`: Logging, Formatação e Supervisão (`REQ_LOG_001` a `REQ_LOG_009`) — Delays: 100 ms.
+    - `esp32_recovery`: Recuperação de Bus-Off e Watchdog (`REQ_REC_001` a `REQ_REC_007`) — Delays: 10 a 2.000 ms.
+    - `esp32_telemetry`: Comunicação Wi-Fi / MQTT (`REQ_COM_001` a `REQ_COM_005`) — Delays: 100 a 10.000 ms.
+    - `uno_ecu_emulator`: Emulador de ECU (Arduino Uno) (`REQ_EMU_001` a `REQ_EMU_008`) — Delays: 1 a 100 ms.
   - Ao mapear cada subsistema ao seu respectivo componente no FRET, o FRET nativo gera contratos leves e independentes, permitindo que a verificação de realizabilidade de cada subsistema execute em **menos de 0,5 segundo**, com zero alterações no código-fonte da ferramenta.
 
 ---
@@ -155,20 +158,19 @@ Este documento registra os diagnósticos, lições aprendidas, correções de so
 
 Na engenharia de requisitos formais aeroespaciais e automotivos (padrões NASA, ARP4754A e ISO 26262), sistemas complexos são estruturados em **subsistemas desacoplados**. Em vez de sobrecarregar o provador SMT com 40 requisitos concorrentes em um único bloco, a verificação deve ser realizada por **Clusters Funcionais**:
 
-### 4.1. Tabela de Clusters Funcionais para Verificação Rápida
+### 4.1. Tabela de Clusters Funcionais e Componentes Formais no FRET
 
-| Cluster Funcional | Requisitos Abrangidos | Quantidade | Delays Máximos | Tempo Esperado no Kind 2 | Resultado |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **1. Driver CAN / TWAI** | `REQ_CAN_001` a `REQ_CAN_006` | 6 | 50 ms | **< 2 segundos** | Realizable: True (Verde) |
-| **2. OBD-II Poller** | `REQ_OBD_001` a `REQ_OBD_004` | 4 | 10 ms | **< 1 segundo** | Realizable: True (Verde) |
-| **3. Gravação MicroSD** | `REQ_SD_001` a `REQ_SD_005` | 5 | 500 ms | **< 2 segundos** | Realizable: True (Verde) |
-| **4. Máquina de Estados (FSM)** | `REQ_FSM_001`, `REQ_FSM_002` | 2 | 10 ms | **< 1 segundo** | Realizable: True (Verde) |
-| **5. Comandos Remotos** | `REQ_CMD_001`, `REQ_CMD_002` | 2 | 100 ms | **< 1 segundo** | Realizable: True (Verde) |
-| **6. Logging e Supervisão** | `REQ_LOG_001` a `REQ_LOG_009` | 9 | 100 ms | **< 3 segundos** | Realizable: True (Verde) |
-| **7. Recuperação e Bus-Off** | `REQ_REC_001` a `REQ_REC_006` | 6 | 100 ms | **< 2 segundos** | Realizable: True (Verde) |
-| **8. Recuperação ISO 11898** | `REQ_REC_007` (janela 2.000 ms) | 1 | 2.000 ms | **~10 segundos** | Realizable: True (Verde) |
-| **9. Conectividade Wi-Fi / MQTT** | `REQ_COM_001` a `REQ_COM_005` | 5 | 10.000 ms | Analisado isoladamente | Evita timeout nos demais clusters |
-| **10. Emulador ECU (Arduino Uno)**| `REQ_EMU_001` a `REQ_EMU_008` | 8 | 100 ms | **< 2 segundos** | Realizable: True (Verde) |
+| Cluster Funcional | Componente Formal no FRET | Requisitos Abrangidos | Quantidade | Delays Máximos | Tempo Esperado no Kind 2 | Resultado |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **1. Driver CAN / TWAI** | `esp32_twai` | `REQ_CAN_001` a `REQ_CAN_006` | 6 | 50 ms | **< 0,5 segundo** | Realizable: True (Verde) |
+| **2. OBD-II Poller** | `esp32_obd` | `REQ_OBD_001` a `REQ_OBD_004` | 4 | 10 ms | **< 0,3 segundo** | Realizable: True (Verde) |
+| **3. Gravação MicroSD** | `esp32_sd` | `REQ_SD_001` a `REQ_SD_005` | 5 | 500 ms | **< 1 segundo** | Realizable: True (Verde) |
+| **4. Máquina de Estados (FSM)** | `esp32_fsm` | `REQ_FSM_001`, `REQ_FSM_002` | 2 | 10 ms | **< 0,2 segundo** | Realizable: True (Verde) |
+| **5. Comandos Remotos** | `esp32_cmd` | `REQ_CMD_001`, `REQ_CMD_002` | 2 | 100 ms | **< 0,2 segundo** | Realizable: True (Verde) |
+| **6. Logging e Supervisão** | `esp32_logger` | `REQ_LOG_001` a `REQ_LOG_009` | 9 | 100 ms | **< 1 segundo** | Realizable: True (Verde) |
+| **7. Recuperação e Watchdog** | `esp32_recovery` | `REQ_REC_001` a `REQ_REC_007` | 7 | 2.000 ms | **~5 segundos** | Realizable: True (Verde) |
+| **8. Conectividade Wi-Fi / MQTT** | `esp32_telemetry` | `REQ_COM_001` a `REQ_COM_005` | 5 | 10.000 ms | Analisado isoladamente | Evita contaminar outros módulos |
+| **9. Emulador ECU (Arduino Uno)**| `uno_ecu_emulator` | `REQ_EMU_001` a `REQ_EMU_008` | 8 | 100 ms | **< 0,5 segundo** | Realizable: True (Verde) |
 
 ---
 
