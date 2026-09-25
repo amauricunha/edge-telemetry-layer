@@ -61,24 +61,102 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 
 ---
 
+## Decomposição de Componentes Formais no NASA FRET (Arquitetura MBSE)
+
 ```
-[SISTEMA: Edge Telemetry Layer] (Total: 48 Requisitos)
+[SISTEMA: Edge Telemetry Layer] (Total: 48 Requisitos Formais no NASA FRET)
    │
-   ├── [COMPONENTE 1: uno_ecu_emulator] (8 requisitos)
-   │     └── Nó Emulador de ECU (ATmega328P + MCP2515 Bare-Metal C++)
-   │           └── [Subsistema 1] [Emulador ECU] Emulação Dinâmica e Física DBC [REQ_EMU_001 a REQ_EMU_008]
+   ├── [NÓ 1: Emulador de ECU veicular (Hardware-in-the-Loop)]
+   │     └── Microcontrolador ATmega328P + Transceptor MCP2515 (C++ Bare-Metal)
+   │           └── [COMPONENTE FRET: uno_ecu_emulator] (8 requisitos: REQ_EMU_001 a REQ_EMU_008)
+   │                 └── Dinâmica Física de Motor (Senoide em PROGMEM), Frames DBC (0x100, 0x200, 0x300) e Resposta OBD-II
    │
-   └── [COMPONENTE 2: esp32s3_collector] (40 requisitos)
-         └── Nó Coletor e Gateway de Borda Integrado (Firmware Rust no_std Embassy)
-               ├── [Subsistema 2] [Camada MCAL] Aquisição e Recepção Passiva TWAI [REQ_CAN_001 a REQ_CAN_006]
-               ├── [Subsistema 3] [Camada APP] Diagnóstico Ativo OBD-II ISO 15765-4 [REQ_OBD_001 a REQ_OBD_004]
-               ├── [Subsistema 4] [Camada APP] Estruturação Tabular CSV e Buffers SRAM [REQ_LOG_001 a REQ_LOG_009]
-               ├── [Subsistema 5] [Camada BSW] Persistência em MicroSD FAT32 via SPI2 [REQ_SD_001 a REQ_SD_005]
-               ├── [Subsistema 6] [Camada BSW] Conectividade em Nuvem Wi-Fi e MQTT [REQ_COM_001 a REQ_COM_005]
-               ├── [Subsistema 7] [Camada APP] FSM de Conectividade e Fallback Offline [REQ_FSM_001 a REQ_FSM_002]
-               ├── [Subsistema 8] [Camada BSW] Controle Remoto de Bancada e Replay [REQ_CMD_001 a REQ_CMD_002]
-               └── [Subsistema 9] [Camada BSW] Resiliência Bus-Off e Watchdog [REQ_REC_001 a REQ_REC_007]
+   └── [NÓ 2: Coletor e Gateway de Borda (Edge Gateway)]
+         └── Microcontrolador ESP32-S3 Dual-Core (Firmware Rust no_std Embassy Assíncrono)
+               ├── [COMPONENTE FRET: esp32_twai] (6 requisitos: REQ_CAN_001 a REQ_CAN_006)
+               │     └── [Camada MCAL] Driver TWAI/CAN, Timestamping e Escala DBC (AC-01: Perda <= 1.0%)
+               ├── [COMPONENTE FRET: esp32_obd] (4 requisitos: REQ_OBD_001 a REQ_OBD_004)
+               │     └── [Camada APP] Poller de Diagnóstico OBD-II ISO 15765-4 e Intercalação Cíclica
+               ├── [COMPONENTE FRET: esp32_logger] (9 requisitos: REQ_LOG_001 a REQ_LOG_009)
+               │     └── [Camada APP] Serialização Tabular CSV, Buffers SRAM Estáticos e Supervisão (AC-05: SRAM < 200 KB)
+               ├── [COMPONENTE FRET: esp32_sd] (5 requisitos: REQ_SD_001 a REQ_SD_005)
+               │     └── [Camada BSW] Sistema de Arquivos FAT32 via SPI2 e Gravação Robusta (AC-08: >= 72.000 amostras)
+               ├── [COMPONENTE FRET: esp32_telemetry] (5 requisitos: REQ_COM_001 a REQ_COM_005)
+               │     └── [Camada BSW] Conectividade Wi-Fi e Despacho Binário MQTT em Nuvem (AC-04: Throughput)
+               ├── [COMPONENTE FRET: esp32_fsm] (2 requisitos: REQ_FSM_001 a REQ_FSM_002)
+               │     └── [Camada APP] FSM de Conectividade, Fallback Offline Imediato (AC-06: Comutação <= 5 ms) e Dreno FIFO
+               ├── [COMPONENTE FRET: esp32_cmd] (2 requisitos: REQ_CMD_001 a REQ_CMD_002)
+               │     └── [Camada BSW] Recepção de Comandos de Bancada e Retransmissão em Streaming (Replay)
+               └── [COMPONENTE FRET: esp32_recovery] (7 requisitos: REQ_REC_001 a REQ_REC_007)
+                     └── [Camada BSW] Recuperação Autônoma de Bus-Off (AC-07: Janela 128 ms via PAC) e Watchdog de Hardware
 ```
+
+---
+
+## Resumo Executivo para Apresentação Acadêmica (Orientador / Banca)
+
+> **Contexto de Engenharia e Pesquisa:**
+> O projeto implementa uma arquitetura de telemetria automotiva de borda para ensaios em pista e bancada Hardware-in-the-Loop (HIL). O nó coletor é implementado em **Rust puro sem alocação dinâmica (`no_std`)** sobre o framework assíncrono **Embassy**, seguindo a separação em camadas inspirada no padrão automotivo **AUTOSAR** (MCAL, BSW, RTE e Aplicação). A especificação formal segue a metodologia **MBSE (Model-Based Systems Engineering)** da **NASA**, onde os requisitos foram modelados em lógica temporal linear (FRETish/LTL) na ferramenta **NASA FRET** e verificados matematicamente para **Realizabilidade Monolítica e Composicional** através dos provadores formais **Kind 2** e **Z3 SMT Solver**.
+
+### 1. Tabela Síntese dos Requisitos por Componente e Camada de Software
+
+| Componente Formal (FRET) | Camada AUTOSAR | Requisitos | Qtd | Deadlines & Invariantes de Tempo Real | Critérios de Aceitação (SRS) | Função Técnica Principal |
+| :--- | :--- | :--- | :---: | :--- | :---: | :--- |
+| **`uno_ecu_emulator`** | Emulador HIL | `REQ_EMU_001` a `008` | 8 | • Atualização física: $\le 1\text{ ms}$<br>• Emissão DBC: $\le 2\text{ ms}$<br>• Resposta OBD-II: $\le 10\text{ ms}$ | **AC-02** ($\text{latência} < 10\text{ ms}$)<br>**AC-03** ($\text{jitter} < 3\text{ ms}$) | Simula a ECU do motor via Arduino UNO (ATmega328P + MCP2515), emitindo frames DBC e respondendo a consultas OBD-II com baixa latência e jitter estrito. |
+| **`esp32_twai`** | **MCAL** | `REQ_CAN_001` a `006` | 6 | • Boot TWAI: $\le 50\text{ ms}$<br>• Timestamp: $\le 2\text{ ms}$<br>• Parsing DBC: $\le 100\ \mu\text{s}$<br>• Inserção RTE: $\le 1\text{ ms}$ | **AC-01** ($\text{perda} \le 1.0\%$) | Driver do controlador CAN nativo (TWAI) do ESP32-S3 em modo assíncrono por interrupções, garantindo conversão de engenharia sem alocação dinâmica de memória. |
+| **`esp32_obd`** | **APP** | `REQ_OBD_001` a `004` | 4 | • Ciclo de polling: $100\text{ ms}$ ($10\text{ Hz}$)<br>• Timeout OBD: $50\text{ ms}$<br>• Intercalação de comandos: $\le 10\text{ ms}$ | **AC-02** (Conformidade com ECU)<br>**AC-04** (Throughput) | Orquestra a interrogação cíclica ativa dos 6 PIDs padronizados (ISO 15765-4) e gerencia filas de comandos prioritários intercalados na transmissão. |
+| **`esp32_logger`** | **APP** | `REQ_LOG_001` a `009` | 9 | • Formatação CSV: $\le 1\text{ ms}$<br>• Flush periódico: $\le 2\text{ s}$<br>• Heartbeat: $60\text{ s}$ | **AC-05** ($\text{SRAM} < 200.0\text{ KB}$)<br>**AC-04** ($\ge 200\text{ pacotes/s}$) | Converte amostras de telemetria em linhas tabulares CSV de 11 colunas utilizando buffer estático de 320 bytes, supervisionando o uso de SRAM sem memory leaks. |
+| **`esp32_sd`** | **BSW** | `REQ_SD_001` a `005` | 5 | • Mount SPI/FAT32: $\le 500\text{ ms}$<br>• Escrita por setor: $512\text{ bytes}$<br>• Yield cooperativo: $\le 20\text{ ms}$ | **AC-08** ($\ge 72.000\text{ amostras}$) | Driver e subsistema de armazenamento local contínuo em cartão MicroSD FAT32 via barramento SPI2, suportando gravação contínua por mais de 1 hora de ensaio ininterrupto. |
+| **`esp32_telemetry`** | **BSW** | `REQ_COM_001` a `005` | 5 | • Conexão Wi-Fi: $\le 10\text{ s}$<br>• Handshake MQTT: $\le 5\text{ s}$<br>• Ciclo de despacho: $50\text{ ms}$ | **AC-04** (Throughput de telemetria)<br>**AC-06** (Fallback de rede) | Gateway de comunicação sem fio via Wi-Fi e protocolo MQTT 3.1.1, compactando lotes binários para publicação em nuvem com reconexão resiliente. |
+| **`esp32_fsm`** | **APP** | `REQ_FSM_001` a `002` | 2 | • Comutação para SD: $\le 5\text{ ms}$<br>• Dreno FIFO na volta: $\le 10\text{ ms}$ | **AC-06** ($\text{comutação} \le 5\text{ ms}$) | Máquina de Estados Finita (FSM) de conectividade: detecta queda do enlace Wi-Fi e desvia instantaneamente 100% dos dados para o MicroSD, esvaziando a FIFO ao reconectar. |
+| **`esp32_cmd`** | **BSW** | `REQ_CMD_001` a `002` | 2 | • Execução de comando: $\le 20\text{ ms}$<br>• Streaming replay: $\le 100\text{ ms}$ | Controle Operacional HIL | Camada de controle remoto de bancada: interpreta comandos recebidos via MQTT/CAN (STOP, PERFIL, RESET, REPLAY) e aciona streaming de reprodução histórica. |
+| **`esp32_recovery`** | **BSW** | `REQ_REC_001` a `007` | 7 | • Detecção de Bus-Off: $\le 10\text{ ms}$<br>• Janela ISO 11898: $128\text{ ms}$<br>• Reativação PAC: $\le 1\text{ ms}$<br>• Rearme Watchdog: $\le 2\text{ s}$ | **AC-07** (Recuperação $\le 128\text{ ms}$ sem reboot) | Subsistema de resiliência e alta confiabilidade: recupera falhas elétricas do barramento CAN em nível de registradores de silício (PAC) e reanima o Watchdog de hardware. |
+
+---
+
+### 2. Mapeamento Direto dos Critérios de Aceitação da Dissertação (AC-01 a AC-08)
+
+Os critérios de aceitação formalizam as métricas quantitativas de desempenho e confiabilidade exigidas no trabalho de mestrado:
+
+1. **[AC-01] Perda Máxima de Frames CAN $\le 1.0\%$:**
+   * *Requisito Formal:* `REQ_CAN_005` no componente `esp32_twai`.
+   * *Formulação FRETish:* `in active_session when can_bus_healthy the esp32_twai shall always satisfy frame_loss_percentage <= 1.0`
+   * *Validação:* Comprovado via contrato de invariante contínuo com medição sobre barramento CAN a 500 kbps sob injeção de carga.
+
+2. **[AC-02] Latência Média de Resposta OBD-II $< 10.0\text{ ms}$:**
+   * *Requisito Formal:* `REQ_EMU_007` no componente `uno_ecu_emulator`.
+   * *Formulação FRETish:* `in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0`
+   * *Validação:* Emulador ATmega328P responde às consultas OBD-II funcionais (`0x7DF` $\to$ `0x7E8`) com tempo de resposta em microssegundos.
+
+3. **[AC-03] Estabilidade Temporal e Jitter de Resposta OBD-II $< 3.0\text{ ms}$:**
+   * *Requisito Formal:* `REQ_EMU_008` no componente `uno_ecu_emulator`.
+   * *Formulação FRETish:* `in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3.0`
+   * *Validação:* Desvio padrão da latência mantido sob rigoroso determinismo em tempo real com interrupções por hardware (Timer1/Timer2).
+
+4. **[AC-04] Throughput Sustentado de Telemetria $\ge 200\text{ pacotes/s}$:**
+   * *Requisitos Formais:* `REQ_LOG_003` no `esp32_logger` e `REQ_COM_004` no `esp32_telemetry`.
+   * *Formulação FRETish:* Despacho contínuo a cada ciclo de 50 ms sem saturação de canais assíncronos.
+
+5. **[AC-05] Consumo Estático de Memória SRAM $< 200.0\text{ KB}$:**
+   * *Requisito Formal:* `REQ_LOG_008` no componente `esp32_logger`.
+   * *Formulação FRETish:* `in active_session when memory_supervision_active the esp32_logger shall always satisfy sram_usage_kb < 200.0`
+   * *Validação:* Firmware implementado em Rust `no_std` com alocação 100% estática em tempo de compilação (Zero Heap Fragmentation).
+
+6. **[AC-06] Tempo de Comutação para Fallback Offline $\le 5\text{ ms}$:**
+   * *Requisito Formal:* `REQ_FSM_001` no componente `esp32_fsm`.
+   * *Formulação FRETish:* `in active_session upon wifi_disconnected the esp32_fsm shall within 5 MILLISECOND satisfy sd_fallback_active`
+   * *Validação:* Na queda de sinal Wi-Fi, o pipeline assíncrono redireciona os dados para o MicroSD em até 5 ms sem perda de telemetria.
+
+7. **[AC-07] Recuperação Autônoma de Bus-Off $\le 128\text{ ms}$ sem Reinicialização:**
+   * *Requisitos Formais:* `REQ_REC_002` a `REQ_REC_005` no componente `esp32_recovery`.
+   * *Formulação FRETish:* Cumprimento da janela normativa ISO 11898 de 128 ms e reativação via registradores físicos (PAC) sem destruir as tarefas do ESP32-S3.
+
+8. **[AC-08] Gravação Contínua em MicroSD $\ge 72.000\text{ Amostras}$ (Ensaio de 1 Hora):**
+   * *Requisito Formal:* `REQ_SD_005` no componente `esp32_sd`.
+   * *Formulação FRETish:* `in active_session when dataset_recording the esp32_sd shall always satisfy total_dataset_samples >= 72000`
+   * *Validação:* Persistência sem falhas de integridade FAT32 por mais de 60 minutos de ensaio ininterrupto a 20 Hz.
+
+---
 
 # Subsistema 1: Emulação de ECU Automotiva (Arduino UNO R3)
 
