@@ -1250,7 +1250,7 @@
             "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Latência Média de Resposta OBD-II [REQ-SYS-08 / AC-02]\nO emulador deve responder com latência média estritamente menor que 10 ms (Critério de Aceitação AC-02).",
             "comments": "",
-            "fulltext": "in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10",
+            "fulltext": "in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0",
             "status": "in progress",
             "semantics": {
                 "type": "nasa",
@@ -1287,14 +1287,14 @@
                     72,
                     77
                 ],
-                "post_condition": "(mean_obd_latency_ms < 10)",
+                "post_condition": "(mean_obd_latency_ms < 10.0)",
                 "responseTextRange": [
                     79,
-                    110
+                    112
                 ],
-                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(obd_benchmark_running)</i></b>, Response = <b><i>(mean_obd_latency_ms < 10)</i></b>.",
-                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(mean_obd_latency_ms < 10)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
-                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(mean_obd_latency_ms < 10)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(obd_benchmark_running)</i></b>, Response = <b><i>(mean_obd_latency_ms < 10.0)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(mean_obd_latency_ms < 10.0)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(mean_obd_latency_ms < 10.0)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
                 "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_always_satisfaction.svg",
                 "scope_mode_pt": "active_session",
                 "scope_mode_ft": "active_session",
@@ -1306,24 +1306,24 @@
                 "regular_condition_SMV_ft": "obd_benchmark_running",
                 "regular_condition_MLTL_ft": "obd_benchmark_running",
                 "regular_condition_PRISM_pctl": "obd_benchmark_running",
-                "post_condition_unexp_pt": "(mean_obd_latency_ms < 10)",
-                "post_condition_unexp_ft": "(mean_obd_latency_ms < 10)",
-                "post_condition_unexp_pctl": "(mean_obd_latency_ms < 10)",
-                "post_condition_SMV_pt": "(mean_obd_latency_ms < 10)",
-                "post_condition_SMV_ft": "(mean_obd_latency_ms < 10)",
-                "post_condition_MLTL_ft": "(mean_obd_latency_ms < 10)",
-                "post_condition_PRISM_pctl": "(mean_obd_latency_ms < 10)",
-                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10))))))) & (active_session -> (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10))))))",
-                "pt": "((H (Lin_active_session -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10)) & Fin_active_session))))",
-                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10))]))))))]",
-                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10)) & (active_session & (Z (! active_session)))))))",
-                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (mean_obd_latency_ms < 10)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (mean_obd_latency_ms < 10)))))",
-                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10))))))",
-                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10))]))))))]",
-                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10))))))",
+                "post_condition_unexp_pt": "(mean_obd_latency_ms < 10.0)",
+                "post_condition_unexp_ft": "(mean_obd_latency_ms < 10.0)",
+                "post_condition_unexp_pctl": "(mean_obd_latency_ms < 10.0)",
+                "post_condition_SMV_pt": "(mean_obd_latency_ms < 10.0)",
+                "post_condition_SMV_ft": "(mean_obd_latency_ms < 10.0)",
+                "post_condition_MLTL_ft": "(mean_obd_latency_ms < 10.0)",
+                "post_condition_PRISM_pctl": "(mean_obd_latency_ms < 10.0)",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10.0))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10.0))))))) & (active_session -> (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10.0))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (mean_obd_latency_ms < 10.0))))))",
+                "pt": "((H (Lin_active_session -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10.0)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (mean_obd_latency_ms < 10.0)) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10.0))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10.0))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10.0))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (mean_obd_latency_ms < 10.0))]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10.0)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (mean_obd_latency_ms < 10.0)) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (mean_obd_latency_ms < 10.0)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (mean_obd_latency_ms < 10.0)))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10.0))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10.0))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10.0))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (mean_obd_latency_ms < 10.0))))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10.0))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10.0))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10.0))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (mean_obd_latency_ms < 10.0))]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10.0))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10.0))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10.0))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (mean_obd_latency_ms < 10.0))))))",
                 "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> ((F[1,1] (! p0)) R[1,M] p2)) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> ((F[1,1] (! p0)) R[0,M] p2)))))) & ((p0 & p1) -> ((F[1,1] (! p0)) R[0,M] p2)))",
-                "WESTMapping": "p0: active_session<br/>p1: obd_benchmark_running<br/>p2: (mean_obd_latency_ms < 10)",
-                "R2U2Code": "((((active_session && ((! obd_benchmark_running) && ((F[1,1] obd_benchmark_running) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (mean_obd_latency_ms < 10))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (obd_benchmark_running -> ((F[1,1] (! active_session)) R[0,M] (mean_obd_latency_ms < 10)))))) && (((TAU == 0) && (active_session && obd_benchmark_running)) -> ((F[1,1] (! active_session)) R[0,M] (mean_obd_latency_ms < 10))))",
+                "WESTMapping": "p0: active_session<br/>p1: obd_benchmark_running<br/>p2: (mean_obd_latency_ms < 10.0)",
+                "R2U2Code": "((((active_session && ((! obd_benchmark_running) && ((F[1,1] obd_benchmark_running) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (mean_obd_latency_ms < 10.0))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (obd_benchmark_running -> ((F[1,1] (! active_session)) R[0,M] (mean_obd_latency_ms < 10.0)))))) && (((TAU == 0) && (active_session && obd_benchmark_running)) -> ((F[1,1] (! active_session)) R[0,M] (mean_obd_latency_ms < 10.0))))",
                 "component": "uno_ecu_emulator"
             },
             "_id": "68170250-b832-11f1-a4da-197ba71217d8"
@@ -1668,7 +1668,7 @@
             "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Estabilidade Temporal e Jitter de Resposta [REQ-SYS-09 / AC-03]\nO desvio padrão da latência de resposta OBD-II deve permanecer inferior a 3 ms durante os ensaios (Critério AC-03).",
             "comments": "",
-            "fulltext": "in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3",
+            "fulltext": "in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3.0",
             "status": "in progress",
             "semantics": {
                 "type": "nasa",
@@ -1705,14 +1705,14 @@
                     72,
                     77
                 ],
-                "post_condition": "(latency_jitter_std_ms < 3)",
+                "post_condition": "(latency_jitter_std_ms < 3.0)",
                 "responseTextRange": [
                     79,
-                    111
+                    113
                 ],
-                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(obd_benchmark_running)</i></b>, Response = <b><i>(latency_jitter_std_ms < 3)</i></b>.",
-                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(latency_jitter_std_ms < 3)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
-                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(latency_jitter_std_ms < 3)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(obd_benchmark_running)</i></b>, Response = <b><i>(latency_jitter_std_ms < 3.0)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(latency_jitter_std_ms < 3.0)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(obd_benchmark_running)</i></b> is true and any point in the interval where <b><i>(obd_benchmark_running)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(latency_jitter_std_ms < 3.0)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
                 "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_always_satisfaction.svg",
                 "scope_mode_pt": "active_session",
                 "scope_mode_ft": "active_session",
@@ -1724,24 +1724,24 @@
                 "regular_condition_SMV_ft": "obd_benchmark_running",
                 "regular_condition_MLTL_ft": "obd_benchmark_running",
                 "regular_condition_PRISM_pctl": "obd_benchmark_running",
-                "post_condition_unexp_pt": "(latency_jitter_std_ms < 3)",
-                "post_condition_unexp_ft": "(latency_jitter_std_ms < 3)",
-                "post_condition_unexp_pctl": "(latency_jitter_std_ms < 3)",
-                "post_condition_SMV_pt": "(latency_jitter_std_ms < 3)",
-                "post_condition_SMV_ft": "(latency_jitter_std_ms < 3)",
-                "post_condition_MLTL_ft": "(latency_jitter_std_ms < 3)",
-                "post_condition_PRISM_pctl": "(latency_jitter_std_ms < 3)",
-                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3))))))) & (active_session -> (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3))))))",
-                "pt": "((H (Lin_active_session -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3)) & Fin_active_session))))",
-                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3))]))))))]",
-                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3)) & (active_session & (Z (! active_session)))))))",
-                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (latency_jitter_std_ms < 3)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (latency_jitter_std_ms < 3)))))",
-                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3))))))",
-                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3))]))))))]",
-                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3))))))",
+                "post_condition_unexp_pt": "(latency_jitter_std_ms < 3.0)",
+                "post_condition_unexp_ft": "(latency_jitter_std_ms < 3.0)",
+                "post_condition_unexp_pctl": "(latency_jitter_std_ms < 3.0)",
+                "post_condition_SMV_pt": "(latency_jitter_std_ms < 3.0)",
+                "post_condition_SMV_ft": "(latency_jitter_std_ms < 3.0)",
+                "post_condition_MLTL_ft": "(latency_jitter_std_ms < 3.0)",
+                "post_condition_PRISM_pctl": "(latency_jitter_std_ms < 3.0)",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3.0))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3.0))))))) & (active_session -> (((Lin_active_session | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3.0))) & (! (Lin_active_session | LAST))))) & (obd_benchmark_running -> ((Lin_active_session | LAST) V (latency_jitter_std_ms < 3.0))))))",
+                "pt": "((H (Lin_active_session -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3.0)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & Fin_active_session)) | (latency_jitter_std_ms < 3.0)) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3.0))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3.0))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3.0))])) & (! Lin_active_session)))) & (obd_benchmark_running => (P>=1[(Lin_active_session R (latency_jitter_std_ms < 3.0))]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3.0)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3.0)) S ((((! obd_benchmark_running) S ((! obd_benchmark_running) & (active_session & (Z (! active_session))))) | (latency_jitter_std_ms < 3.0)) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (latency_jitter_std_ms < 3.0)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (obd_benchmark_running)) or (latency_jitter_std_ms < 3.0)))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3.0))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3.0))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! obd_benchmark_running) & ((! LAST) & ((X obd_benchmark_running) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3.0))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (obd_benchmark_running -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (latency_jitter_std_ms < 3.0))))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3.0))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3.0))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3.0))])) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running => (P>=1[((active_session & (X (! active_session))) R (latency_jitter_std_ms < 3.0))]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3.0))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3.0))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! obd_benchmark_running) & ((X obd_benchmark_running) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3.0))) & (! (active_session & (X (! active_session))))))) & (obd_benchmark_running -> ((active_session & (X (! active_session))) V (latency_jitter_std_ms < 3.0))))))",
                 "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> ((F[1,1] (! p0)) R[1,M] p2)) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> ((F[1,1] (! p0)) R[0,M] p2)))))) & ((p0 & p1) -> ((F[1,1] (! p0)) R[0,M] p2)))",
-                "WESTMapping": "p0: active_session<br/>p1: obd_benchmark_running<br/>p2: (latency_jitter_std_ms < 3)",
-                "R2U2Code": "((((active_session && ((! obd_benchmark_running) && ((F[1,1] obd_benchmark_running) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (latency_jitter_std_ms < 3))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (obd_benchmark_running -> ((F[1,1] (! active_session)) R[0,M] (latency_jitter_std_ms < 3)))))) && (((TAU == 0) && (active_session && obd_benchmark_running)) -> ((F[1,1] (! active_session)) R[0,M] (latency_jitter_std_ms < 3))))",
+                "WESTMapping": "p0: active_session<br/>p1: obd_benchmark_running<br/>p2: (latency_jitter_std_ms < 3.0)",
+                "R2U2Code": "((((active_session && ((! obd_benchmark_running) && ((F[1,1] obd_benchmark_running) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (latency_jitter_std_ms < 3.0))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (obd_benchmark_running -> ((F[1,1] (! active_session)) R[0,M] (latency_jitter_std_ms < 3.0)))))) && (((TAU == 0) && (active_session && obd_benchmark_running)) -> ((F[1,1] (! active_session)) R[0,M] (latency_jitter_std_ms < 3.0))))",
                 "component": "uno_ecu_emulator"
             },
             "_id": "811af860-b832-11f1-a4da-197ba71217d8"
@@ -2008,7 +2008,7 @@
             "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Limite de Consumo de Memória SRAM [REQ-SYS-29 / AC-05] [Subsistema 4] [Camada APP]\nO consumo de memória SRAM alocável deve permanecer estritamente contido abaixo de 200 KB durante operação contínua (Critério AC-05).",
             "comments": "",
-            "fulltext": "in active_session when memory_supervision_active the esp32s3_collector shall always satisfy sram_usage_kb < 200",
+            "fulltext": "in active_session when memory_supervision_active the esp32s3_collector shall always satisfy sram_usage_kb < 200.0",
             "status": "in progress",
             "semantics": {
                 "type": "nasa",
@@ -2045,14 +2045,14 @@
                     77,
                     82
                 ],
-                "post_condition": "(sram_usage_kb < 200)",
+                "post_condition": "(sram_usage_kb < 200.0)",
                 "responseTextRange": [
                     84,
-                    110
+                    112
                 ],
-                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(memory_supervision_active)</i></b>, Response = <b><i>(sram_usage_kb < 200)</i></b>.",
-                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(memory_supervision_active)</i></b> is true and any point in the interval where <b><i>(memory_supervision_active)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(sram_usage_kb < 200)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
-                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(memory_supervision_active)</i></b> is true and any point in the interval where <b><i>(memory_supervision_active)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(sram_usage_kb < 200)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(memory_supervision_active)</i></b>, Response = <b><i>(sram_usage_kb < 200.0)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(memory_supervision_active)</i></b> is true and any point in the interval where <b><i>(memory_supervision_active)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(sram_usage_kb < 200.0)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(memory_supervision_active)</i></b> is true and any point in the interval where <b><i>(memory_supervision_active)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(sram_usage_kb < 200.0)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
                 "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_always_satisfaction.svg",
                 "scope_mode_pt": "active_session",
                 "scope_mode_ft": "active_session",
@@ -2064,24 +2064,24 @@
                 "regular_condition_SMV_ft": "memory_supervision_active",
                 "regular_condition_MLTL_ft": "memory_supervision_active",
                 "regular_condition_PRISM_pctl": "memory_supervision_active",
-                "post_condition_unexp_pt": "(sram_usage_kb < 200)",
-                "post_condition_unexp_ft": "(sram_usage_kb < 200)",
-                "post_condition_unexp_pctl": "(sram_usage_kb < 200)",
-                "post_condition_SMV_pt": "(sram_usage_kb < 200)",
-                "post_condition_SMV_ft": "(sram_usage_kb < 200)",
-                "post_condition_MLTL_ft": "(sram_usage_kb < 200)",
-                "post_condition_PRISM_pctl": "(sram_usage_kb < 200)",
-                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (sram_usage_kb < 200))) & (! (Lin_active_session | LAST))))) & (memory_supervision_active -> ((Lin_active_session | LAST) V (sram_usage_kb < 200))))))) & (active_session -> (((Lin_active_session | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (sram_usage_kb < 200))) & (! (Lin_active_session | LAST))))) & (memory_supervision_active -> ((Lin_active_session | LAST) V (sram_usage_kb < 200))))))",
-                "pt": "((H (Lin_active_session -> (Y ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200)) & Fin_active_session))))",
-                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! memory_supervision_active) & ((X memory_supervision_active) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (sram_usage_kb < 200))])) & (! Lin_active_session)))) & (memory_supervision_active => (P>=1[(Lin_active_session R (sram_usage_kb < 200))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! memory_supervision_active) & ((X memory_supervision_active) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (sram_usage_kb < 200))])) & (! Lin_active_session)))) & (memory_supervision_active => (P>=1[(Lin_active_session R (sram_usage_kb < 200))]))))))]",
-                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200)) & (active_session & (Z (! active_session)))))))",
-                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (memory_supervision_active)) or (sram_usage_kb < 200)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (memory_supervision_active)) or (sram_usage_kb < 200)))))",
-                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (memory_supervision_active -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (memory_supervision_active -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200))))))",
-                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200))])) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active => (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200))])) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active => (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200))]))))))]",
-                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (sram_usage_kb < 200))) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active -> ((active_session & (X (! active_session))) V (sram_usage_kb < 200))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (sram_usage_kb < 200))) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active -> ((active_session & (X (! active_session))) V (sram_usage_kb < 200))))))",
+                "post_condition_unexp_pt": "(sram_usage_kb < 200.0)",
+                "post_condition_unexp_ft": "(sram_usage_kb < 200.0)",
+                "post_condition_unexp_pctl": "(sram_usage_kb < 200.0)",
+                "post_condition_SMV_pt": "(sram_usage_kb < 200.0)",
+                "post_condition_SMV_ft": "(sram_usage_kb < 200.0)",
+                "post_condition_MLTL_ft": "(sram_usage_kb < 200.0)",
+                "post_condition_PRISM_pctl": "(sram_usage_kb < 200.0)",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (sram_usage_kb < 200.0))) & (! (Lin_active_session | LAST))))) & (memory_supervision_active -> ((Lin_active_session | LAST) V (sram_usage_kb < 200.0))))))) & (active_session -> (((Lin_active_session | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (sram_usage_kb < 200.0))) & (! (Lin_active_session | LAST))))) & (memory_supervision_active -> ((Lin_active_session | LAST) V (sram_usage_kb < 200.0))))))",
+                "pt": "((H (Lin_active_session -> (Y ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200.0)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200.0)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200.0)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & Fin_active_session)) | (sram_usage_kb < 200.0)) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! memory_supervision_active) & ((X memory_supervision_active) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (sram_usage_kb < 200.0))])) & (! Lin_active_session)))) & (memory_supervision_active => (P>=1[(Lin_active_session R (sram_usage_kb < 200.0))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! memory_supervision_active) & ((X memory_supervision_active) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (sram_usage_kb < 200.0))])) & (! Lin_active_session)))) & (memory_supervision_active => (P>=1[(Lin_active_session R (sram_usage_kb < 200.0))]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200.0)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200.0)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200.0)) S ((((! memory_supervision_active) S ((! memory_supervision_active) & (active_session & (Z (! active_session))))) | (sram_usage_kb < 200.0)) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (memory_supervision_active)) or (sram_usage_kb < 200.0)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (memory_supervision_active)) or (sram_usage_kb < 200.0)))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200.0))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (memory_supervision_active -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200.0))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! memory_supervision_active) & ((! LAST) & ((X memory_supervision_active) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200.0))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (memory_supervision_active -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (sram_usage_kb < 200.0))))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200.0))])) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active => (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200.0))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200.0))])) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active => (P>=1[((active_session & (X (! active_session))) R (sram_usage_kb < 200.0))]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (sram_usage_kb < 200.0))) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active -> ((active_session & (X (! active_session))) V (sram_usage_kb < 200.0))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! memory_supervision_active) & ((X memory_supervision_active) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (sram_usage_kb < 200.0))) & (! (active_session & (X (! active_session))))))) & (memory_supervision_active -> ((active_session & (X (! active_session))) V (sram_usage_kb < 200.0))))))",
                 "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> ((F[1,1] (! p0)) R[1,M] p2)) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> ((F[1,1] (! p0)) R[0,M] p2)))))) & ((p0 & p1) -> ((F[1,1] (! p0)) R[0,M] p2)))",
-                "WESTMapping": "p0: active_session<br/>p1: memory_supervision_active<br/>p2: (sram_usage_kb < 200)",
-                "R2U2Code": "((((active_session && ((! memory_supervision_active) && ((F[1,1] memory_supervision_active) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (sram_usage_kb < 200))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (memory_supervision_active -> ((F[1,1] (! active_session)) R[0,M] (sram_usage_kb < 200)))))) && (((TAU == 0) && (active_session && memory_supervision_active)) -> ((F[1,1] (! active_session)) R[0,M] (sram_usage_kb < 200))))",
+                "WESTMapping": "p0: active_session<br/>p1: memory_supervision_active<br/>p2: (sram_usage_kb < 200.0)",
+                "R2U2Code": "((((active_session && ((! memory_supervision_active) && ((F[1,1] memory_supervision_active) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (sram_usage_kb < 200.0))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (memory_supervision_active -> ((F[1,1] (! active_session)) R[0,M] (sram_usage_kb < 200.0)))))) && (((TAU == 0) && (active_session && memory_supervision_active)) -> ((F[1,1] (! active_session)) R[0,M] (sram_usage_kb < 200.0))))",
                 "component": "esp32s3_collector"
             },
             "_id": "97dce120-b847-11f1-a4da-197ba71217d8"
@@ -2671,7 +2671,7 @@
             "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Atualização do Modelo Físico da ECU [REQ-SYS-01]\nA cada ciclo de 50 ms do Timer1 sob perfil ativo válido (`active_profile >= 1`), a CPU do emulador deve calcular as 6 grandezas físicas simuladas do motor (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`, `coolant_temp_c`) a partir da tabela senoidal modulada pelo perfil em menos de 1 ms de tempo de execução da ISR, assegurando invariantes válidos.",
             "comments": "",
-            "fulltext": "in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40",
+            "fulltext": "in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0",
             "status": "in progress",
             "semantics": {
                 "type": "nasa",
@@ -2716,14 +2716,14 @@
                     92,
                     111
                 ],
-                "post_condition": "(physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40)",
+                "post_condition": "(physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0)",
                 "responseTextRange": [
                     113,
-                    244
+                    256
                 ],
-                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b>,  n = <b><i>1</i></b>, Response = <b><i>(physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40)</i></b>.",
-                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> is true and any point in the interval where <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40)</i></b> must hold at some point with distance <= <b><i>1</i></b> from the trigger (i.e., at trigger, trigger+1, ..., or trigger+<b><i>1</i></b>). If the interval ends sooner than trigger+<b><i>1</i></b>, then <b><i>(physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40)</i></b> need not hold.",
-                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> is true and any point in the interval where <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40)</i></b> must hold at some point with distance <= <b><i>1</i></b> from the trigger (i.e., at trigger, trigger+1, ..., or trigger+<b><i>1</i></b>). If the interval ends sooner than trigger+<b><i>1</i></b>, then <b><i>(physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40)</i></b> need not hold.",
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b>,  n = <b><i>1</i></b>, Response = <b><i>(physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> is true and any point in the interval where <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0)</i></b> must hold at some point with distance <= <b><i>1</i></b> from the trigger (i.e., at trigger, trigger+1, ..., or trigger+<b><i>1</i></b>). If the interval ends sooner than trigger+<b><i>1</i></b>, then <b><i>(physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0)</i></b> need not hold.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> is true and any point in the interval where <b><i>((active_profile >= 1) & (timer1_50ms_tick))</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0)</i></b> must hold at some point with distance <= <b><i>1</i></b> from the trigger (i.e., at trigger, trigger+1, ..., or trigger+<b><i>1</i></b>). If the interval ends sooner than trigger+<b><i>1</i></b>, then <b><i>(physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0)</i></b> need not hold.",
                 "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_within_satisfaction.svg",
                 "scope_mode_pt": "active_session",
                 "scope_mode_ft": "active_session",
@@ -2735,24 +2735,24 @@
                 "regular_condition_SMV_ft": "((active_profile >= 1) & timer1_50ms_tick)",
                 "regular_condition_MLTL_ft": "((active_profile >= 1) & timer1_50ms_tick)",
                 "regular_condition_PRISM_pctl": "((active_profile >= 1) & timer1_50ms_tick)",
-                "post_condition_unexp_pt": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "post_condition_unexp_ft": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "post_condition_unexp_pctl": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "post_condition_SMV_pt": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "post_condition_SMV_ft": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "post_condition_MLTL_ft": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "post_condition_PRISM_pctl": "((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (Lin_active_session | LAST))))) -> ((X ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[<1] (Lin_active_session | LAST)))) & (! (Lin_active_session | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[<1] (Lin_active_session | LAST)))))))) & (active_session -> (((Lin_active_session | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (Lin_active_session | LAST))))) -> ((X ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[<1] (Lin_active_session | LAST)))) & (! (Lin_active_session | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[<1] (Lin_active_session | LAST)))))))",
-                "pt": "((H (Lin_active_session -> (Y (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) S (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) S (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) & Fin_active_session))))",
-                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! Lin_active_session))) => ((X (P>=1[(F<=1 ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))])) & (! Lin_active_session)))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! Lin_active_session))) => ((X (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))])) & (! Lin_active_session)))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))]))))))]",
-                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) S (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) S (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))))) & (active_session & (Z (! active_session)))))))",
-                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(OT(1, 1, ((((active_profile >= 1) and timer1_50ms_tick) and (YtoPre(not (((active_profile >= 1) and timer1_50ms_tick))) or (active_session and ZtoPre(not (active_session))))) and not (((((((physics_model_updated and (speed_kmh >= 0)) and (rpm >= 0)) and (throttle_pct >= 0)) and (load_pct >= 0)) and (maf_g_s >= 0)) and (coolant_temp_c >= -40))))) => OT(0, 0, ((active_session and ZtoPre(not (active_session))) or ((((((physics_model_updated and (speed_kmh >= 0)) and (rpm >= 0)) and (throttle_pct >= 0)) and (load_pct >= 0)) and (maf_g_s >= 0)) and (coolant_temp_c >= -40))))))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(OT(1, 1, ((((active_profile >= 1) and timer1_50ms_tick) and (YtoPre(not (((active_profile >= 1) and timer1_50ms_tick))) or (active_session and ZtoPre(not (active_session))))) and not (((((((physics_model_updated and (speed_kmh >= 0)) and (rpm >= 0)) and (throttle_pct >= 0)) and (load_pct >= 0)) and (maf_g_s >= 0)) and (coolant_temp_c >= -40))))) => OT(0, 0, ((active_session and ZtoPre(not (active_session))) or ((((((physics_model_updated and (speed_kmh >= 0)) and (rpm >= 0)) and (throttle_pct >= 0)) and (load_pct >= 0)) and (maf_g_s >= 0)) and (coolant_temp_c >= -40))))))))",
-                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))))))",
-                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[(F<=1 ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))])) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))])) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40)))]))))))]",
-                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (active_session & (X (! active_session)))))) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (active_session & (X (! active_session)))))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (active_session & (X (! active_session)))))) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))) | (F[0,0] (active_session & (X (! active_session)))))))))",
+                "post_condition_unexp_pt": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "post_condition_unexp_ft": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "post_condition_unexp_pctl": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "post_condition_SMV_pt": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "post_condition_SMV_ft": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "post_condition_MLTL_ft": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "post_condition_PRISM_pctl": "((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (Lin_active_session | LAST))))) -> ((X ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[<1] (Lin_active_session | LAST)))) & (! (Lin_active_session | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[<1] (Lin_active_session | LAST)))))))) & (active_session -> (((Lin_active_session | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (Lin_active_session | LAST))))) -> ((X ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[<1] (Lin_active_session | LAST)))) & (! (Lin_active_session | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[<1] (Lin_active_session | LAST)))))))",
+                "pt": "((H (Lin_active_session -> (Y (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) S (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) S (((O[=1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | Fin_active_session)) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[<1] (Fin_active_session | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! Lin_active_session))) => ((X (P>=1[(F<=1 ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))])) & (! Lin_active_session)))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! Lin_active_session))) => ((X (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))])) & (! Lin_active_session)))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) S (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) S (((O[1,1] ((((active_profile >= 1) & timer1_50ms_tick) & ((Y (! ((active_profile >= 1) & timer1_50ms_tick))) | (active_session & (Z (! active_session))))) & (! ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) -> (O[0,0] ((active_session & (Z (! active_session))) | ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))))) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(OT(1, 1, ((((active_profile >= 1) and timer1_50ms_tick) and (YtoPre(not (((active_profile >= 1) and timer1_50ms_tick))) or (active_session and ZtoPre(not (active_session))))) and not (((((((physics_model_updated and (speed_kmh >= 0.0)) and (rpm >= 0.0)) and (throttle_pct >= 0.0)) and (load_pct >= 0.0)) and (maf_g_s >= 0.0)) and (coolant_temp_c >= -40.0))))) => OT(0, 0, ((active_session and ZtoPre(not (active_session))) or ((((((physics_model_updated and (speed_kmh >= 0.0)) and (rpm >= 0.0)) and (throttle_pct >= 0.0)) and (load_pct >= 0.0)) and (maf_g_s >= 0.0)) and (coolant_temp_c >= -40.0))))))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(OT(1, 1, ((((active_profile >= 1) and timer1_50ms_tick) and (YtoPre(not (((active_profile >= 1) and timer1_50ms_tick))) or (active_session and ZtoPre(not (active_session))))) and not (((((((physics_model_updated and (speed_kmh >= 0.0)) and (rpm >= 0.0)) and (throttle_pct >= 0.0)) and (load_pct >= 0.0)) and (maf_g_s >= 0.0)) and (coolant_temp_c >= -40.0))))) => OT(0, 0, ((active_session and ZtoPre(not (active_session))) or ((((((physics_model_updated and (speed_kmh >= 0.0)) and (rpm >= 0.0)) and (throttle_pct >= 0.0)) and (load_pct >= 0.0)) and (maf_g_s >= 0.0)) and (coolant_temp_c >= -40.0))))))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((! LAST) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (((active_session & (! LAST)) & (X (! active_session))) | LAST)))))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[(F<=1 ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))])) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))])) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) => (P>=1[(F[<=1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0)))]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (active_session & (X (! active_session)))))) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (active_session & (X (! active_session)))))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! ((active_profile >= 1) & timer1_50ms_tick)) & ((X ((active_profile >= 1) & timer1_50ms_tick)) & (! (active_session & (X (! active_session)))))) -> ((X ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (active_session & (X (! active_session)))))) & (! (active_session & (X (! active_session))))))) & (((active_profile >= 1) & timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))) | (F[0,0] (active_session & (X (! active_session)))))))))",
                 "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> ((F[1,2] p2) | (F[2,2] (! p0)))) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> ((F[0,1] p2) | (F[1,1] (! p0)))))))) & ((p0 & p1) -> ((F[0,1] p2) | (F[1,1] (! p0)))))",
-                "WESTMapping": "p0: active_session<br/>p1: ((active_profile >= 1) & timer1_50ms_tick)<br/>p2: ((((((physics_model_updated & (speed_kmh >= 0)) & (rpm >= 0)) & (throttle_pct >= 0)) & (load_pct >= 0)) & (maf_g_s >= 0)) & (coolant_temp_c >= -40))",
-                "R2U2Code": "((((active_session && ((! ((active_profile >= 1) && timer1_50ms_tick)) && ((F[1,1] ((active_profile >= 1) && timer1_50ms_tick)) && (F[1,1] active_session)))) -> ((F[1,2] ((((((physics_model_updated && (speed_kmh >= 0)) && (rpm >= 0)) && (throttle_pct >= 0)) && (load_pct >= 0)) && (maf_g_s >= 0)) && (coolant_temp_c >= -40))) || (F[2,2] (! active_session)))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (((active_profile >= 1) && timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated && (speed_kmh >= 0)) && (rpm >= 0)) && (throttle_pct >= 0)) && (load_pct >= 0)) && (maf_g_s >= 0)) && (coolant_temp_c >= -40))) || (F[1,1] (! active_session))))))) && (((TAU == 0) && (active_session && ((active_profile >= 1) && timer1_50ms_tick))) -> ((F[0,1] ((((((physics_model_updated && (speed_kmh >= 0)) && (rpm >= 0)) && (throttle_pct >= 0)) && (load_pct >= 0)) && (maf_g_s >= 0)) && (coolant_temp_c >= -40))) || (F[1,1] (! active_session)))))",
+                "WESTMapping": "p0: active_session<br/>p1: ((active_profile >= 1) & timer1_50ms_tick)<br/>p2: ((((((physics_model_updated & (speed_kmh >= 0.0)) & (rpm >= 0.0)) & (throttle_pct >= 0.0)) & (load_pct >= 0.0)) & (maf_g_s >= 0.0)) & (coolant_temp_c >= -40.0))",
+                "R2U2Code": "((((active_session && ((! ((active_profile >= 1) && timer1_50ms_tick)) && ((F[1,1] ((active_profile >= 1) && timer1_50ms_tick)) && (F[1,1] active_session)))) -> ((F[1,2] ((((((physics_model_updated && (speed_kmh >= 0.0)) && (rpm >= 0.0)) && (throttle_pct >= 0.0)) && (load_pct >= 0.0)) && (maf_g_s >= 0.0)) && (coolant_temp_c >= -40.0))) || (F[2,2] (! active_session)))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (((active_profile >= 1) && timer1_50ms_tick) -> ((F[0,1] ((((((physics_model_updated && (speed_kmh >= 0.0)) && (rpm >= 0.0)) && (throttle_pct >= 0.0)) && (load_pct >= 0.0)) && (maf_g_s >= 0.0)) && (coolant_temp_c >= -40.0))) || (F[1,1] (! active_session))))))) && (((TAU == 0) && (active_session && ((active_profile >= 1) && timer1_50ms_tick))) -> ((F[0,1] ((((((physics_model_updated && (speed_kmh >= 0.0)) && (rpm >= 0.0)) && (throttle_pct >= 0.0)) && (load_pct >= 0.0)) && (maf_g_s >= 0.0)) && (coolant_temp_c >= -40.0))) || (F[1,1] (! active_session)))))",
                 "component": "uno_ecu_emulator"
             },
             "_id": "afc18680-b831-11f1-a4da-197ba71217d8"
@@ -3921,7 +3921,7 @@
             "project": "EdgeTelemetryLayer_ESPS3_COLETOR",
             "rationale": "Cumprimento da Taxa de Recepção [REQ-SYS-04 / AC-01][Subsistema 2] [Camada MCAL]\nA taxa de perda de quadros deve ser mantida estritamente abaixo de 1%, assegurando recepção de no mínimo 99% (Critério AC-01).",
             "comments": "",
-            "fulltext": "in active_session when can_bus_healthy the esp32s3_collector shall always satisfy frame_loss_percentage <= 1",
+            "fulltext": "in active_session when can_bus_healthy the esp32s3_collector shall always satisfy frame_loss_percentage <= 1.00",
             "status": "in progress",
             "semantics": {
                 "type": "nasa",
@@ -3958,14 +3958,14 @@
                     67,
                     72
                 ],
-                "post_condition": "(frame_loss_percentage <= 1)",
+                "post_condition": "(frame_loss_percentage <= 1.00)",
                 "responseTextRange": [
                     74,
-                    107
+                    110
                 ],
-                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(can_bus_healthy)</i></b>, Response = <b><i>(frame_loss_percentage <= 1)</i></b>.",
-                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(can_bus_healthy)</i></b> is true and any point in the interval where <b><i>(can_bus_healthy)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(frame_loss_percentage <= 1)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
-                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(can_bus_healthy)</i></b> is true and any point in the interval where <b><i>(can_bus_healthy)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(frame_loss_percentage <= 1)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "diagramVariables": "M = <b><i>active_session</i></b>, TC = <b><i>(can_bus_healthy)</i></b>, Response = <b><i>(frame_loss_percentage <= 1.00)</i></b>.",
+                "description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(can_bus_healthy)</i></b> is true and any point in the interval where <b><i>(can_bus_healthy)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, <b><i>(frame_loss_percentage <= 1.00)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
+                "probabilistic_description": "SCOPE: in every interval where <b><i>active_session</i></b> holds.<br>TRIGGER: first point in the interval if <b><i>(can_bus_healthy)</i></b> is true and any point in the interval where <b><i>(can_bus_healthy)</i></b> becomes true (from false).<br>REQUIRED BEHAVIOR: for every trigger, with probability >=1, <b><i>(frame_loss_percentage <= 1.00)</i></b> must hold at all time points between (and including) the trigger and the end of the interval.",
                 "diagram": "_media/user-interface/examples/svgDiagrams/in_regular_always_satisfaction.svg",
                 "scope_mode_pt": "active_session",
                 "scope_mode_ft": "active_session",
@@ -3977,24 +3977,24 @@
                 "regular_condition_SMV_ft": "can_bus_healthy",
                 "regular_condition_MLTL_ft": "can_bus_healthy",
                 "regular_condition_PRISM_pctl": "can_bus_healthy",
-                "post_condition_unexp_pt": "(frame_loss_percentage <= 1)",
-                "post_condition_unexp_ft": "(frame_loss_percentage <= 1)",
-                "post_condition_unexp_pctl": "(frame_loss_percentage <= 1)",
-                "post_condition_SMV_pt": "(frame_loss_percentage <= 1)",
-                "post_condition_SMV_ft": "(frame_loss_percentage <= 1)",
-                "post_condition_MLTL_ft": "(frame_loss_percentage <= 1)",
-                "post_condition_PRISM_pctl": "(frame_loss_percentage <= 1)",
-                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (frame_loss_percentage <= 1))) & (! (Lin_active_session | LAST))))) & (can_bus_healthy -> ((Lin_active_session | LAST) V (frame_loss_percentage <= 1))))))) & (active_session -> (((Lin_active_session | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (frame_loss_percentage <= 1))) & (! (Lin_active_session | LAST))))) & (can_bus_healthy -> ((Lin_active_session | LAST) V (frame_loss_percentage <= 1))))))",
-                "pt": "((H (Lin_active_session -> (Y ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1)) & Fin_active_session))))",
-                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! can_bus_healthy) & ((X can_bus_healthy) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (frame_loss_percentage <= 1))])) & (! Lin_active_session)))) & (can_bus_healthy => (P>=1[(Lin_active_session R (frame_loss_percentage <= 1))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! can_bus_healthy) & ((X can_bus_healthy) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (frame_loss_percentage <= 1))])) & (! Lin_active_session)))) & (can_bus_healthy => (P>=1[(Lin_active_session R (frame_loss_percentage <= 1))]))))))]",
-                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1)) & (active_session & (Z (! active_session)))))))",
-                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (can_bus_healthy)) or (frame_loss_percentage <= 1)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (can_bus_healthy)) or (frame_loss_percentage <= 1)))))",
-                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (can_bus_healthy -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (can_bus_healthy -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1))))))",
-                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1))])) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy => (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1))])) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy => (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1))]))))))]",
-                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1))) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy -> ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1))) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy -> ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1))))))",
+                "post_condition_unexp_pt": "(frame_loss_percentage <= 1.00)",
+                "post_condition_unexp_ft": "(frame_loss_percentage <= 1.00)",
+                "post_condition_unexp_pctl": "(frame_loss_percentage <= 1.00)",
+                "post_condition_SMV_pt": "(frame_loss_percentage <= 1.00)",
+                "post_condition_SMV_ft": "(frame_loss_percentage <= 1.00)",
+                "post_condition_MLTL_ft": "(frame_loss_percentage <= 1.00)",
+                "post_condition_PRISM_pctl": "(frame_loss_percentage <= 1.00)",
+                "ft": "((LAST V ((! (Fin_active_session & (! LAST))) | (X (((Lin_active_session | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (frame_loss_percentage <= 1.00))) & (! (Lin_active_session | LAST))))) & (can_bus_healthy -> ((Lin_active_session | LAST) V (frame_loss_percentage <= 1.00))))))) & (active_session -> (((Lin_active_session | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (Lin_active_session | LAST))))) -> ((X ((Lin_active_session | LAST) V (frame_loss_percentage <= 1.00))) & (! (Lin_active_session | LAST))))) & (can_bus_healthy -> ((Lin_active_session | LAST) V (frame_loss_percentage <= 1.00))))))",
+                "pt": "((H (Lin_active_session -> (Y ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1.00)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1.00)) & Fin_active_session))))) & (((! Lin_active_session) S ((! Lin_active_session) & Fin_active_session)) -> ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1.00)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & Fin_active_session)) | (frame_loss_percentage <= 1.00)) & Fin_active_session))))",
+                "pctl": "P>=1[((G ((! (Fin_active_session & (! LAST))) | (X ((Lin_active_session R (((! can_bus_healthy) & ((X can_bus_healthy) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (frame_loss_percentage <= 1.00))])) & (! Lin_active_session)))) & (can_bus_healthy => (P>=1[(Lin_active_session R (frame_loss_percentage <= 1.00))])))))) & (active_session => (Lin_active_session | ((Lin_active_session R (((! can_bus_healthy) & ((X can_bus_healthy) & (! Lin_active_session))) => ((X (P>=1[(Lin_active_session R (frame_loss_percentage <= 1.00))])) & (! Lin_active_session)))) & (can_bus_healthy => (P>=1[(Lin_active_session R (frame_loss_percentage <= 1.00))]))))))]",
+                "ptExpanded": "((H (((! active_session) & (Y active_session)) -> (Y ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1.00)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1.00)) & (active_session & (Z (! active_session)))))))) & (((! ((! active_session) & (Y active_session))) S ((! ((! active_session) & (Y active_session))) & (active_session & (Z (! active_session))))) -> ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1.00)) S ((((! can_bus_healthy) S ((! can_bus_healthy) & (active_session & (Z (! active_session))))) | (frame_loss_percentage <= 1.00)) & (active_session & (Z (! active_session)))))))",
+                "CoCoSpecCode": "(H(((not (active_session) and YtoPre(active_session)) => YtoPre(SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (can_bus_healthy)) or (frame_loss_percentage <= 1.00)))))) and (SI((active_session and ZtoPre(not (active_session))),not ((not (active_session) and YtoPre(active_session)))) => SI((active_session and ZtoPre(not (active_session))),(SI((active_session and ZtoPre(not (active_session))),not (can_bus_healthy)) or (frame_loss_percentage <= 1.00)))))",
+                "ftExpanded": "((LAST V ((! ((((! active_session) & (! LAST)) & (X active_session)) & (! LAST))) | (X (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1.00))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (can_bus_healthy -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1.00))))))) & (active_session -> (((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (((! can_bus_healthy) & ((! LAST) & ((X can_bus_healthy) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) -> ((X ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1.00))) & (! (((active_session & (! LAST)) & (X (! active_session))) | LAST))))) & (can_bus_healthy -> ((((active_session & (! LAST)) & (X (! active_session))) | LAST) V (frame_loss_percentage <= 1.00))))))",
+                "pctlExpanded": "P>=1[((G ((! (((! active_session) & (X active_session)) & (! false))) | (X (((active_session & (X (! active_session))) R (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1.00))])) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy => (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1.00))])))))) & (active_session => ((active_session & (X (! active_session))) | (((active_session & (X (! active_session))) R (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) => ((X (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1.00))])) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy => (P>=1[((active_session & (X (! active_session))) R (frame_loss_percentage <= 1.00))]))))))]",
+                "ftInfAUExpanded": "((G ((! ((! active_session) & (X active_session))) | (X (((active_session & (X (! active_session))) V (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1.00))) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy -> ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1.00))))))) & (active_session -> (((active_session & (X (! active_session))) V (((! can_bus_healthy) & ((X can_bus_healthy) & (! (active_session & (X (! active_session)))))) -> ((X ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1.00))) & (! (active_session & (X (! active_session))))))) & (can_bus_healthy -> ((active_session & (X (! active_session))) V (frame_loss_percentage <= 1.00))))))",
                 "mltlExpanded": "((G[0,M] (((p0 & ((! p1) & ((F[1,1] p1) & (F[1,1] p0)))) -> ((F[1,1] (! p0)) R[1,M] p2)) & (((! p0) & (F[1,1] p0)) -> (F[1,1] (p1 -> ((F[1,1] (! p0)) R[0,M] p2)))))) & ((p0 & p1) -> ((F[1,1] (! p0)) R[0,M] p2)))",
-                "WESTMapping": "p0: active_session<br/>p1: can_bus_healthy<br/>p2: (frame_loss_percentage <= 1)",
-                "R2U2Code": "((((active_session && ((! can_bus_healthy) && ((F[1,1] can_bus_healthy) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (frame_loss_percentage <= 1))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (can_bus_healthy -> ((F[1,1] (! active_session)) R[0,M] (frame_loss_percentage <= 1)))))) && (((TAU == 0) && (active_session && can_bus_healthy)) -> ((F[1,1] (! active_session)) R[0,M] (frame_loss_percentage <= 1))))",
+                "WESTMapping": "p0: active_session<br/>p1: can_bus_healthy<br/>p2: (frame_loss_percentage <= 1.00)",
+                "R2U2Code": "((((active_session && ((! can_bus_healthy) && ((F[1,1] can_bus_healthy) && (F[1,1] active_session)))) -> ((F[1,1] (! active_session)) R[1,M] (frame_loss_percentage <= 1.00))) && (((! active_session) && (F[1,1] active_session)) -> (F[1,1] (can_bus_healthy -> ((F[1,1] (! active_session)) R[0,M] (frame_loss_percentage <= 1.00)))))) && (((TAU == 0) && (active_session && can_bus_healthy)) -> ((F[1,1] (! active_session)) R[0,M] (frame_loss_percentage <= 1.00))))",
                 "component": "esp32s3_collector"
             },
             "_id": "fb2a0370-b838-11f1-a4da-197ba71217d8"
@@ -4006,40 +4006,45 @@
             "component_name": "esp32s3_collector",
             "variable_name": "active_session",
             "reqs": [
-                "3f466260-b839-11f1-a4da-197ba71217d8",
-                "7b7328a0-b838-11f1-a4da-197ba71217d8",
-                "9c2b5f40-b83d-11f1-a4da-197ba71217d8",
-                "beda7620-b83d-11f1-a4da-197ba71217d8",
-                "cd268890-b838-11f1-a4da-197ba71217d8",
-                "fb2a0370-b838-11f1-a4da-197ba71217d8",
                 "0a8780b0-b846-11f1-a4da-197ba71217d8",
-                "cf684f50-b845-11f1-a4da-197ba71217d8",
-                "541c7a50-b846-11f1-a4da-197ba71217d8",
-                "a7ad25c0-b846-11f1-a4da-197ba71217d8",
-                "c6e935f0-b846-11f1-a4da-197ba71217d8",
-                "4267be40-b847-11f1-a4da-197ba71217d8",
-                "517b4d20-b847-11f1-a4da-197ba71217d8",
-                "60d5f720-b847-11f1-a4da-197ba71217d8",
-                "97dce120-b847-11f1-a4da-197ba71217d8",
-                "a3d4d820-b847-11f1-a4da-197ba71217d8",
-                "ed3ca740-b847-11f1-a4da-197ba71217d8",
-                "cd6fac40-b848-11f1-a4da-197ba71217d8",
                 "2205b9c0-b849-11f1-a4da-197ba71217d8",
                 "37f51cd0-b849-11f1-a4da-197ba71217d8",
+                "3f466260-b839-11f1-a4da-197ba71217d8",
+                "4267be40-b847-11f1-a4da-197ba71217d8",
+                "517b4d20-b847-11f1-a4da-197ba71217d8",
+                "541c7a50-b846-11f1-a4da-197ba71217d8",
+                "60d5f720-b847-11f1-a4da-197ba71217d8",
+                "7b7328a0-b838-11f1-a4da-197ba71217d8",
                 "90b9dfe0-b849-11f1-a4da-197ba71217d8",
-                "a311cee0-b84a-11f1-a4da-197ba71217d8"
+                "97dce120-b847-11f1-a4da-197ba71217d8",
+                "9c2b5f40-b83d-11f1-a4da-197ba71217d8",
+                "a311cee0-b84a-11f1-a4da-197ba71217d8",
+                "a3d4d820-b847-11f1-a4da-197ba71217d8",
+                "a7ad25c0-b846-11f1-a4da-197ba71217d8",
+                "beda7620-b83d-11f1-a4da-197ba71217d8",
+                "c6e935f0-b846-11f1-a4da-197ba71217d8",
+                "cd268890-b838-11f1-a4da-197ba71217d8",
+                "cd6fac40-b848-11f1-a4da-197ba71217d8",
+                "cf684f50-b845-11f1-a4da-197ba71217d8",
+                "ed3ca740-b847-11f1-a4da-197ba71217d8",
+                "fb2a0370-b838-11f1-a4da-197ba71217d8"
             ],
             "dataType": "boolean",
             "idType": "Internal",
             "moduleName": "",
             "description": "Guarda de modo indicando que a sessão de captura e gravação de telemetria está ativa.",
             "assignment": "true",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": 0,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": false,
+            "smvCompleted": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoractive_session"
         },
         {
@@ -4054,12 +4059,17 @@
             "moduleName": "",
             "description": "Esvaziamento completo da fila de backlog em RAM e envio dos dados pendentes via MQTT concluído.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbacklog_fifo_drained"
         },
         {
@@ -4074,12 +4084,17 @@
             "moduleName": "",
             "description": "Evento de conclusão da rodada formal de testes e benchmark de desempenho da telemetria.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": 0,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbenchmark_completion"
         },
         {
@@ -4094,12 +4109,17 @@
             "moduleName": "",
             "description": "Sinalizador indicando lote de telemetria acumulado em memória atingindo o limite de 150 registros.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbinary_batch_full"
         },
         {
@@ -4108,21 +4128,26 @@
             "variable_name": "boot_mode",
             "reqs": [
                 "3236fd60-b838-11f1-a4da-197ba71217d8",
-                "bbb81bf0-b847-11f1-a4da-197ba71217d8",
                 "5fa63440-b848-11f1-a4da-197ba71217d8",
-                "858a1050-b848-11f1-a4da-197ba71217d8"
+                "858a1050-b848-11f1-a4da-197ba71217d8",
+                "bbb81bf0-b847-11f1-a4da-197ba71217d8"
             ],
             "dataType": "boolean",
             "idType": "Internal",
             "moduleName": "",
             "description": "Guarda de modo da fase de boot, energização e configuração dos periféricos MCAL no ESP32-S3.",
             "assignment": "true -> false",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": 0,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": false,
+            "smvCompleted": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorboot_mode"
         },
         {
@@ -4131,20 +4156,25 @@
             "variable_name": "boot_trigger",
             "reqs": [
                 "3236fd60-b838-11f1-a4da-197ba71217d8",
-                "bbb81bf0-b847-11f1-a4da-197ba71217d8",
-                "5fa63440-b848-11f1-a4da-197ba71217d8"
+                "5fa63440-b848-11f1-a4da-197ba71217d8",
+                "bbb81bf0-b847-11f1-a4da-197ba71217d8"
             ],
             "dataType": "boolean",
             "idType": "Input",
             "moduleName": "",
             "description": "Gatilho de inicialização ou reinício a frio da placa ESP32-S3.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": 0,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorboot_trigger"
         },
         {
@@ -4159,12 +4189,17 @@
             "moduleName": "",
             "description": "Volume instantâneo em bytes ocupado no buffer circular de gravação em MicroSD (capacidade 4096 B).",
             "assignment": "0",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": false,
+            "smvCompleted": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbuffer_occupancy"
         },
         {
@@ -4179,12 +4214,17 @@
             "moduleName": "",
             "description": "Sinal emitido liberando as tarefas do barramento CAN após recuperação bem-sucedida de Bus-Off.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_clear_signaled"
         },
         {
@@ -4199,12 +4239,17 @@
             "moduleName": "",
             "description": "Interrupção de hardware do periférico TWAI sinalizando ocorrência de condição de erro Bus-Off.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_error_detected"
         },
         {
@@ -4219,12 +4264,17 @@
             "moduleName": "",
             "description": "Estado em que a flag de sinalização de Bus-Off permanece ativa no sistema.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_flag_active"
         },
         {
@@ -4239,12 +4289,17 @@
             "moduleName": "",
             "description": "Flag interna sinalizada pelo driver TWAI registrando a falha de Bus-Off para recuperação.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_flag_set"
         },
         {
@@ -4259,12 +4314,17 @@
             "moduleName": "",
             "description": "Sinal de pausa cooperativa emitido para as tarefas task_can_rx e task_obd_poller suspenderem o TWAI.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_pause_signaled"
         },
         {
@@ -4279,12 +4339,17 @@
             "moduleName": "",
             "description": "Evento indicando início da janela compulsória de espera e observação de bits recessivos.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorbus_off_pause_started"
         },
         {
@@ -4299,12 +4364,17 @@
             "moduleName": "",
             "description": "Integridade elétrica e lógica do barramento CAN atestada sem presença de condição de Bus-Off.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_bus_healthy"
         },
         {
@@ -4319,12 +4389,17 @@
             "moduleName": "",
             "description": "Comando CAN de bancada intercalado com sucesso entre janelas de polling OBD sem violar a periodicidade.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_cmd_interleaved"
         },
         {
@@ -4339,12 +4414,17 @@
             "moduleName": "",
             "description": "Comando de atuação CAN recebido na fila interna de transmissão prioritária.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_cmd_received_in_queue"
         },
         {
@@ -4359,12 +4439,17 @@
             "moduleName": "",
             "description": "Interrupção de hardware do TWAI indicando novo frame CAN disponível no FIFO de recepção.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcan_frame_arrived"
         },
         {
@@ -4379,12 +4464,17 @@
             "moduleName": "",
             "description": "Preempção voluntária da CPU liberada pela tarefa de escrita do SD entre blocos consecutivos de 512 B.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorchunk_preemption_yielded"
         },
         {
@@ -4399,12 +4489,17 @@
             "moduleName": "",
             "description": "Mensagem de confirmação (ACK) de execução de comando remoto publicada no tópico MQTT.",
             "assignment": "",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": 0,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": true,
+            "smvCompleted": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcommand_executed_ack"
         },
         {
@@ -4420,12 +4515,17 @@
             "moduleName": "",
             "description": "Guarda de modo indicando interface Wi-Fi autenticada e conexão com broker MQTT operacional.",
             "assignment": "true",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": 0,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": false,
+            "smvCompleted": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorconnected_mode"
         },
         {
@@ -4446,6 +4546,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcsv_line_available"
         },
         {
@@ -4466,6 +4568,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorcsv_line_formatted"
         },
         {
@@ -4486,6 +4590,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectordata_packets_dispatche"
         },
         {
@@ -4506,6 +4612,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectordataset_recording"
         },
         {
@@ -4526,6 +4634,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectordispatch_cycle_50ms"
         },
         {
@@ -4546,6 +4656,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorengineering_values_scaled"
         },
         {
@@ -4566,6 +4678,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorfat32_filesystem_mounted"
         },
         {
@@ -4586,6 +4700,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorflush_signal_emitted"
         },
         {
@@ -4606,6 +4722,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorflush_timer_2s_expired"
         },
         {
@@ -4626,6 +4744,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorframe_loss_percentage"
         },
         {
@@ -4646,6 +4766,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorframe_timestamp_captured"
         },
         {
@@ -4666,6 +4788,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorheader_and_boot_lines_written"
         },
         {
@@ -4686,6 +4810,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorheartbeat_diag_logged"
         },
         {
@@ -4706,6 +4832,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorheartbeat_timer_60s"
         },
         {
@@ -4726,6 +4854,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorhw_watchdog_fed"
         },
         {
@@ -4747,6 +4877,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorip_dhcp_assigned"
         },
         {
@@ -4767,6 +4899,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorlogger_stall_30s_detected"
         },
         {
@@ -4787,6 +4921,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormcal_spi_sd_up"
         },
         {
@@ -4807,6 +4943,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormcal_twai_up"
         },
         {
@@ -4827,6 +4965,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormemory_supervision_active"
         },
         {
@@ -4847,6 +4987,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormqtt_batch_published"
         },
         {
@@ -4867,6 +5009,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormqtt_broker_connected"
         },
         {
@@ -4887,6 +5031,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectormqtt_credentials_valid"
         },
         {
@@ -4907,6 +5053,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectornew_file_opened"
         },
         {
@@ -4927,6 +5075,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectornull_mandatory_fields"
         },
         {
@@ -4947,6 +5097,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_request_0x7df_transmitted"
         },
         {
@@ -4967,6 +5119,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timeout_50ms_elapsed"
         },
         {
@@ -4987,6 +5141,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timeout_recorded"
         },
         {
@@ -5007,6 +5163,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_timer_100ms_expired"
         },
         {
@@ -5027,6 +5185,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorobd_tx_cycle_completed"
         },
         {
@@ -5041,12 +5201,17 @@
             "moduleName": "",
             "description": "Guarda de modo indicando desconexão de rede Wi-Fi e comutação para armazenamento local no SD.",
             "assignment": "false",
+            "assignmentVariables": [],
             "copilotAssignment": "",
+            "smvAssignmentVariables": [],
             "modeRequirement": "",
             "modeldoc": false,
-            "modelComponent": "",
             "modeldoc_id": "",
+            "modeldoc_vectorIndex": null,
+            "modelComponent": "",
             "completed": true,
+            "r2u2Completed": false,
+            "smvCompleted": false,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoroffline_mode"
         },
         {
@@ -5067,6 +5232,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectoroverflow_logged_and_dropped"
         },
         {
@@ -5087,6 +5254,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorpending_bytes_flushed"
         },
         {
@@ -5107,6 +5276,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorpid_index_incremented"
         },
         {
@@ -5127,6 +5298,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorram_backlog_retained"
         },
         {
@@ -5147,6 +5320,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorraw_can_frame_ready"
         },
         {
@@ -5154,8 +5329,8 @@
             "component_name": "esp32s3_collector",
             "variable_name": "recovery_window_elapsed",
             "reqs": [
-                "b3fcab40-b849-11f1-a4da-197ba71217d8",
-                "1d5841d0-b84a-11f1-a4da-197ba71217d8"
+                "1d5841d0-b84a-11f1-a4da-197ba71217d8",
+                "b3fcab40-b849-11f1-a4da-197ba71217d8"
             ],
             "dataType": "boolean",
             "idType": "Output",
@@ -5168,6 +5343,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrecovery_window_elapsed"
         },
         {
@@ -5188,6 +5365,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorremote_command_received"
         },
         {
@@ -5208,6 +5387,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorreplay_command_triggered"
         },
         {
@@ -5228,6 +5409,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorreplay_streaming_active"
         },
         {
@@ -5248,6 +5431,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrte_channel_overflow"
         },
         {
@@ -5268,6 +5453,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorrte_channel_pushed"
         },
         {
@@ -5288,6 +5475,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_buffer_pushed"
         },
         {
@@ -5308,6 +5497,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_card_inserted"
         },
         {
@@ -5328,6 +5519,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_fallback_active"
         },
         {
@@ -5348,6 +5541,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsd_write_failed"
         },
         {
@@ -5368,6 +5563,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsector_write_chunk"
         },
         {
@@ -5388,6 +5585,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_duration_reached"
         },
         {
@@ -5408,6 +5607,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_file_rotated_atomically"
         },
         {
@@ -5428,6 +5629,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_rotate_command"
         },
         {
@@ -5448,6 +5651,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsession_stopped_and_flushed"
         },
         {
@@ -5468,6 +5673,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsram_usage_kb"
         },
         {
@@ -5488,6 +5695,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorstall_diag_logged"
         },
         {
@@ -5508,6 +5717,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorstatus_json_published"
         },
         {
@@ -5528,6 +5739,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorstatus_timer_5s"
         },
         {
@@ -5548,6 +5761,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorsystem_tasks_healthy"
         },
         {
@@ -5568,6 +5783,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortelemetry_frame_parsed"
         },
         {
@@ -5588,6 +5805,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortelemetry_frame_received"
         },
         {
@@ -5608,6 +5827,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortotal_dataset_samples"
         },
         {
@@ -5628,6 +5849,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortwai_async_enabled"
         },
         {
@@ -5649,6 +5872,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectortwai_reset_mode_cleared"
         },
         {
@@ -5669,6 +5894,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorwifi_credentials_configured"
         },
         {
@@ -5689,6 +5916,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorwifi_disconnected"
         },
         {
@@ -5709,6 +5938,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_ESPS3_COLETOResp32s3_collectorwifi_reconnected"
         },
         {
@@ -5732,6 +5963,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatoractive_profile"
         },
         {
@@ -5797,6 +6030,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorboot_trigger"
         },
         {
@@ -5819,6 +6054,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcan_bus_operational"
         },
         {
@@ -5839,6 +6076,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcommanded_profile"
         },
         {
@@ -5859,6 +6098,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorcoolant_temp_c"
         },
         {
@@ -5879,6 +6120,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatordbc_frames_emitted"
         },
         {
@@ -5899,6 +6142,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorlatency_jitter_std_ms"
         },
         {
@@ -5919,6 +6164,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorload_pct"
         },
         {
@@ -5939,6 +6186,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormaf_g_s"
         },
         {
@@ -5959,6 +6208,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormcp2515_hardware_up"
         },
         {
@@ -5979,6 +6230,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormcp2515_rx_polled"
         },
         {
@@ -5999,6 +6252,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatormean_obd_latency_ms"
         },
         {
@@ -6020,6 +6275,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_benchmark_running"
         },
         {
@@ -6040,6 +6297,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_request_0x7df_received"
         },
         {
@@ -6060,6 +6319,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorobd_response_0x7e8_sent"
         },
         {
@@ -6081,6 +6342,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorphysics_model_updated"
         },
         {
@@ -6101,6 +6364,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorprofile_cmd_0x010_received"
         },
         {
@@ -6121,6 +6386,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorrpm"
         },
         {
@@ -6141,6 +6408,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorspeed_kmh"
         },
         {
@@ -6161,6 +6430,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": false,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatorthrottle_pct"
         },
         {
@@ -6181,6 +6452,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatortimer1_50ms_tick"
         },
         {
@@ -6201,6 +6474,8 @@
             "modelComponent": "",
             "modeldoc_id": "",
             "completed": true,
+            "smvCompleted": true,
+            "r2u2Completed": true,
             "_id": "EdgeTelemetryLayer_UNO_ECU_EMULATORuno_ecu_emulatortimer2_1ms_tick"
         }
     ]

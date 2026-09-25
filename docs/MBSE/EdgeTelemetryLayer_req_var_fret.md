@@ -42,7 +42,7 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
      ```
 4. No campo **Requirement Description**, cole **apenas** o texto da caixa `FRETish Text`:
    ```
-   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10
+   in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0
    ```
    - O editor colorirá automaticamente: **vermelho** (Scope), **laranja** (Condition), **verde** (Component), **azul** (Timing), **roxo** (Response).
    - Texto sem coloração = erro de sintaxe — consulte as Regras acima.
@@ -123,7 +123,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0 & rpm >= 0 & throttle_pct >= 0 & load_pct >= 0 & maf_g_s >= 0 & coolant_temp_c >= -40
+  in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -196,7 +196,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10
+  in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -212,7 +212,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `uno_ecu_emulator`
 - **FRETish Text:**
   ```text
-  in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3
+  in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3.0
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -289,7 +289,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `esp32s3_collector`
 - **FRETish Text:**
   ```text
-  in active_session when can_bus_healthy the esp32s3_collector shall always satisfy frame_loss_percentage <= 1
+  in active_session when can_bus_healthy the esp32s3_collector shall always satisfy frame_loss_percentage <= 1.0
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -488,7 +488,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 - **Component:** `esp32s3_collector`
 - **FRETish Text:**
   ```text
-  in active_session when memory_supervision_active the esp32s3_collector shall always satisfy sram_usage_kb < 200
+  in active_session when memory_supervision_active the esp32s3_collector shall always satisfy sram_usage_kb < 200.0
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
