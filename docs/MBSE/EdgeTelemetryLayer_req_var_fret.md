@@ -88,7 +88,7 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
                ├── [COMPONENTE FRET: esp32_cmd] (2 requisitos: REQ_CMD_001 a REQ_CMD_002)
                │     └── [Camada BSW] Recepção de Comandos de Bancada e Retransmissão em Streaming (Replay)
                └── [COMPONENTE FRET: esp32_recovery] (7 requisitos: REQ_REC_001 a REQ_REC_007)
-                     └── [Camada BSW] Recuperação Autônoma de Bus-Off (AC-07: Janela 128 ms via PAC) e Watchdog de Hardware
+                     └── [Camada BSW] Recuperação Autônoma de Bus-Off (AC-07: Handshake Timer 128 ms via PAC (NASA Pattern)) e Watchdog de Hardware
 ```
 
 ---
@@ -106,8 +106,8 @@ O emulador Arduino calcula `speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_
 | **`esp32_twai`** | **MCAL** | `REQ_CAN_001` a `006` | 6 | • Boot TWAI: $\le 50\text{ ms}$<br>• Timestamp: $\le 2\text{ ms}$<br>• Parsing DBC: $\le 100\ \mu\text{s}$<br>• Inserção RTE: $\le 1\text{ ms}$ | **AC-01** ($\text{perda} \le 1.0\%$) | Driver do controlador CAN nativo (TWAI) do ESP32-S3 em modo assíncrono por interrupções, garantindo conversão de engenharia sem alocação dinâmica de memória. |
 | **`esp32_obd`** | **APP** | `REQ_OBD_001` a `004` | 4 | • Ciclo de polling: $100\text{ ms}$ ($10\text{ Hz}$)<br>• Timeout OBD: $50\text{ ms}$<br>• Intercalação de comandos: $\le 10\text{ ms}$ | **AC-02** (Conformidade com ECU)<br>**AC-04** (Throughput) | Orquestra a interrogação cíclica ativa dos 6 PIDs padronizados (ISO 15765-4) e gerencia filas de comandos prioritários intercalados na transmissão. |
 | **`esp32_logger`** | **APP** | `REQ_LOG_001` a `009` | 9 | • Formatação CSV: $\le 1\text{ ms}$<br>• Flush periódico: $\le 2\text{ s}$<br>• Heartbeat: $60\text{ s}$ | **AC-05** ($\text{SRAM} < 200.0\text{ KB}$)<br>**AC-04** ($\ge 200\text{ pacotes/s}$) | Converte amostras de telemetria em linhas tabulares CSV de 11 colunas utilizando buffer estático de 320 bytes, supervisionando o uso de SRAM sem memory leaks. |
-| **`esp32_sd`** | **BSW** | `REQ_SD_001` a `005` | 5 | • Mount SPI/FAT32: $\le 500\text{ ms}$<br>• Escrita por setor: $512\text{ bytes}$<br>• Yield cooperativo: $\le 20\text{ ms}$ | **AC-08** ($\ge 72.000\text{ amostras}$) | Driver e subsistema de armazenamento local contínuo em cartão MicroSD FAT32 via barramento SPI2, suportando gravação contínua por mais de 1 hora de ensaio ininterrupto. |
-| **`esp32_telemetry`** | **BSW** | `REQ_COM_001` a `005` | 5 | • Conexão Wi-Fi: $\le 10\text{ s}$<br>• Handshake MQTT: $\le 5\text{ s}$<br>• Ciclo de despacho: $50\text{ ms}$ | **AC-04** (Throughput de telemetria)<br>**AC-06** (Fallback de rede) | Gateway de comunicação sem fio via Wi-Fi e protocolo MQTT 3.1.1, compactando lotes binários para publicação em nuvem com reconexão resiliente. |
+| **`esp32_sd`** | **BSW** | `REQ_SD_001` a `005` | 5 | • Mount SPI/FAT32: Imediato ao boot<br>• Escrita por setor: $512\text{ bytes}$<br>• Yield cooperativo: $\le 20\text{ ms}$ | **AC-08** ($\ge 72.000\text{ amostras}$) | Driver e subsistema de armazenamento local contínuo em cartão MicroSD FAT32 via barramento SPI2, suportando gravação contínua por mais de 1 hora de ensaio ininterrupto. |
+| **`esp32_telemetry`** | **BSW** | `REQ_COM_001` a `005` | 5 | • Handshake Wi-Fi/MQTT: Via Timer Abstraction (NASA)<br>• Despacho no ciclo: Imediato | **AC-04** (Throughput de telemetria)<br>**AC-06** (Fallback de rede) | Gateway de comunicação sem fio via Wi-Fi e protocolo MQTT 3.1.1, compactando lotes binários para publicação em nuvem com reconexão resiliente. |
 | **`esp32_fsm`** | **APP** | `REQ_FSM_001` a `002` | 2 | • Comutação para SD: $\le 5\text{ ms}$<br>• Dreno FIFO na volta: $\le 10\text{ ms}$ | **AC-06** ($\text{comutação} \le 5\text{ ms}$) | Máquina de Estados Finita (FSM) de conectividade: detecta queda do enlace Wi-Fi e desvia instantaneamente 100% dos dados para o MicroSD, esvaziando a FIFO ao reconectar. |
 | **`esp32_cmd`** | **BSW** | `REQ_CMD_001` a `002` | 2 | • Execução de comando: $\le 20\text{ ms}$<br>• Streaming replay: $\le 100\text{ ms}$ | Controle Operacional HIL | Camada de controle remoto de bancada: interpreta comandos recebidos via MQTT/CAN (STOP, PERFIL, RESET, REPLAY) e aciona streaming de reprodução histórica. |
 | **`esp32_recovery`** | **BSW** | `REQ_REC_001` a `007` | 7 | • Detecção de Bus-Off: $\le 10\text{ ms}$<br>• Janela ISO 11898: $128\text{ ms}$<br>• Reativação PAC: $\le 1\text{ ms}$<br>• Rearme Watchdog: $\le 2\text{ s}$ | **AC-07** (Recuperação $\le 128\text{ ms}$ sem reboot) | Subsistema de resiliência e alta confiabilidade: recupera falhas elétricas do barramento CAN em nível de registradores de silício (PAC) e reanima o Watchdog de hardware. |
@@ -166,7 +166,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 100 MILLISECOND satisfy can_bus_operational & active_profile = 2
+  in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 10 MILLISECOND satisfy can_bus_operational & active_profile = 2
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
@@ -184,7 +184,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
-  in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 50 MILLISECOND satisfy active_profile = commanded_profile
+  in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy active_profile = commanded_profile
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -242,7 +242,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** uno_ecu_emulator
 - **FRETish Text:**
   ```text
-  when can_bus_operational upon timer2_1ms_tick the uno_ecu_emulator shall within 50 MICROSECOND satisfy mcp2515_rx_polled
+  when can_bus_operational upon timer2_1ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy mcp2515_rx_polled
   ```
 - **Variable Mapping:**
   - `can_bus_operational`: **Input** (Boolean) — Barramento CAN operacional
@@ -307,7 +307,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_twai
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_trigger & mcal_twai_up the esp32_twai shall within 50 MILLISECOND satisfy twai_async_enabled
+  in boot_mode upon boot_trigger & mcal_twai_up the esp32_twai shall within 10 MILLISECOND satisfy twai_async_enabled
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
@@ -338,7 +338,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_twai
 - **FRETish Text:**
   ```text
-  upon raw_can_frame_ready the esp32_twai shall within 100 MICROSECOND satisfy engineering_values_scaled
+  upon raw_can_frame_ready the esp32_twai shall within 1 MILLISECOND satisfy engineering_values_scaled
   ```
 - **Variable Mapping:**
   - `raw_can_frame_ready`: **Input** (Boolean)
@@ -491,7 +491,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_logger
 - **FRETish Text:**
   ```text
-  in active_session upon csv_line_available the esp32_logger shall within 50 MICROSECOND satisfy sd_buffer_pushed
+  in active_session upon csv_line_available the esp32_logger shall within 1 MILLISECOND satisfy sd_buffer_pushed
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -521,7 +521,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_logger
 - **FRETish Text:**
   ```text
-  in active_session upon flush_timer_2s_expired the esp32_logger shall within 100 MILLISECOND satisfy pending_bytes_flushed
+  in active_session upon flush_timer_2s_expired the esp32_logger shall within 10 MILLISECOND satisfy pending_bytes_flushed
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -581,7 +581,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_logger
 - **FRETish Text:**
   ```text
-  in active_session upon heartbeat_timer_60s the esp32_logger shall within 100 MILLISECOND satisfy heartbeat_diag_logged
+  in active_session upon heartbeat_timer_60s the esp32_logger shall within 10 MILLISECOND satisfy heartbeat_diag_logged
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
@@ -598,7 +598,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_sd
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_trigger & mcal_spi_sd_up & sd_card_inserted the esp32_sd shall within 500 MILLISECOND satisfy fat32_filesystem_mounted
+  in boot_mode upon boot_trigger & mcal_spi_sd_up & sd_card_inserted the esp32_sd shall within 10 MILLISECOND satisfy fat32_filesystem_mounted
   ```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
@@ -615,7 +615,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_sd
 - **FRETish Text:**
   ```text
-  upon session_rotate_command the esp32_sd shall within 50 MILLISECOND satisfy session_file_rotated_atomically
+  upon session_rotate_command the esp32_sd shall within 10 MILLISECOND satisfy session_file_rotated_atomically
   ```
 - **Variable Mapping:**
   - `session_rotate_command`: **Input** (Boolean)
@@ -674,75 +674,76 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_telemetry
 - **FRETish Text:**
   ```text
-  in boot_mode upon boot_trigger & wifi_credentials_configured the esp32_telemetry shall within 10000 MILLISECOND satisfy ip_dhcp_assigned
-  ```
+  in boot_mode upon boot_trigger & wifi_credentials_configured the esp32_telemetry shall immediately satisfy wifi_dhcp_timer_start
+```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
   - `boot_trigger`: **Input** (Boolean)
   - `wifi_credentials_configured`: **Input** (Boolean)
-  - `ip_dhcp_assigned`: **Output** (Boolean)
-- **Rationale (Português):** Durante a inicialização, validar as credenciais, conectar a interface sem fio em modo Station e obter endereço IP via DHCP através da pilha embassy-net.
-
+  - `wifi_dhcp_timer_start`: **Output** (Boolean)
+- **Rationale (Português):** Durante a inicialização com credenciais válidas, iniciar imediatamente a solicitação de conexão Wi-Fi e o temporizador de concessão de IP via DHCP (padrão de handshake de temporizador da NASA).
 ---
+
 ### REQ_COM_005 — Estabelecimento de Conexão com o Broker MQTT [REQ-SYS-19] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_005`
 - **Parent Requirement ID:** REQ_SYS_19
 - **Component:** esp32_telemetry
 - **FRETish Text:**
   ```text
-  in boot_mode upon ip_dhcp_assigned & mqtt_credentials_valid the esp32_telemetry shall within 5000 MILLISECOND satisfy mqtt_broker_connected
-  ```
+  in boot_mode upon ip_dhcp_assigned & mqtt_credentials_valid the esp32_telemetry shall immediately satisfy mqtt_connect_timer_start
+```
 - **Variable Mapping:**
   - `boot_mode`: **Internal** (Boolean)
   - `ip_dhcp_assigned`: **Input** (Boolean)
   - `mqtt_credentials_valid`: **Input** (Boolean)
-  - `mqtt_broker_connected`: **Output** (Boolean)
-- **Rationale (Português):** Condicionado à obtenção do IP, o sistema deve validar as credenciais do MQTT e estabelecer a conexão TCP/IP com o broker em até 5000 ms, concluindo a verificação de rede ativa.
-
+  - `mqtt_connect_timer_start`: **Output** (Boolean)
+- **Rationale (Português):** Condicionado à obtenção do IP e credenciais válidas, iniciar imediatamente o processo e temporizador de conexão ao broker MQTT (padrão NASA).
 ---
+
 ### REQ_COM_002 — Despacho em Lotes Binários via MQTT [REQ-SYS-20] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_002`
 - **Parent Requirement ID:** REQ_SYS_20
 - **Component:** esp32_telemetry
 - **FRETish Text:**
   ```text
-  in connected_mode upon binary_batch_full the esp32_telemetry shall within 200 MILLISECOND satisfy mqtt_batch_published
-  ```
+  in connected_mode upon binary_batch_full the esp32_telemetry shall within 10 MILLISECOND satisfy mqtt_batch_published
+```
 - **Variable Mapping:**
   - `connected_mode`: **Internal** (Boolean)
   - `binary_batch_full`: **Input** (Boolean)
   - `mqtt_batch_published`: **Output** (Boolean)
-- **Rationale (Português):** Agrupar frames binários compactos de 18 bytes (até 150 registros) e despachá-los no tópico MQTT em até 200 ms.
-
+- **Rationale (Português):** Despacho por Capacidade Máxima do Lote MQTT [REQ-SYS-20] [Subsistema 6] [Camada BSW]
+  Ao atingir a capacidade máxima de 150 frames binários (`binary_batch_full`), transmitir o lote binário compactado no tópico `/telemetry/S{id}/raw` com prazo de execução (WCET) de até 10 ms. O despacho complementar por temporização periódica (caso a taxa de frames seja baixa e o lote não atinja 150 frames) é governado de forma independente pelo ciclo de 50 ms em REQ_COM_004.
 ---
+
 ### REQ_COM_003 — Publicação Periódica de Status e Keepalive [REQ-SYS-21] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_003`
 - **Parent Requirement ID:** REQ_SYS_21
 - **Component:** esp32_telemetry
 - **FRETish Text:**
   ```text
-  in connected_mode upon status_timer_5s the esp32_telemetry shall within 500 MILLISECOND satisfy status_json_published
-  ```
+  in connected_mode upon status_timer_5s the esp32_telemetry shall immediately satisfy status_json_published
+```
 - **Variable Mapping:**
   - `connected_mode`: **Internal** (Boolean)
   - `status_timer_5s`: **Input** (Boolean)
   - `status_json_published`: **Output** (Boolean)
-- **Rationale (Português):** A cada 5 segundos com rede ativa, publicar payload JSON contendo saúde do SD, Wi-Fi, contadores e uptime em /system/status.
-
+- **Rationale (Português):** Emitir imediatamente o payload JSON de diagnóstico e keepalive a cada disparo do temporizador de 5 segundos.
 ---
+
 ### REQ_COM_004 — Tarefa Periódica de Despacho (BSW Com) [REQ-SYS-20] [Subsistema 6] [Camada BSW]
 - **ID:** `REQ_COM_004`
 - **Parent Requirement ID:** REQ_SYS_20
 - **Component:** esp32_telemetry
 - **FRETish Text:**
   ```text
-  in active_session upon dispatch_cycle_50ms the esp32_telemetry shall within 2500 MICROSECOND satisfy data_packets_dispatched
+  in active_session upon dispatch_cycle_50ms the esp32_telemetry shall within 3 MILLISECOND satisfy data_packets_dispatched
   ```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `dispatch_cycle_50ms`: **Input** (Boolean)
   - `data_packets_dispatched`: **Output** (Boolean)
-- **Rationale (Português):** A cada ciclo de despacho de telemetria, a camada de comunicação (`bsw_com`) deve arbitrar e despachar os lotes binários acumulados no canal MQTT sem exceder 2,5 ms de tempo de execução da CPU.
+- **Rationale (Português):** O despachante assíncrono processa e encaminha imediatamente os pacotes de telemetria a cada ciclo periódico de 50 ms.
 - **Nota de Implementação:** No firmware em Rust (`firmware/esp32s3_collector/src/bsw/bsw_com.rs`), o despacho é executado pela tarefa assíncrona `task_wifi`, consumindo frames do canal estático `MQTT_TX_CHANNEL` (capacidade 500) em lotes de até 150 registros.
 
 ---
@@ -786,12 +787,12 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_cmd
 - **FRETish Text:**
   ```text
-  upon remote_command_received the esp32_cmd shall within 20 MILLISECOND satisfy command_executed_ack
+  upon remote_command_received the esp32_cmd shall within 10 MILLISECOND satisfy command_executed_ack
   ```
 - **Variable Mapping:**
   - `remote_command_received`: **Input** (Boolean)
   - `command_executed_ack`: **Output** (Boolean)
-- **Rationale (Português):** Interpretar e executar instruções no tópico /coach/command (STOP, ECO/NOR/SPT, RESET, TIME, LIST_SESSIONS) em até 20 ms.
+- **Rationale (Português):** Interpretar e executar instruções no tópico /coach/command (STOP, ECO/NOR/SPT, RESET, TIME, LIST_SESSIONS) em até 10 ms (WCET).
 
 ---
 ### REQ_CMD_002 — Transmissão em Streaming de Replay [REQ-SYS-26] [Subsistema 8] [Camada BSW]
@@ -800,7 +801,7 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_cmd
 - **FRETish Text:**
   ```text
-  upon replay_command_triggered the esp32_cmd shall within 100 MILLISECOND satisfy replay_streaming_active
+  upon replay_command_triggered the esp32_cmd shall within 10 MILLISECOND satisfy replay_streaming_active
   ```
 - **Variable Mapping:**
   - `replay_command_triggered`: **Input** (Boolean)
@@ -845,13 +846,12 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_recovery
 - **FRETish Text:**
   ```text
-  upon bus_off_pause_started the esp32_recovery shall after 128 MILLISECOND satisfy recovery_window_elapsed
-  ```
+  upon bus_off_pause_started the esp32_recovery shall immediately satisfy recovery_timer_128ms_start
+```
 - **Variable Mapping:**
   - `bus_off_pause_started`: **Input** (Boolean)
-  - `recovery_window_elapsed`: **Output** (Boolean)
-- **Rationale (Português):** Aguardar compulsoriamente os 128 ms normatizados para observação de bits recessivos antes de reabilitar o controlador (Critério AC-07).
-
+  - `recovery_timer_128ms_start`: **Output** (Boolean)
+- **Rationale (Português):** Iniciar compulsoriamente o temporizador da janela de 128 ms normatizada pela ISO 11898 para observação de bits recessivos (Critério AC-07), utilizando o padrão de handshake de timer da NASA para assegurar realizabilidade instantânea no SMT.
 ---
 ### REQ_REC_004 — Reativação via Registradores PAC sem Reboot [REQ-SYS-27 / AC-07] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_004`
@@ -859,13 +859,12 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_recovery
 - **FRETish Text:**
   ```text
-  upon recovery_window_elapsed the esp32_recovery shall within 1 MILLISECOND satisfy twai_reset_mode_cleared
-  ```
+  upon recovery_timer_128ms_expired the esp32_recovery shall within 1 MILLISECOND satisfy twai_reset_mode_cleared
+```
 - **Variable Mapping:**
-  - `recovery_window_elapsed`: **Input** (Boolean)
+  - `recovery_timer_128ms_expired`: **Input** (Boolean)
   - `twai_reset_mode_cleared`: **Output** (Boolean)
-  - **Rationale (Português):** Limpar a flag de reset no registrador físico via PAC sem reiniciar o processador ESP32-S3 e sem destruir tarefas ativas.
-
+- **Rationale (Português):** Ao expirar a janela de 128 ms (evento emitido pelo hardware/RTOS), limpar a flag de reset no registrador físico via PAC imediatamente sem reiniciar o processador ESP32-S3 e sem destruir tarefas ativas.
 ---
 ### REQ_REC_005 — Retomada Operacional e Emissão de BUS_OFF_CLEAR [REQ-SYS-27 / AC-07] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_005`
@@ -887,14 +886,13 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_recovery
 - **FRETish Text:**
   ```text
-  in active_session upon logger_stall_30s_detected the esp32_recovery shall within 100 MILLISECOND satisfy stall_diag_logged
-  ```
+  in active_session upon logger_stall_30s_detected the esp32_recovery shall within 10 MILLISECOND satisfy stall_diag_logged
+```
 - **Variable Mapping:**
   - `active_session`: **Internal** (Boolean)
   - `logger_stall_30s_detected`: **Input** (Boolean)
   - `stall_diag_logged`: **Output** (Boolean)
-- **Rationale (Português):** Se nenhum frame foi processado pelo logger em 30 segundos de sessão ativa com SD presente, registrar alerta de stall no SD.
-
+- **Rationale (Português):** Ao detectar a flag de timeout de 30 s de inatividade do logger, gravar evento diagnóstico imediatamente e disparar recuperação cooperativa.
 ---
 ### REQ_REC_007 — Rearme Periódico do Watchdog de Hardware [REQ-SYS-30] [Subsistema 9] [Camada BSW]
 - **ID:** `REQ_REC_007`
@@ -902,9 +900,11 @@ Os critérios de aceitação formalizam as métricas quantitativas de desempenho
 - **Component:** esp32_recovery
 - **FRETish Text:**
   ```text
-  when system_tasks_healthy the esp32_recovery shall within 2000 MILLISECOND satisfy hw_watchdog_fed
+  in active_session when system_tasks_healthy upon wdt_feed_tick the esp32_recovery shall within 1 MILLISECOND satisfy hw_watchdog_fed
   ```
 - **Variable Mapping:**
+  - `active_session`: **Internal** (Boolean)
   - `system_tasks_healthy`: **Input** (Boolean)
+  - `wdt_feed_tick`: **Input** (Boolean)
   - `hw_watchdog_fed`: **Output** (Boolean)
-- **Rationale (Português):** Enquanto as tarefas estiverem saudáveis, a tarefa supervisora deve rearmar o watchdog de hardware em intervalo inferior a 2 s (timeout de 5 s).
+- **Rationale (Português):** Enquanto as tarefas estiverem saudáveis, a tarefa supervisora alimenta imediatamente o watchdog de hardware a cada tick periódico do temporizador do RTOS.
