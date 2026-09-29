@@ -1,0 +1,43 @@
+package Comm_Devices_Pkg
+public
+	with Data_Types_Pkg;
+
+	---------------------------------------------------------------------------
+	-- DISPOSITIVO PADRÃO: Módulo Wi-Fi / MQTT (Baseline)
+	---------------------------------------------------------------------------
+	device WiFi_Device
+		features
+			mqtt_stream_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
+			coaching_stream_in: in event data port Data_Types_Pkg::Driver_Coaching_Data;
+		flows
+			f_sink_telemetry: flow sink mqtt_stream_in;
+			f_sink_coaching: flow sink coaching_stream_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+	end WiFi_Device;
+
+	device implementation WiFi_Device.impl
+	end WiFi_Device.impl;
+
+	---------------------------------------------------------------------------
+	-- DISPOSITIVO CANDIDATO (DevCompatibility / CAvA): Modem Celular 4G/LTE (SIMCom / Quectel)
+	-- Conexão persistente de longa distância para frotas veiculares
+	---------------------------------------------------------------------------
+	device Cellular_LTE_Device
+		features
+			cellular_stream_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
+			coaching_stream_in: in event data port Data_Types_Pkg::Driver_Coaching_Data;
+			network_status_out: out event data port Data_Types_Pkg::Diagnostic_Packet_Data;
+		flows
+			f_sink_telemetry: flow sink cellular_stream_in;
+			f_sink_coaching: flow sink coaching_stream_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 100 ms;
+	end Cellular_LTE_Device;
+
+	device implementation Cellular_LTE_Device.impl
+	end Cellular_LTE_Device.impl;
+
+end Comm_Devices_Pkg;

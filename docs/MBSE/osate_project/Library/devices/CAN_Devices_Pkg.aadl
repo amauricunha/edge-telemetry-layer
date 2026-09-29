@@ -1,0 +1,65 @@
+package CAN_Devices_Pkg
+public
+	with Buses_Pkg;
+	with Data_Types_Pkg;
+
+	---------------------------------------------------------------------------
+	-- DISPOSITIVO PADRÃO: Transceptor CAN Diferencial Físico (Baseline)
+	---------------------------------------------------------------------------
+	device CAN_Transceiver
+		features
+			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus.impl;
+			can_rx_frame: out event data port Data_Types_Pkg::CAN_Frame_Data;
+			can_tx_frame: in event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_source: flow source can_rx_frame;
+			f_sink: flow sink can_tx_frame;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 5 ms;
+	end CAN_Transceiver;
+
+	device implementation CAN_Transceiver.impl
+	end CAN_Transceiver.impl;
+
+	---------------------------------------------------------------------------
+	-- DISPOSITIVO CANDIDATO (DevCompatibility / CAvA): Transceptor Inteligente CAN-FD
+	-- Interface enriquecida com porta de diagnóstico e maior taxa de amostragem (2 ms)
+	---------------------------------------------------------------------------
+	device CAN_FD_Transceiver_Candidate
+		features
+			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus.impl;
+			can_fd_rx_frame: out event data port Data_Types_Pkg::CAN_Frame_Data;
+			can_fd_tx_frame: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			bus_error_diag: out event port; -- Porta adicional incompatível com o baseline
+		flows
+			f_source: flow source can_fd_rx_frame;
+			f_sink: flow sink can_fd_tx_frame;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 2 ms;
+	end CAN_FD_Transceiver_Candidate;
+
+	device implementation CAN_FD_Transceiver_Candidate.impl
+	end CAN_FD_Transceiver_Candidate.impl;
+
+	---------------------------------------------------------------------------
+	-- EMULADOR DE ECU EXTERNO (ESTÍMULO HARDWARE-IN-THE-LOOP)
+	---------------------------------------------------------------------------
+	device Uno_ECU_Emulator_Device
+		features
+			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus.impl;
+			can_tx_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+			can_rx_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_ecu_source: flow source can_tx_out;
+			f_ecu_sink: flow sink can_rx_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+	end Uno_ECU_Emulator_Device;
+
+	device implementation Uno_ECU_Emulator_Device.impl
+	end Uno_ECU_Emulator_Device.impl;
+
+end CAN_Devices_Pkg;

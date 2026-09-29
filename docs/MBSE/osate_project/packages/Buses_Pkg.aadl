@@ -1,0 +1,31 @@
+package Buses_Pkg
+public
+
+	-- Barramento diferencial CAN a 500 kbps (1 bit = 2 us, 16 us/byte)
+	bus CAN_Bus
+		properties
+			Transmission_Time => [Fixed => 10 us .. 20 us; PerByte => 16 us .. 16 us;];
+	end CAN_Bus;
+
+	bus implementation CAN_Bus.impl
+	end CAN_Bus.impl;
+
+	-- Barramento local SPI para memória e cartão SD a 20 MHz
+	bus SPI_Bus
+		properties
+			Transmission_Time => [Fixed => 1 us .. 2 us; PerByte => 1 us .. 1 us;];
+	end SPI_Bus;
+
+	bus implementation SPI_Bus.impl
+	end SPI_Bus.impl;
+
+	-- Barramento interno inter-core para comunicação rápida entre núcleos da CPU
+	bus InterCore_Bus
+		properties
+			Transmission_Time => [Fixed => 100 ns .. 200 ns; PerByte => 20 ns .. 50 ns;];
+	end InterCore_Bus;
+
+	bus implementation InterCore_Bus.impl
+	end InterCore_Bus.impl;
+
+end Buses_Pkg;

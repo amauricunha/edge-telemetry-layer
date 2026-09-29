@@ -1,0 +1,88 @@
+package Software_Threads_Pkg
+public
+	with Data_Types_Pkg;
+
+	---------------------------------------------------------------------------
+	-- 1. task_can_rx: leitura do controlador TWAI e inserção no canal assíncrono
+	---------------------------------------------------------------------------
+	thread Task_CAN_RX
+		features
+			can_frame_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			telemetry_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_path: flow path can_frame_in -> telemetry_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 5 ms;
+			Compute_Execution_Time => 200 us .. 800 us;
+			Deadline => 5 ms;
+			Priority => 10;
+	end Task_CAN_RX;
+
+	thread implementation Task_CAN_RX.impl
+	end Task_CAN_RX.impl;
+
+	---------------------------------------------------------------------------
+	-- 2. task_obd_poller: disparo de requisições 0x7DF e recepção de PIDs em 0x7E8
+	---------------------------------------------------------------------------
+	thread Task_OBD_Poller
+		features
+			obd_resp_in: in event data port Data_Types_Pkg::Diagnostic_Packet_Data;
+			obd_req_out: out event data port Data_Types_Pkg::Diagnostic_Packet_Data;
+			telemetry_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_path: flow path obd_resp_in -> telemetry_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 100 ms;
+			Compute_Execution_Time => 1 ms .. 5 ms;
+			Deadline => 100 ms;
+			Priority => 4;
+	end Task_OBD_Poller;
+
+	thread implementation Task_OBD_Poller.impl
+	end Task_OBD_Poller.impl;
+
+	---------------------------------------------------------------------------
+	-- 3. task_logger: serialização para linha CSV e gestão de buffers estáticos
+	---------------------------------------------------------------------------
+	thread Task_Logger
+		features
+			telemetry_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			csv_payload_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+		flows
+			f_path: flow path telemetry_in -> csv_payload_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 20 ms;
+			Compute_Execution_Time => 500 us .. 1500 us;
+			Deadline => 20 ms;
+			Priority => 8;
+	end Task_Logger;
+
+	thread implementation Task_Logger.impl
+	end Task_Logger.impl;
+
+	---------------------------------------------------------------------------
+	-- 4. task_tx_dispatch: despacho para gravação em cartão SD ou publicação MQTT
+	---------------------------------------------------------------------------
+	thread Task_TX_Dispatch
+		features
+			csv_payload_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
+			sd_record_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+			mqtt_packet_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+		flows
+			f_path_sd: flow path csv_payload_in -> sd_record_out;
+			f_path_mqtt: flow path csv_payload_in -> mqtt_packet_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+			Compute_Execution_Time => 1 ms .. 3 ms;
+			Deadline => 50 ms;
+			Priority => 6;
+	end Task_TX_Dispatch;
+
+	thread implementation Task_TX_Dispatch.impl
+	end Task_TX_Dispatch.impl;
+
+end Software_Threads_Pkg;

@@ -1,0 +1,42 @@
+package Storage_Devices_Pkg
+public
+	with Buses_Pkg;
+	with Data_Types_Pkg;
+
+	---------------------------------------------------------------------------
+	-- DISPOSITIVO PADRÃO: Cartão MicroSD FAT32 via SPI (Baseline)
+	---------------------------------------------------------------------------
+	device MicroSD_Device
+		features
+			spi_conn: requires bus access Buses_Pkg::SPI_Bus.impl;
+			file_stream_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
+		flows
+			f_sink: flow sink file_stream_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+	end MicroSD_Device;
+
+	device implementation MicroSD_Device.impl
+	end MicroSD_Device.impl;
+
+	---------------------------------------------------------------------------
+	-- DISPOSITIVO CANDIDATO (DevCompatibility / CAvA): Módulo de Memória Flash SPI / eMMC
+	-- Maior velocidade de gravação por página direta sem FAT32
+	---------------------------------------------------------------------------
+	device HighSpeed_Flash_Device
+		features
+			spi_conn: requires bus access Buses_Pkg::SPI_Bus.impl;
+			raw_block_stream_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
+			write_complete_event: out event port;
+		flows
+			f_sink: flow sink raw_block_stream_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 20 ms;
+	end HighSpeed_Flash_Device;
+
+	device implementation HighSpeed_Flash_Device.impl
+	end HighSpeed_Flash_Device.impl;
+
+end Storage_Devices_Pkg;

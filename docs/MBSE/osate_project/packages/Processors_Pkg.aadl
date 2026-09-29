@@ -1,0 +1,44 @@
+package Processors_Pkg
+public
+	with Buses_Pkg;
+
+	-- Núcleo de Processamento Xtensa LX7 a 240 MHz com suporte a ponto flutuante
+	processor Xtensa_LX7_Core
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+	end Xtensa_LX7_Core;
+
+	processor implementation Xtensa_LX7_Core.impl
+	end Xtensa_LX7_Core.impl;
+
+	-- Modelo do Processador ESP32-S3 (Mono-núcleo lógico - Baseline Pilar 2)
+	processor ESP32S3_Processor
+		features
+			can_bus_access: requires bus access Buses_Pkg::CAN_Bus.impl;
+			spi_bus_access: requires bus access Buses_Pkg::SPI_Bus.impl;
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+	end ESP32S3_Processor;
+
+	processor implementation ESP32S3_Processor.impl
+	end ESP32S3_Processor.impl;
+
+	-- Modelo do Processador ESP32-S3 Dual-Core (Evolução CAvA / Pilar 4)
+	-- Core 0 alocado exclusivamente para Telemetria em Tempo Real
+	-- Core 1 alocado para Inferência TinyML e Feature Extraction
+	processor ESP32S3_DualCore_Processor
+		features
+			can_bus_access: requires bus access Buses_Pkg::CAN_Bus.impl;
+			spi_bus_access: requires bus access Buses_Pkg::SPI_Bus.impl;
+	end ESP32S3_DualCore_Processor;
+
+	processor implementation ESP32S3_DualCore_Processor.impl
+		subcomponents
+			core0: processor Xtensa_LX7_Core.impl;
+			core1: processor Xtensa_LX7_Core.impl;
+			intercore_bus: bus Buses_Pkg::InterCore_Bus.impl;
+	end ESP32S3_DualCore_Processor.impl;
+
+end Processors_Pkg;
