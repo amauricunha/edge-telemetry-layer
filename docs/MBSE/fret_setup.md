@@ -87,6 +87,19 @@ jkind -help
 jrealizability -help
 ```
 
+### 2.7. Model Checker NuSMV (v2.6.0 - Motor de Test Case Generation e LTLSIM)
+O **NuSMV** é o model checker simbólico baseado em BDD/SAT utilizado pelo FRET tanto para a simulação interativa de LTL (`LTLSIM`) quanto para a geração de casos de teste em componentes booleanos (`TEST CASE GENERATION`):
+```bash
+curl -sL https://nusmv.fbk.eu/distrib/NuSMV-2.6.0-linux64.tar.gz -o /tmp/NuSMV.tar.gz
+tar -xzf /tmp/NuSMV.tar.gz -C /tmp
+sudo cp /tmp/NuSMV-2.6.0-Linux/bin/NuSMV /usr/local/bin/NuSMV
+sudo ln -sf /usr/local/bin/NuSMV /usr/local/bin/nusmv
+sudo chmod +x /usr/local/bin/NuSMV
+
+# Validação do NuSMV
+NuSMV -h
+```
+
 ---
 
 ## 3. Configuração do Node.js (via NVM)

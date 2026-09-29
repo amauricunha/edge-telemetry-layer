@@ -6,6 +6,30 @@ Cada requisito está formalizado na gramática **FRETish (em inglês normatizado
 
 ---
 
+## Fundamentação Arquitetural: Por que Modelamos Componentes de Software (SW-C) em uma Mesma CPU Física?
+
+Uma dúvida recorrente em bancas de engenharia é: *"Se o coletor possui uma única CPU física (o microcontrolador ESP32-S3), por que o modelo MBSE o divide em 8 componentes formais no FRET?"*
+
+A resposta reside na distinção canônica entre **Arquitetura de Hardware (Nível Físico)** e **Arquitetura de Software (Nível Lógico)**:
+
+1. **O Conceito de "Componente" na Engenharia de Sistemas Críticos (NASA e AUTOSAR):**
+   - Em normas aeroespaciais e automotivas de missão crítica (NASA, ARP4754A, AUTOSAR Classic e ISO 26262), o termo **Componente** quase nunca se refere ao chip de silício.
+   - Refere-se a um **Componente de Software (Software Component — SW-C)**: uma unidade lógica de execução concorrente governada pelo RTOS (no firmware Rust, o runtime assíncrono `Embassy`), com interfaces e prazos de pior caso (WCET) rigorosamente delimitados.
+2. **O Padrão Adotado pela Própria NASA (Caso de Estudo `LMCPS`):**
+   - No maior caso de estudo oficial da NASA (`LMCPS` — *Lockheed Martin Cyber-Physical Systems*, disponível na pasta `docs/MBSE/FRET_docs/LMCPS`), composto por 97 requisitos formais, a NASA dividiu o sistema em **13 componentes funcionais independentes**:
+     `Autopilot`, `RollAutopilot`, `Euler`, `Regulator`, `Tustin_Integrator`, `FSM_Sensor`, etc.
+   - **Todos esses 13 módulos executam na mesma CPU física** do computador de controle de voo (*Flight Control Computer*). A NASA adotou essa decomposição porque modelar tarefas concorrentes como uma única caixa-preta opaca é metodologicamente inadequado e gera modelos intratáveis.
+3. **Validação Rigorosa dos Requisitos ENTRE os Módulos (Design por Contrato / Assume-Guarantee):**
+   - Ao modelar cada subsistema como um componente formal, **validamos com máximo rigor as interfaces entre as tarefas**:
+     - O módulo **Produtor** (`esp32_twai` - MCAL) garante colocar o registro decodificado no canal assíncrono da RTE em até $1\text{ ms}$ (`telemetry_frame_parsed = true`).
+     - O módulo **Consumidor** (`esp32_logger` - Aplicação) assume como premissa de entrada a chegada desse dado e garante formatá-lo em linha CSV e colocá-lo no buffer SRAM em até $1\text{ ms}$.
+     - Se o provador formal Kind 2 comprova a realizabilidade de ambos os contratos, **a comunicação inter-tarefas através da RTE está matematicamente provada por indução composicional (Assume-Guarantee)**.
+   - Se unificássemos tudo em uma "caixa-preta de CPU", as filas da RTE (`TELEMETRY_CHANNEL`, `CAN_CMD_CHANNEL`) e os buffers em SRAM virariam variáveis internas invisíveis, e o FRET não conseguiria verificar se os prazos de pior caso (WCET) de cada camada de software são respeitados.
+4. **Prevenção de Falsos Conflitos de Atribuição no Solver SMT:**
+   - Evita que o solver SMT aponte falsos conflitos de concorrência causados pela tentativa de modelar múltiplas tarefas assíncronas concorrentes em uma única equação de transição de estados.
+
+---
+
 ## Regras Essenciais de Sintaxe FRETish (ANTLR 4)
 
 > **Unidades de tempo:** O parser exige os tokens lexicais completos em maiúsculas:

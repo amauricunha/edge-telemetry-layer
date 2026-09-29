@@ -82,7 +82,7 @@ Este documento registra os diagnósticos, lições aprendidas, correções de so
   2. **Ação Tomada:** O repositório do NASA FRET foi **completamente revertido para o código oficial original da NASA (`git checkout`)** e recompilado com sucesso (`webpack compiled successfully`). O FRET permanece 100% *vanilla* e imutável.
 
 - **A Solução Arquitetural Canônica (Granularidade de Componentes no MBSE):**
-  - Em sistemas operacionais de tempo real (FreeRTOS) e padrões aeroespaciais (ARP4754A / ISO 26262), o firmware do ESP32-S3 não é um monólito indiferenciado, mas uma coleção de **Tarefas / Componentes Funcionais Desacoplados**:
+  - Em sistemas operacionais de tempo real (FreeRTOS/Embassy) e padrões aeroespaciais (ARP4754A / ISO 26262), o firmware do ESP32-S3 não é um monólito indiferenciado, mas uma coleção de **Tarefas / Componentes Funcionais Desacoplados**:
     - `esp32_twai`: Driver CAN / TWAI (`REQ_CAN_001` a `REQ_CAN_006`) — Delays: 1 a 50 ms.
     - `esp32_obd`: Poller de PIDs OBD-II (`REQ_OBD_001` a `REQ_OBD_004`) — Delays: 10 ms.
     - `esp32_sd`: Gravador MicroSD (`REQ_SD_001` a `REQ_SD_005`) — Delays: 500 ms.
@@ -93,6 +93,29 @@ Este documento registra os diagnósticos, lições aprendidas, correções de so
     - `esp32_telemetry`: Comunicação Wi-Fi / MQTT (`REQ_COM_001` a `REQ_COM_005`) — Delays: 100 a 10.000 ms.
     - `uno_ecu_emulator`: Emulador de ECU (Arduino Uno) (`REQ_EMU_001` a `REQ_EMU_008`) — Delays: 1 a 100 ms.
   - Ao mapear cada subsistema ao seu respectivo componente no FRET, o FRET nativo gera contratos leves e independentes, permitindo que a verificação de realizabilidade de cada subsistema execute em **menos de 0,5 segundo**, com zero alterações no código-fonte da ferramenta.
+
+#### 1.5.1. Fundamentação Teórica: Por que Modelar Componentes de Software (SW-C) em uma Mesma CPU Física?
+Uma dúvida metodológica comum em bancas de pós-graduação e auditorias formais é: *"Se o coletor possui uma única CPU física (ESP32-S3), por que o modelo MBSE o divide em 8 componentes formais distintos no FRET?"*
+
+A resposta reside na distinção rigorosa entre **Arquitetura de Hardware (Nível Físico)** e **Arquitetura de Software (Nível Lógico)**:
+
+1. **O Conceito de "Componente" na Engenharia de Missão Crítica (NASA e AUTOSAR):**
+   - Em padrões aeroespaciais e automotivos de alta integridade (NASA, ARP4754A, AUTOSAR Classic/Adaptive e ISO 26262), o termo **Componente** no MBSE quase nunca se refere ao chip de silício.
+   - Refere-se a um **Componente de Software (Software Component — SW-C)**: uma unidade lógica de execução concorrente, governada pelo escalonador do RTOS (no nosso caso, o runtime assíncrono `Embassy`), com interfaces e orçamentos temporais rigorosamente delimitados.
+2. **Como a Própria NASA Modela Sistemas Multitarefa (O Caso de Estudo `LMCPS`):**
+   - No maior caso de estudo oficial da NASA (`LMCPS` — *Lockheed Martin Cyber-Physical Systems*, disponível em `docs/MBSE/FRET_docs/LMCPS`), composto por 97 requisitos formais, a NASA decompôs o sistema em **13 componentes formais independentes**:
+     `Autopilot`, `RollAutopilot`, `Euler`, `Regulator`, `Tustin_Integrator`, `FSM_Sensor`, `TriplexSignalMonitor`, `NLGuidance`, etc.
+   - **Todos esses 13 módulos executam rigorosamente na mesma CPU** do computador de controle de voo (*Flight Control Computer*). A NASA adotou essa decomposição modular porque tentar verificar algoritmos concorrentes como um único monólito opaco é impraticável e conceitualmente incorreto.
+3. **Validação Rigorosa dos Requisitos ENTRE os Módulos (Design por Contrato / Assume-Guarantee):**
+   - Longe de enfraquecer a validação entre subsistemas, **a separação modular é exatamente o que viabiliza a verificação formal das interfaces internas**.
+   - No firmware real, as tarefas comunicam-se através de canais da RTE (`TELEMETRY_CHANNEL`, `CAN_CMD_CHANNEL`) e buffers compartilhados em SRAM.
+   - Sob o princípio do **Design por Contrato (Design by Contract)**:
+     - O módulo **Produtor** (`esp32_twai`) possui um contrato que *garante* colocar o registro decodificado na fila da RTE dentro do prazo WCET $\le 1\text{ ms}$ (`telemetry_frame_parsed = true`).
+     - O módulo **Consumidor** (`esp32_logger`) possui um contrato que toma a chegada de `telemetry_frame_parsed` como *premissa de entrada* e *garante* formatar a linha CSV e alocá-la no buffer em $\le 1\text{ ms}$.
+     - Se o solver Kind 2 comprova a realizabilidade do Produtor e do Consumidor, **a integração entre as camadas de software está matematicamente provada por indução composicional (Assume-Guarantee)**.
+   - Caso o sistema fosse modelado como uma "caixa-preta de CPU", as filas da RTE e os estados intermediários desapareceriam dos contratos formais, impedindo o auditor de verificar se os prazos de pior caso (WCET) de cada camada do firmware são respeitados.
+4. **Prevenção de Falsos Conflitos de Atribuição no Solver SMT:**
+   - Em modelos monolíticos com dezenas de tarefas assíncronas concorrentes, o solver tenta sintetizar uma única função de transição global. Isso frequentemente gera **falsos conflitos de realizabilidade** (*Simultaneous Variable Assignment*), onde o solver assume erroneamente que duas tarefas independentes podem tentar comandar os mesmos barramentos no mesmo ciclo de clock. A separação por componentes de software elimina 100% desses falsos positivos.
 
 ---
 
