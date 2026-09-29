@@ -1,0 +1,154 @@
+[
+    {
+        "testId": "test1",
+        "testTrace": {
+            "traceLength": 4,
+            "keys": [
+                "remote_command_received",
+                "replay_command_triggered",
+                "command_executed_ack",
+                "replay_streaming_active"
+            ],
+            "values": [
+                [
+                    0,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    1,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test2",
+        "testTrace": {
+            "traceLength": 4,
+            "keys": [
+                "remote_command_received",
+                "replay_command_triggered",
+                "command_executed_ack",
+                "replay_streaming_active"
+            ],
+            "values": [
+                [
+                    0,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    0,
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test3",
+        "testTrace": {
+            "traceLength": 4,
+            "keys": [
+                "remote_command_received",
+                "replay_command_triggered",
+                "command_executed_ack",
+                "replay_streaming_active"
+            ],
+            "values": [
+                [
+                    1,
+                    0,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    1
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test4",
+        "testTrace": {
+            "traceLength": 4,
+            "keys": [
+                "remote_command_received",
+                "replay_command_triggered",
+                "command_executed_ack",
+                "replay_streaming_active"
+            ],
+            "values": [
+                [
+                    1,
+                    0,
+                    0,
+                    0
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ],
+                [
+                    0,
+                    0,
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1,
+                    0,
+                    0
+                ]
+            ]
+        }
+    }
+]

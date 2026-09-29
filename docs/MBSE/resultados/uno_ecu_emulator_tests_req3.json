@@ -1,0 +1,360 @@
+[
+    {
+        "testId": "test1",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "active_session"
+            ],
+            "traceLength": 1,
+            "values": [
+                [
+                    false,
+                    0,
+                    -41,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test2",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "uno_ecu_emulatorSpec_coolant_temp_c_GreaterThanOrEqual__40_0_2",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    true,
+                    1,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    -0.5,
+                    0,
+                    true,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    -40,
+                    0,
+                    0,
+                    true,
+                    0,
+                    0,
+                    0,
+                    false,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test3",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    true,
+                    1,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    -0.5,
+                    0,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    -40,
+                    0,
+                    0,
+                    true,
+                    0,
+                    0,
+                    0,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test4",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    true,
+                    0,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    -0.5,
+                    0,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test5",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "uno_ecu_emulatorSpec_coolant_temp_c_GreaterThanOrEqual__40_0_3",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    true,
+                    1,
+                    -40,
+                    0,
+                    0,
+                    true,
+                    0,
+                    0,
+                    0,
+                    true,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    -41,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    false,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test6",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    true,
+                    1,
+                    -40,
+                    0,
+                    0,
+                    true,
+                    0,
+                    0,
+                    0,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    -41,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test7",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    false,
+                    1,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    -41,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test8",
+        "testTrace": {
+            "keys": [
+                "timer1_50ms_tick",
+                "active_profile",
+                "coolant_temp_c",
+                "load_pct",
+                "maf_g_s",
+                "physics_model_updated",
+                "rpm",
+                "speed_kmh",
+                "throttle_pct",
+                "active_session"
+            ],
+            "traceLength": 3,
+            "values": [
+                [
+                    true,
+                    1,
+                    -40,
+                    0,
+                    0,
+                    true,
+                    0,
+                    0,
+                    0,
+                    true
+                ],
+                [
+                    true,
+                    1,
+                    0,
+                    0,
+                    0,
+                    false,
+                    0,
+                    0,
+                    0,
+                    true
+                ],
+                [
+                    false,
+                    0,
+                    0,
+                    0,
+                    0,
+                    false,
+                    -0.5,
+                    0,
+                    0,
+                    true
+                ]
+            ]
+        }
+    }
+]

@@ -1,0 +1,89 @@
+[
+    {
+        "testId": "test1",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "mean_obd_latency_ms",
+                "active_session"
+            ],
+            "traceLength": 1,
+            "values": [
+                [
+                    false,
+                    10,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test2",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "mean_obd_latency_ms",
+                "uno_ecu_emulatorSpec_mean_obd_latency_ms_LessThan_10_0_0",
+                "active_session"
+            ],
+            "traceLength": 1,
+            "values": [
+                [
+                    true,
+                    0,
+                    false,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test3",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "mean_obd_latency_ms",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    false,
+                    9,
+                    true
+                ],
+                [
+                    false,
+                    10,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test4",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "mean_obd_latency_ms",
+                "uno_ecu_emulatorSpec_mean_obd_latency_ms_LessThan_10_0_1",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    false,
+                    9,
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    9,
+                    false,
+                    true
+                ]
+            ]
+        }
+    }
+]

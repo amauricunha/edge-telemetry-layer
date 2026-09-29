@@ -13,15 +13,11 @@ O objeto de estudo é a engenharia reversa da camada Edge Telemetry Layer, conte
 
 
 Pilar 1: Especificação, Formalização e Verificação de Requisitos
-O grupo deve formalizar a especificação de requisitos do sistema de telemetria, escolhendo uma das abordagens facultadas:
+O grupo deve formalizar a especificação de requisitos do sistema de telemetria:
 
-Opção A (FRET / NASA):
 Estruturar os requisitos funcionais e temporais na linguagem controlada FRETish, decompondo cada regra em scope, condition, component, timing e response.
 Configurar a tabela de variáveis (Variable Mapping), tipando-as como Input, Output ou Internal.
 Executar a Verificação de Realizabilidade (Checking Realizability) monolítica ou composicional para comprovar a ausência de conflitos de estados na FSM e deadlocks lógicos. Caso surjam conflitos, documentar o contraexemplo e a correção textual efetuada.
-
-Opção B (Diretamente no OSATE):
-Especificar os requisitos no ecossistema do OSATE, associando propriedades e anexos formais diretamente aos componentes correspondentes da arquitetura.
 
 Entregáveis do Pilar 1:
 

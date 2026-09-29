@@ -1,0 +1,89 @@
+[
+    {
+        "testId": "test1",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "latency_jitter_std_ms",
+                "active_session"
+            ],
+            "traceLength": 1,
+            "values": [
+                [
+                    false,
+                    3,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test2",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "latency_jitter_std_ms",
+                "uno_ecu_emulatorSpec_latency_jitter_std_ms_LessThan_3_0_0",
+                "active_session"
+            ],
+            "traceLength": 1,
+            "values": [
+                [
+                    true,
+                    2,
+                    false,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test3",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "latency_jitter_std_ms",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    false,
+                    2,
+                    true
+                ],
+                [
+                    false,
+                    3,
+                    true
+                ]
+            ]
+        }
+    },
+    {
+        "testId": "test4",
+        "testTrace": {
+            "keys": [
+                "obd_benchmark_running",
+                "latency_jitter_std_ms",
+                "uno_ecu_emulatorSpec_latency_jitter_std_ms_LessThan_3_0_1",
+                "active_session"
+            ],
+            "traceLength": 2,
+            "values": [
+                [
+                    false,
+                    2,
+                    true,
+                    true
+                ],
+                [
+                    true,
+                    2,
+                    false,
+                    true
+                ]
+            ]
+        }
+    }
+]

@@ -1,0 +1,345 @@
+package EdgeTelemetry_Pkg
+public
+	with Base_Types;
+	with Deployment_Properties;
+	with Timing_Properties;
+	with Communication_Properties;
+
+	---------------------------------------------------------------------------
+	-- 1. TIPOS DE DADOS MANIPULADOS (DATA COMPONENTS)
+	---------------------------------------------------------------------------
+	data CAN_Frame_Data
+		properties
+			Source_Data_Size => 16 Bytes; -- 8 bytes carga útil + 4 bytes ID + DLC + Flags
+	end CAN_Frame_Data;
+
+	data Diagnostic_Packet_Data
+		properties
+			Source_Data_Size => 8 Bytes; -- ISO 15765-4 Single Frame (ex: 0x7DF / 0x7E8)
+	end Diagnostic_Packet_Data;
+
+	data CSV_Payload_Data
+		properties
+			Source_Data_Size => 320 Bytes; -- Buffer estático de linha CSV formatada
+	end CSV_Payload_Data;
+
+	---------------------------------------------------------------------------
+	-- 2. BARRAMENTOS FÍSICOS (BUS COMPONENTS)
+	---------------------------------------------------------------------------
+	-- Barramento diferencial CAN a 500 kbps (1 bit = 2 us)
+	bus CAN_Bus
+		properties
+			Transmission_Time => [Fixed => 10 us .. 20 us; PerByte => 16 us .. 16 us;];
+	end CAN_Bus;
+
+	bus implementation CAN_Bus.impl
+	end CAN_Bus.impl;
+
+	-- Barramento local SPI (interface MicroSD a 20 MHz)
+	bus SPI_Bus
+		properties
+			Transmission_Time => [Fixed => 1 us .. 2 us; PerByte => 1 us .. 1 us;];
+	end SPI_Bus;
+
+	bus implementation SPI_Bus.impl
+	end SPI_Bus.impl;
+
+	---------------------------------------------------------------------------
+	-- 3. DISPOSITIVOS FÍSICOS (DEVICE COMPONENTS)
+	---------------------------------------------------------------------------
+	-- Transceptor físico CAN (SN65HVD230 / MCP2551)
+	device CAN_Transceiver
+		features
+			can_bus_conn: requires bus access CAN_Bus.impl;
+			can_rx_frame: out event data port CAN_Frame_Data;
+			can_tx_frame: in event data port CAN_Frame_Data;
+		flows
+			f_source: flow source can_rx_frame;
+			f_sink: flow sink can_tx_frame;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 5 ms;
+	end CAN_Transceiver;
+
+	device implementation CAN_Transceiver.impl
+	end CAN_Transceiver.impl;
+
+	-- Leitor de Cartão MicroSD (Persistência local FAT32 via SPI)
+	device MicroSD_Device
+		features
+			spi_conn: requires bus access SPI_Bus.impl;
+			file_stream_in: in event data port CSV_Payload_Data;
+		flows
+			f_sink: flow sink file_stream_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+	end MicroSD_Device;
+
+	device implementation MicroSD_Device.impl
+	end MicroSD_Device.impl;
+
+	-- Módulo de Comunicação Wi-Fi / MQTT (Gateway de telemetria sem fio)
+	device WiFi_Device
+		features
+			mqtt_stream_in: in event data port CSV_Payload_Data;
+		flows
+			f_sink: flow sink mqtt_stream_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+	end WiFi_Device;
+
+	device implementation WiFi_Device.impl
+	end WiFi_Device.impl;
+
+	---------------------------------------------------------------------------
+	-- 4. PROCESSADOR COM ESCALONADOR PREEMPTIVO (PROCESSOR COMPONENT)
+	---------------------------------------------------------------------------
+	processor ESP32S3_Processor
+		features
+			can_bus_access: requires bus access CAN_Bus.impl;
+			spi_bus_access: requires bus access SPI_Bus.impl;
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+	end ESP32S3_Processor;
+
+	processor implementation ESP32S3_Processor.impl
+	end ESP32S3_Processor.impl;
+
+	---------------------------------------------------------------------------
+	-- 5. CAMADA DE SOFTWARE: THREADS PERIÓDICAS (PIPELINE DE TEMPO REAL)
+	---------------------------------------------------------------------------
+	-- 5.1. task_can_rx: leitura do controlador TWAI e inserção no canal assíncrono
+	thread Task_CAN_RX
+		features
+			can_frame_in: in event data port CAN_Frame_Data;
+			telemetry_out: out event data port CAN_Frame_Data;
+		flows
+			f_path: flow path can_frame_in -> telemetry_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 5 ms;
+			Compute_Execution_Time => 200 us .. 800 us; -- BCET = 0.2 ms, WCET = 0.8 ms
+			Deadline => 5 ms;
+			Priority => 10; -- Maior prioridade Rate-Monotonic (menor período)
+	end Task_CAN_RX;
+
+	thread implementation Task_CAN_RX.impl
+	end Task_CAN_RX.impl;
+
+	-- 5.2. task_obd_poller: disparo de requisições 0x7DF e recepção de PIDs em 0x7E8
+	thread Task_OBD_Poller
+		features
+			obd_resp_in: in event data port Diagnostic_Packet_Data;
+			obd_req_out: out event data port Diagnostic_Packet_Data;
+			telemetry_out: out event data port CAN_Frame_Data;
+		flows
+			f_path: flow path obd_resp_in -> telemetry_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 100 ms; -- AC-02: Polling cíclico a 10 Hz
+			Compute_Execution_Time => 1 ms .. 5 ms; -- BCET = 1.0 ms, WCET = 5.0 ms
+			Deadline => 100 ms;
+			Priority => 4; -- Prioridade menor (maior período)
+	end Task_OBD_Poller;
+
+	thread implementation Task_OBD_Poller.impl
+	end Task_OBD_Poller.impl;
+
+	-- 5.3. task_logger: serialização para linha CSV e gestão de buffers estáticos
+	thread Task_Logger
+		features
+			telemetry_in: in event data port CAN_Frame_Data;
+			csv_payload_out: out event data port CSV_Payload_Data;
+		flows
+			f_path: flow path telemetry_in -> csv_payload_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 20 ms; -- Amostragem e serialização a 50 Hz
+			Compute_Execution_Time => 500 us .. 1500 us; -- BCET = 0.5 ms, WCET = 1.5 ms
+			Deadline => 20 ms;
+			Priority => 8;
+	end Task_Logger;
+
+	thread implementation Task_Logger.impl
+	end Task_Logger.impl;
+
+	-- 5.4. task_tx_dispatch: despacho para gravação em cartão SD ou publicação MQTT
+	thread Task_TX_Dispatch
+		features
+			csv_payload_in: in event data port CSV_Payload_Data;
+			sd_record_out: out event data port CSV_Payload_Data;
+			mqtt_packet_out: out event data port CSV_Payload_Data;
+		flows
+			f_path_sd: flow path csv_payload_in -> sd_record_out;
+			f_path_mqtt: flow path csv_payload_in -> mqtt_packet_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms; -- AC-04: Ciclo de despacho telemétrico (20 Hz)
+			Compute_Execution_Time => 1 ms .. 3 ms; -- BCET = 1.0 ms, WCET = 3.0 ms
+			Deadline => 50 ms;
+			Priority => 6;
+	end Task_TX_Dispatch;
+
+	thread implementation Task_TX_Dispatch.impl
+	end Task_TX_Dispatch.impl;
+
+	---------------------------------------------------------------------------
+	-- 6. PROCESSO DE SOFTWARE (PROCESS COMPONENT)
+	---------------------------------------------------------------------------
+	process Telemetry_Process
+		features
+			can_raw_in: in event data port CAN_Frame_Data;
+			sd_stream_out: out event data port CSV_Payload_Data;
+			mqtt_stream_out: out event data port CSV_Payload_Data;
+		flows
+			f_can_to_sd: flow path can_raw_in -> sd_stream_out;
+			f_can_to_mqtt: flow path can_raw_in -> mqtt_stream_out;
+	end Telemetry_Process;
+
+	-- 6.1. Implementação com Semântica Imediata (Immediate Semantics)
+	process implementation Telemetry_Process.immediate_impl
+		subcomponents
+			th_can_rx: thread Task_CAN_RX.impl;
+			th_obd_poller: thread Task_OBD_Poller.impl;
+			th_logger: thread Task_Logger.impl;
+			th_tx_dispatch: thread Task_TX_Dispatch.impl;
+		connections
+			c_in: port can_raw_in -> th_can_rx.can_frame_in;
+			c_rx_to_log: port th_can_rx.telemetry_out -> th_logger.telemetry_in {Timing => immediate;};
+			c_log_to_tx: port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => immediate;};
+			c_tx_to_sd: port th_tx_dispatch.sd_record_out -> sd_stream_out;
+			c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+		flows
+			f_can_to_sd: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
+			f_can_to_mqtt: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+	end Telemetry_Process.immediate_impl;
+
+	-- 6.2. Implementação com Semântica Atrasada (Delayed Semantics)
+	process implementation Telemetry_Process.delayed_impl
+		subcomponents
+			th_can_rx: thread Task_CAN_RX.impl;
+			th_obd_poller: thread Task_OBD_Poller.impl;
+			th_logger: thread Task_Logger.impl;
+			th_tx_dispatch: thread Task_TX_Dispatch.impl;
+		connections
+			c_in: port can_raw_in -> th_can_rx.can_frame_in;
+			c_rx_to_log: port th_can_rx.telemetry_out -> th_logger.telemetry_in {Timing => delayed;};
+			c_log_to_tx: port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => delayed;};
+			c_tx_to_sd: port th_tx_dispatch.sd_record_out -> sd_stream_out;
+			c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+		flows
+			f_can_to_sd: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
+			f_can_to_mqtt: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+	end Telemetry_Process.delayed_impl;
+
+	---------------------------------------------------------------------------
+	-- 7. NÓ EMULADOR ARDUINO UNO (SUBSISTEMA HIL EXTERNO)
+	---------------------------------------------------------------------------
+	device Uno_ECU_Emulator_Device
+		features
+			can_bus_conn: requires bus access CAN_Bus.impl;
+			can_tx_out: out event data port CAN_Frame_Data;
+			can_rx_in: in event data port CAN_Frame_Data;
+		flows
+			f_ecu_source: flow source can_tx_out;
+			f_ecu_sink: flow sink can_rx_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms; -- Emissão periódica DBC a 20 Hz
+	end Uno_ECU_Emulator_Device;
+
+	device implementation Uno_ECU_Emulator_Device.impl
+	end Uno_ECU_Emulator_Device.impl;
+
+	---------------------------------------------------------------------------
+	-- 8. SISTEMA INTEGRADO RAIZ (TOP LEVEL SYSTEM & BINDINGS)
+	---------------------------------------------------------------------------
+	system EdgeTelemetry_System
+	end EdgeTelemetry_System;
+
+	-- 8.1. Implementação Raiz com Semântica Imediata (Modo Immediate)
+	system implementation EdgeTelemetry_System.immediate_impl
+		subcomponents
+			cpu: processor ESP32S3_Processor.impl;
+			can_bus: bus CAN_Bus.impl;
+			spi_bus: bus SPI_Bus.impl;
+			ecu_emulator: device Uno_ECU_Emulator_Device.impl;
+			can_transceiver: device CAN_Transceiver.impl;
+			sd_card: device MicroSD_Device.impl;
+			wifi_module: device WiFi_Device.impl;
+			sw_telemetry: process Telemetry_Process.immediate_impl;
+		connections
+			-- Conexões de Barramento Físico
+			b_can_cpu: bus access can_bus <-> cpu.can_bus_access;
+			b_can_transceiver: bus access can_bus <-> can_transceiver.can_bus_conn;
+			b_can_emulator: bus access can_bus <-> ecu_emulator.can_bus_conn;
+			b_spi_cpu: bus access spi_bus <-> cpu.spi_bus_access;
+			b_spi_sd: bus access spi_bus <-> sd_card.spi_conn;
+
+			-- Conexões de Portas Físicas e Lógicas
+			p_can_wire: port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+			p_can_to_sw: port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+			p_sw_to_sd: port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+			p_sw_to_wifi: port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+		flows
+			end_to_end_can_to_sd: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
+		properties
+			-- Alocação Formal de Processador (Actual_Processor_Binding)
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+
+			-- Alocação Formal de Barramento (Actual_Connection_Binding)
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+	end EdgeTelemetry_System.immediate_impl;
+
+	-- 8.2. Implementação Raiz com Semântica Atrasada (Modo Delayed)
+	system implementation EdgeTelemetry_System.delayed_impl
+		subcomponents
+			cpu: processor ESP32S3_Processor.impl;
+			can_bus: bus CAN_Bus.impl;
+			spi_bus: bus SPI_Bus.impl;
+			ecu_emulator: device Uno_ECU_Emulator_Device.impl;
+			can_transceiver: device CAN_Transceiver.impl;
+			sd_card: device MicroSD_Device.impl;
+			wifi_module: device WiFi_Device.impl;
+			sw_telemetry: process Telemetry_Process.delayed_impl;
+		connections
+			-- Conexões de Barramento Físico
+			b_can_cpu: bus access can_bus <-> cpu.can_bus_access;
+			b_can_transceiver: bus access can_bus <-> can_transceiver.can_bus_conn;
+			b_can_emulator: bus access can_bus <-> ecu_emulator.can_bus_conn;
+			b_spi_cpu: bus access spi_bus <-> cpu.spi_bus_access;
+			b_spi_sd: bus access spi_bus <-> sd_card.spi_conn;
+
+			-- Conexões de Portas Físicas e Lógicas
+			p_can_wire: port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+			p_can_to_sw: port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+			p_sw_to_sd: port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+			p_sw_to_wifi: port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+		flows
+			end_to_end_can_to_sd: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
+		properties
+			-- Alocação Formal de Processador (Actual_Processor_Binding)
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+
+			-- Alocação Formal de Barramento (Actual_Connection_Binding)
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+	end EdgeTelemetry_System.delayed_impl;
+
+end EdgeTelemetry_Pkg;
