@@ -2,14 +2,16 @@
 ## Pilar 2: Modelação Arquitetural em AADL no OSATE
 **Projeto:** Edge Telemetry Layer (CAN 500 kbps, OBD-II ISO 15765-4, MicroSD FAT32, Wi-Fi/MQTT)  
 **Padrão:** SAE AADL AS5506B / OSATE 2.10+  
+**Metodologia Formal de Referência:** *Sharper Specs for Smarter Drones: Formalising Requirements with FRET* (Sheridan, Becker et al. — RefSQ 2025)  
+**Compatibilidade com Ferramentas UFSC:** Estrutura modular compatível com `DevCompatibility` (análise de compatibilidade de dispositivos e alocação de software em hardware)  
 **Repositório:** [`can-obd-telemetry`](file:///c:/workspace/can-obd-telemetry)  
 **Data:** Setembro de 2026  
 
 ---
 
 ### Sumário Executivo
-Este documento consolida as especificações arquiteturais do **Pilar 2** estipuladas no plano de trabalho ([`trabalho.md`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/trabalho.md)). A modelação textual foi realizada em linguagem **AADL (Architecture Analysis and Design Language)**, abrangendo:
-1. **Plataforma de Execução (Hardware):** Processador com protocolo preemptivo POSIX, barramentos físicos diferenciais e síncronos, e dispositivos periféricos.
+Este documento consolida as especificações arquiteturais do **Pilar 2** estipuladas no plano de trabalho ([`trabalho.md`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/trabalho.md)). A modelação textual foi realizada em linguagem **AADL (Architecture Analysis and Design Language)**, incorporando as diretrizes de engenharia baseada em modelos da conferência **RefSQ 2025** do grupo do **Prof. Dr. Leandro Buss Becker (UFSC)**, abrangendo:
+1. **Plataforma de Execução (Hardware):** Processador com protocolo preemptivo POSIX, barramentos físicos diferenciais e síncronos, e dispositivos periféricos modelados de forma isolada para compatibilidade com o analisador `DevCompatibility`.
 2. **Camada de Software (Processos e Tarefas):** Tipagem de dados manipulados, declaração das 4 tarefas periódicas do pipeline com seus atributos temporais estritos (Período, BCET, WCET, Deadline e Prioridade) e processo encapsulador.
 3. **Fluxos de Informação e Semântica de Portas:** Caminhos de fluxo internos, fluxos ponta a ponta (*end to end flows*) e implementação contrastada das semânticas de conexão `immediate` versus `delayed`.
 4. **Integração e Alocações (*Bindings*):** Implementação raiz do sistema com amarração formal de hardware (`Actual_Processor_Binding` e `Actual_Connection_Binding`) e compilação para modelo de instância `.aaxl2`.

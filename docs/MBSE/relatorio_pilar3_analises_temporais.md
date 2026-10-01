@@ -2,6 +2,7 @@
 ## Pilar 3: Análises Estáticas e Temporais no OSATE
 **Projeto:** Edge Telemetry Layer (CAN 500 kbps, OBD-II ISO 15765-4, MicroSD FAT32, Wi-Fi/MQTT)  
 **Ambiente:** OSATE 2 (Open Source AADL Tool Environment) v2.10+  
+**Metodologia Formal de Referência:** *Sharper Specs for Smarter Drones: Formalising Requirements with FRET* (Sheridan, Becker et al. — RefSQ 2025)  
 **Modelos Analisados:**  
 - `instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`  
 - `instances/EdgeTelemetry_System_delayed_impl_Instance.aaxl2`  
@@ -11,7 +12,7 @@
 ---
 
 ### Sumário Executivo
-Este documento estabelece o relatório estruturado dos entregáveis do **Pilar 3** estipulados no plano de trabalho ([`trabalho.md`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/trabalho.md)). Contempla a validação matemática e os roteiros de extração experimental sobre o modelo instanciado da camada de telemetria no OSATE:
+Este documento estabelece o relatório estruturado dos entregáveis do **Pilar 3** estipulados no plano de trabalho ([`trabalho.md`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/trabalho.md)). Contempla a validação matemática e os roteiros de extração experimental sobre o modelo instanciado da camada de telemetria no OSATE, integrando os orçamentos de pior caso (WCET) derivados e comprovados formalmente no FRET (Pilar 1) sob a metodologia de **Sheridan, Becker et al. (RefSQ 2025)**:
 1. **Análise de Escalonabilidade (*Check Schedulability*):** Comprovação analítica de que a taxa de utilização da CPU é $U = 34.5\% \le 75.68\%$ e que o tempo de resposta no pior caso ($R_i$) de cada uma das 4 threads cumpre rigorosamente os respectivos prazos limites (*deadlines*), sob política preemptiva POSIX por prioridades fixas.
 2. **Análise de Latência Ponta a Ponta (*Check Flow Latency*):** Avaliação analítica e experimental do fluxo `end_to_end_can_to_sd` e `end_to_end_can_to_mqtt`, contrastando matematicamente o ganho de desempenho da semântica `immediate` ($\approx 5.30\text{ ms}$) contra a retenção amostral da semântica `delayed` ($\approx 75.0\text{ ms}$ a $125.0\text{ ms}$).
 3. **Mapeamento de Conformidade:** Rastreabilidade dos resultados obtidos perante os Critérios de Aceitação **AC-01 a AC-08** da dissertação.

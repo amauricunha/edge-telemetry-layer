@@ -2,6 +2,7 @@
 ## Pilar 4: Avaliação de Evolução Arquitetural e Inteligência de Borda (Framework CAvA & TinyML)
 **Projeto:** Edge Telemetry Layer com Extensão AIoT para *Driver Coaching*  
 **Framework Metodológico:** CAvA (*Component/Architecture Variability and Evolution approach*)  
+**Metodologia Formal de Referência:** *Sharper Specs for Smarter Drones: Formalising Requirements with FRET* (Sheridan, Becker et al. — RefSQ 2025)  
 **Ferramentas:** OSATE 2, DevCompatibility (AEW - *Architecture Evolution Workbench*), TFLite Micro  
 **Repositório:** [`can-obd-telemetry`](file:///c:/workspace/can-obd-telemetry)  
 **Data:** Setembro de 2026  
