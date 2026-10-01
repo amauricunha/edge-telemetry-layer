@@ -106,42 +106,45 @@ Para executar qualquer análise estática ou temporal no OSATE, o modelo declara
 
 ---
 
-## 4. Execução da Análise de Escalonabilidade (Pilar 3.1 - Check Schedulability)
+## 4. Execução da Análise de Escalonabilidade (Pilar 3.1 - Schedule Bound Threads)
 
-A análise comprova formalmente se o conjunto de tarefas periódicas é viável e executável em tempo hábil sob o protocolo preemptivo com prioridades estáticas POSIX.
+A análise comprova formalmente se o conjunto de tarefas periódicas é viável e executável em tempo hábil sob o protocolo preemptivo com prioridades estáticas POSIX (Rate-Monotonic Scheduling / RMS).
 
 ### 4.1. Como Executar no OSATE:
-1. Abra a instância gerada: `EdgeTelemetry_System_immediate_impl_Instance.aaxl2`.
-2. No menu superior do OSATE, acerte a perspectiva de análise ou clique no menu:
-   - **`Analyses`** > **`Timing`** > **`Check Schedulability`**
-3. O relatório detalhado de escalonabilidade será gerado no painel inferior ou na pasta `reports/schedulability/`.
+1. Clique com o botão direito sobre o arquivo de instância gerado: `EdgeTelemetry_System_immediate_impl_Instance.aaxl2`.
+2. No menu de contexto (ou no menu superior do OSATE), selecione:
+   - **`Analyses`** > **`Timing`** > **`Schedule Bound Threads`** *(Nota: Em versões anteriores do OSATE ou na literatura este comando era denominado "Check Schedulability"; a janela de relatório gerada intitula-se **Test schedulability Report**)*.
+3. O relatório detalhado de escalonabilidade será gerado no painel e na pasta `reports/schedulability/`.
 
-### 4.2. Demonstração Matemática e Validação Teórica:
-O OSATE utiliza o método de Análise do Tempo de Resposta no Pior Caso (WCRT - *Worst-Case Response Time*):
+### 4.2. Demonstração Matemática e Validação Teórica vs. OSATE:
+O OSATE utiliza o método exato de Análise do Tempo de Resposta no Pior Caso (WCRT - *Worst-Case Response Time*):
 
 1. **Taxa de Utilização Global da CPU ($U$):**
    $$U = \sum_{i=1}^{n} \frac{C_i}{T_i} = \frac{0.8}{5} + \frac{1.5}{20} + \frac{3.0}{50} + \frac{5.0}{100} = 0.16 + 0.075 + 0.06 + 0.05 = \mathbf{34.5\%}$$
    - **Condição de Liu & Layland para 4 tarefas:**
      $$U_{LL}(4) = 4 \times (2^{1/4} - 1) \approx \mathbf{75.68\%}$$
-   - Como $U = 34.5\% \le 75.68\%$, o sistema é **incondicionalmente escalonável**.
+   - Como $U = 34.5\% \le 75.68\%$, o processador é **incondicionalmente escalonável** (*schedulable with utilization 34.5%*).
 
 2. **Equação Recurrente de Tempo de Resposta no Pior Caso ($R_i$):**
    $$R_i^{(k+1)} = C_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i^{(k)}}{T_j} \right\rceil C_j$$
 
-   - **`Task_CAN_RX`** (Prioridade 10):
-     $$R_1 = C_1 = 0.8\text{ ms} \le D_1 (5.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO}}$$
-   - **`Task_Logger`** (Prioridade 8):
+   - **`Task_CAN_RX`** (Prioridade 10, $T=5000\,\mu\text{s}$, $C=800\,\mu\text{s}$):
+     $$R_1 = C_1 = 0.8\text{ ms}\ (800\,\mu\text{s}) \le D_1 (5.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO (true)}}$$
+   - **`Task_Logger`** (Prioridade 8, $T=20000\,\mu\text{s}$, $C=1500\,\mu\text{s}$):
      $$R_2^{(0)} = C_2 = 1.5\text{ ms}$$
-     $$R_2^{(1)} = 1.5 + \left\lceil \frac{1.5}{5.0} \right\rceil \times 0.8 = 1.5 + 1 \times 0.8 = 2.3\text{ ms} \le D_2 (20.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO}}$$
-   - **`Task_TX_Dispatch`** (Prioridade 6):
-     $$R_3^{(0)} = C_3 = 3.0\text{ ms}$$
-     $$R_3^{(1)} = 3.0 + \left\lceil \frac{3.0}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{3.0}{20.0} \right\rceil \times 1.5 = 3.0 + 0.8 + 1.5 = 5.3\text{ ms} \le D_3 (50.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO}}$$
-   - **`Task_OBD_Poller`** (Prioridade 4):
-     $$R_4^{(0)} = C_4 = 5.0\text{ ms}$$
-     $$R_4^{(1)} = 5.0 + \left\lceil \frac{5.0}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{5.0}{20.0} \right\rceil \times 1.5 + \left\lceil \frac{5.0}{50.0} \right\rceil \times 3.0 = 5.0 + 0.8 + 1.5 + 3.0 = 10.3\text{ ms} \le D_4 (100.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO}}$$
+     $$R_2^{(1)} = 1.5 + \left\lceil \frac{1.5}{5.0} \right\rceil \times 0.8 = 1.5 + 1 \times 0.8 = 2.3\text{ ms}\ (2300\,\mu\text{s}) \le D_2 (20.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO (true)}}$$
+   - **`Task_TX_Dispatch`** (Prioridade 6, $T=50000\,\mu\text{s}$, $C=3000\,\mu\text{s}$):
+     $$R_3^{(0)} = 3.0\text{ ms}$$
+     $$R_3^{(1)} = 3.0 + \left\lceil \frac{3.0}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{3.0}{20.0} \right\rceil \times 1.5 = 3.0 + 0.8 + 1.5 = 5.3\text{ ms}$$
+     $$R_3^{(2)} = 3.0 + \left\lceil \frac{5.3}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{5.3}{20.0} \right\rceil \times 1.5 = 3.0 + 2 \times 0.8 + 1.5 = 6.1\text{ ms}\ (6100\,\mu\text{s}) \le D_3 (50.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO (true)}}$$
+   - **`Task_OBD_Poller`** (Prioridade 4, $T=100000\,\mu\text{s}$, $C=5000\,\mu\text{s}$):
+     $$R_4^{(0)} = 5.0\text{ ms}$$
+     $$R_4^{(1)} = 5.0 + \left\lceil \frac{5.0}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{5.0}{20.0} \right\rceil \times 1.5 + \left\lceil \frac{5.0}{50.0} \right\rceil \times 3.0 = 5.0 + 0.8 + 1.5 + 3.0 = 10.3\text{ ms}$$
+     $$R_4^{(2)} = 5.0 + \left\lceil \frac{10.3}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{10.3}{20.0} \right\rceil \times 1.5 + \left\lceil \frac{10.3}{50.0} \right\rceil \times 3.0 = 5.0 + 3 \times 0.8 + 1.5 + 3.0 = 11.9\text{ ms}$$
+     $$R_4^{(3)} = 5.0 + \left\lceil \frac{11.9}{5.0} \right\rceil \times 0.8 + \left\lceil \frac{11.9}{20.0} \right\rceil \times 1.5 + \left\lceil \frac{11.9}{50.0} \right\rceil \times 3.0 = 11.9\text{ ms}\ (11900\,\mu\text{s}) \le D_4 (100.0\text{ ms}) \quad \color{green}{\checkmark\ \text{SUCESSO (true)}}$$
 
 **Conclusão da Análise de Escalonabilidade:**  
-Todas as quatro tarefas do pipeline crítico cumprem seus prazos com folga temporal expressiva ($\text{Slack} > 60\%$), garantindo ausência total de preempções infinitas ou estouros de deadline.
+Todas as quatro tarefas do pipeline crítico cumprem seus prazos com folga temporal expressiva ($\text{Slack} > 88\%$), garantindo ausência total de preempções infinitas ou estouros de deadline, confirmando formalmente a viabilidade do sistema de tempo real.
 
 ---
 
@@ -150,10 +153,10 @@ Todas as quatro tarefas do pipeline crítico cumprem seus prazos com folga tempo
 A análise de fluxo ponta a ponta avalia o tempo total que um dado leva para viajar desde a sua chegada física no transceptor CAN, percorrer todas as camadas do firmware (leitura, serialização CSV e despacho) até atingir a persistência no MicroSD ou transmissão Wi-Fi.
 
 ### 5.1. Como Executar no OSATE:
-1. Abra o arquivo de instância desejado (ex: `EdgeTelemetry_System_immediate_impl_Instance.aaxl2`).
-2. No menu superior, clique em:
-   - **`Analyses`** > **`Flows`** > **`Check Flow Latency`**
-3. O OSATE inspecionará o fluxo declarado:
+1. Clique com o botão direito sobre o arquivo de instância desejado (ex: `EdgeTelemetry_System_immediate_impl_Instance.aaxl2`).
+2. No menu de contexto (ou menu superior), selecione:
+   - **`Analyses`** > **`Timing`** > **`Check Flow Latency`**
+3. O OSATE inspecionará os fluxos declarados:
    - `end_to_end_can_to_sd`
    - `end_to_end_can_to_mqtt`
 4. Repita para a instância `EdgeTelemetry_System_delayed_impl_Instance.aaxl2`.
