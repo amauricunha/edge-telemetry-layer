@@ -48,14 +48,41 @@ Toda a pilha concorrente foi modelada dentro do processo `Telemetry_Process` e d
 
 ---
 
-## 2. Instalação e Importação no OSATE
+## 2. Estrutura do Projeto e Importação no OSATE
 
-1. Abra o **OSATE** no seu ambiente.
-2. Certifique-se de que o workspace contém o projeto padrão de bibliotecas AADL (`Plugin_Resources` contendo `Base_Types`, `Deployment_Properties`, `Timing_Properties` e `Communication_Properties`). Se não estiver presente, crie um novo projeto AADL via:
+O projeto AADL foi estruturado em dois formatos complementares:
+- **Formato A — Projeto Modular por Componentes / Pacotes (Padrão Recomendado para `DevCompatibility`):**  
+  Localizado em [`docs/MBSE/osate_project/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/), organiza o sistema em pacotes AADL independentes (`packages/`) e uma biblioteca padronizada de periféricos candidatos (`Library/devices/`), atendendo aos requisitos da ferramenta **DevCompatibility** do grupo do Prof. Leandro Becker.
+- **Formato B — Ficheiro Consolidado Único:**  
+  Localizado em [`docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl), consolida todas as declarações em um único arquivo para inspeção rápida.
+
+### 2.1. Como Importar o Projeto Modular no OSATE:
+1. Abra o **OSATE** no seu ambiente Eclipse.
+2. Certifique-se de que o workspace contém as bibliotecas padrão AADL (`Plugin_Resources` contendo `Base_Types`, `Deployment_Properties`, `Timing_Properties` e `Communication_Properties`). Caso não existam, crie um novo projeto AADL:
    - `File` > `New` > `AADL Project` (Nome sugerido: `EdgeTelemetry_MBSE`).
-3. Clique com o botão direito na pasta do projeto e selecione `Import...` > `General` > `File System`.
-4. Aponte para a pasta `c:\workspace\can-obd-telemetry\docs\MBSE` e importe o arquivo `EdgeTelemetryLayer_Pilar2.aadl`.
-5. Abra o arquivo no editor do OSATE e verifique na aba **Problems** se não há erros de sintaxe (zero erros).
+3. Importe a pasta modular do projeto:
+   - Clique com o botão direito no projeto criado > `Import...` > `General` > `File System`.
+   - Aponte para a pasta `c:\workspace\can-obd-telemetry\docs\MBSE\osate_project`.
+   - Marque as pastas **`packages/`** e **`Library/`** e clique em **`Finish`**.
+4. **Verificação no AADL Navigator:** A árvore de arquivos ficará organizada da seguinte forma:
+   ```
+   EdgeTelemetry_MBSE/
+   ├── packages/
+   │   ├── Data_Types_Pkg.aadl
+   │   ├── Buses_Pkg.aadl
+   │   ├── Processors_Pkg.aadl
+   │   ├── Software_Threads_Pkg.aadl
+   │   ├── Software_Processes_Pkg.aadl
+   │   ├── EdgeTelemetry_System_Pkg.aadl (Sistema Raiz do Baseline - Pilar 2/3)
+   │   ├── TinyML_Pkg.aadl               (Extensão de IA de Borda - Pilar 4)
+   │   └── Evolved_System_Pkg.aadl       (Sistema Evoluído Dual-Core - Pilar 4)
+   └── Library/
+       └── devices/
+           ├── CAN_Devices_Pkg.aadl      (CAN Baseline + CAN-FD Candidato)
+           ├── Storage_Devices_Pkg.aadl  (MicroSD + Flash candidatos)
+           └── Comm_Devices_Pkg.aadl     (Wi-Fi + Modem LTE candidatos)
+   ```
+5. Verifique na aba **Problems** se não há erros de sintaxe (zero erros).
 
 ---
 
@@ -63,9 +90,10 @@ Toda a pilha concorrente foi modelada dentro do processo `Telemetry_Process` e d
 
 Para executar qualquer análise estática ou temporal no OSATE, o modelo declarativo deve ser **instanciado** em um modelo concreto de objetos interconectados.
 
-1. No painel **AADL Navigator**, navegue até o arquivo `EdgeTelemetryLayer_Pilar2.aadl`.
-2. Expanda os nós até localizar a implementação raiz:
-   - `EdgeTelemetry_System.immediate_impl` (para análise com semântica imediata)
+### No Formato Modular (Recomendado):
+1. No painel **AADL Navigator**, abra a pasta `packages/` e selecione o arquivo **`EdgeTelemetry_System_Pkg.aadl`**.
+2. Expanda o arquivo até localizar a implementação raiz:
+   - `EdgeTelemetry_System.immediate_impl` (para análise de tempo real com semântica imediata)
    - `EdgeTelemetry_System.delayed_impl` (para análise com semântica atrasada)
 3. Clique com o **botão direito** sobre `EdgeTelemetry_System.immediate_impl` e selecione:
    - **`Instantiate (Create System Instance)`**
@@ -73,6 +101,8 @@ Para executar qualquer análise estática ou temporal no OSATE, o modelo declara
    - `instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`
 5. Repita o procedimento para `EdgeTelemetry_System.delayed_impl`, gerando:
    - `instances/EdgeTelemetry_System_delayed_impl_Instance.aaxl2`
+
+*(Nota: Caso utilize o ficheiro único consolidado `EdgeTelemetryLayer_Pilar2.aadl`, o procedimento de instanciação é idêntico).*
 
 ---
 
@@ -144,14 +174,18 @@ A comparação entre as duas políticas de conexão exigida no Pilar 3 demonstra
 
 ---
 
-## 7. Preparação para o Pilar 4 (Avaliação de Evolução Arquitetural - Framework CAvA)
+## 7. Preparação para o Pilar 4: Integração com `DevCompatibility` e Framework CAvA
 
-No **Pilar 4**, a metodologia **CAvA (Component/Architecture Variability and Evolution approach)** exige avaliar a substituição de um componente por um dispositivo candidato.
+O **Pilar 4** aplica o framework **CAvA (Component/Architecture Variability and Evolution approach)** e utiliza a ferramenta **`DevCompatibility`** desenvolvida no grupo de pesquisa do Prof. Leandro Becker (UFSC).
 
-### Cenário de Evolução Proposto:
-- **Substituição do Transceptor CAN Convencional por CAN-FD / SPI Isolado:**  
-  Substituir o driver TWAI nativo por um controlador CAN-FD SPI dedicado (ex: MCP2518FD) ou atualizar a mídia de armazenamento para um módulo eMMC / Flash SPI com DMA.
-- **Análise de Impacto:**  
-  1. Criação do componente alternativo no AADL (`device CAN_FD_Transceiver`).
-  2. Inclusão de wrapper intermediário na camada de software (`thread Task_CAN_Wrapper`) com overhead de conversão de frames ($C_{wrapper} = 150\ \mu\text{s}$).
-  3. Reinstanciação do sistema e recálculo da latência ponta a ponta e utilização da CPU no OSATE.
+### 7.1. Como Funciona a Análise no `DevCompatibility`:
+A ferramenta `DevCompatibility` opera sobre o workspace modular (`docs/MBSE/osate_project/`) confrontando o sistema existente contra uma biblioteca de periféricos candidatos:
+1. **Target Architecture (Arquitetura Alvo):** Seleciona o sistema baseline (`EdgeTelemetry_System_Pkg::EdgeTelemetry_System.immediate_impl`).
+2. **Componente sob Avaliação:** Seleciona o dispositivo `can_transceiver` (baseado em `CAN_Devices_Pkg::CAN_Transceiver`).
+3. **Candidate Library (Biblioteca de Candidatos):** A ferramenta faz a varredura automática na pasta `Library/devices/` e identifica os candidatos elegíveis em `CAN_Devices_Pkg.aadl`:
+   - `CAN_FD_Transceiver_Candidate`: Dispositivo com maior taxa de amostragem ($2\text{ ms}$) e porta dedicada de diagnóstico elétrico (`bus_error_diag: out event port`).
+4. **Detecção Automática de Incompatibilidades:**
+   - **Incompatibilidade de Portas:** A porta `bus_error_diag` não possui correspondência no processo de telemetria existente.
+   - **Incompatibilidade Temporal:** Aumento da taxa de injeção de frames de $200\text{ Hz}$ ($5\text{ ms}$) para $500\text{ Hz}$ ($2\text{ ms}$).
+5. **Mitigação Formal via Wrappers e Extensão TinyML:**  
+   O resultado do `DevCompatibility` direciona a criação de um adaptador de software intermediário (`TinyML_Input_Adapter`) e a evolução arquitetural para o **Sistema Dual-Core com TinyML** modelado em [`packages/Evolved_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Evolved_System_Pkg.aadl) e detalhado no [Relatório Técnico do Pilar 4](file:///c:/workspace/can-obd-telemetry/docs/MBSE/relatorio_pilar4_cava_tinyml.md).
