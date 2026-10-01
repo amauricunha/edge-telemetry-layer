@@ -259,18 +259,114 @@ Abaixo encontra-se a representação esquemática do modelo instanciado gerado n
 
 ---
 
-## 6. Localização dos Artefatos de Código do Pilar 2
+## 6. Matriz Completa de Rastreabilidade FRET $\to$ AADL $\to$ Critérios de Aceitação
+
+A integração formal entre a especificação de requisitos (FRET / Pilar 1) e a modelagem estrutural (AADL / Pilar 2) amarra a razão de existência de cada elemento modelado no OSATE:
+
+| Componente / Pacote AADL | Requisitos FRET (Pilar 1) | Requisitos SRS | Critério de Aceitação (AC) | Papel Arquitetural e Justificativa de Engenharia |
+| :--- | :--- | :--- | :---: | :--- |
+| **`CAN_Frame_Data`** (`Data_Types_Pkg`) | `REQ_TWAI_001`, `REQ_TWAI_002` | `REQ-SYS-01`, `REQ-SYS-02` | **AC-01** ($\le 1.0\%$ perda) | 16 bytes: 8 bytes carga útil + 4 bytes ID + DLC + Flags + Timestamp relativo de hardware. Evita truncamento de sinal. |
+| **`Diagnostic_Packet_Data`** (`Data_Types_Pkg`) | `REQ_OBD_001`, `REQ_OBD_002` | `REQ-SYS-05`, `REQ-SYS-06` | **AC-02** ($< 10\text{ ms}$ resp.) | 8 bytes: Padrão ISO 15765-4 (Single Frame) para interrogação 0x7DF e resposta 0x7E8 dos 6 PIDs cíclicos. |
+| **`CSV_Payload_Data`** (`Data_Types_Pkg`) | `REQ_LOG_001`, `REQ_LOG_002` | `REQ-SYS-11`, `REQ-SYS-12` | **AC-04** ($\ge 200\text{ pkt/s}$) | 320 bytes: Buffer estático pré-alocado contendo linha com 11 colunas numéricas; previne fragmentação de memória heap. |
+| **`Feature_Tensor_Data`** (`Data_Types_Pkg`) | `REQ_TINYML_001` | `REQ-SYS-31` | **AC-08** ($U \le 40\%$) | 64 bytes: 8 atributos normalizados (f32) em janela deslizante para inferência de direção veicular (Pilar 4). |
+| **`Driver_Coaching_Data`** (`Data_Types_Pkg`) | `REQ_TINYML_002` | `REQ-SYS-32` | **AC-05** / **AC-08** | 32 bytes: Score de condução (0-100), perfil predito (Eco/Agressivo) e códigos de recomendação para nuvem MQTT. |
+| **`CAN_Bus`** (`Buses_Pkg`) | `REQ_TWAI_001`, `REQ_REC_001` | `REQ-SYS-01`, `REQ-SYS-26` | **AC-01**, **AC-07** (Bus-off) | Barramento físico diferencial a 500 kbps ($16\ \mu\text{s/byte}$). Propriedade `Transmission_Time` alimenta a análise de latência. |
+| **`SPI_Bus`** (`Buses_Pkg`) | `REQ_SD_001`, `REQ_SD_002` | `REQ-SYS-16`, `REQ-SYS-17` | **AC-03** (Zero corrupção) | Barramento serial síncrono operando a 10-20 MHz ($1\ \mu\text{s/byte}$). Interliga o SoC ao leitor de cartão MicroSD. |
+| **`CAN_Transceiver`** (`CAN_Devices_Pkg`) | `REQ_TWAI_001` | `REQ-SYS-01` | **AC-01** | Transceptor físico (SN65HVD230/MCP2551). Modelado como `device` e atua como `flow source` inicial da cadeia de dados. |
+| **`MicroSD_Device`** (`Storage_Devices_Pkg`) | `REQ_SD_001`, `REQ_SD_005` | `REQ-SYS-16`, `REQ-SYS-18` | **AC-03** | Mídia Flash FAT32 com período de sincronização de 50 ms. Atua como `flow sink` no fluxo `end_to_end_can_to_sd`. |
+| **`WiFi_Device`** (`Comm_Devices_Pkg`) | `REQ_FSM_001`, `REQ_CMD_001` | `REQ-SYS-21`, `REQ-SYS-25` | **AC-05** ($\le 5\text{ s}$ recon.) | Gateway Wi-Fi/MQTT (2.4 GHz). Atua como `flow sink` no fluxo `end_to_end_can_to_mqtt`. |
+| **`Uno_ECU_Emulator_Device`** (`CAN_Devices_Pkg`)| — | `REQ-SYS-01`, `REQ-SYS-05` | **HIL Testbed** | Emulador HIL externo (Arduino UNO). Modelado como `device` para não poluir o orçamento de CPU do ESP32-S3 sob teste. |
+| **`ESP32S3_Processor`** (`Processors_Pkg`) | Todos | Todos | **AC-08** ($U \le 40\%$) | Processador de 240 MHz com escalonamento preemptivo POSIX 1003 Highest Priority First (equivalente ao RTOS do firmware). |
+| **`Task_CAN_RX`** (`Software_Threads_Pkg`) | `REQ_TWAI_001`, `REQ_TWAI_002` | `REQ-SYS-01`, `REQ-SYS-02` | **AC-01** | Período $5\text{ ms}$, WCET $0.8\text{ ms}$, Prioridade $10$. Maior prioridade Rate-Monotonic para esvaziar a FIFO TWAI. |
+| **`Task_Logger`** (`Software_Threads_Pkg`) | `REQ_LOG_001`, `REQ_LOG_002` | `REQ-SYS-11`, `REQ-SYS-13` | **AC-04** | Período $20\text{ ms}$, WCET $1.5\text{ ms}$, Prioridade $8$. Formatação em texto tabular e buffer em SRAM. |
+| **`Task_TX_Dispatch`** (`Software_Threads_Pkg`) | `REQ_SD_001`, `REQ_FSM_001` | `REQ-SYS-16`, `REQ-SYS-21` | **AC-03**, **AC-04** | Período $50\text{ ms}$, WCET $3.0\text{ ms}$, Prioridade $6$. Despacho concorrente para escrita no SD e publicação MQTT. |
+| **`Task_OBD_Poller`** (`Software_Threads_Pkg`) | `REQ_OBD_001`, `REQ_OBD_002` | `REQ-SYS-05`, `REQ-SYS-10` | **AC-02** | Período $100\text{ ms}$, WCET $5.0\text{ ms}$, Prioridade $4$. Polling cíclico a 10 Hz dos 6 PIDs veiculares via PID 0x7DF. |
+
+---
+
+## 7. Detalhamento Metodológico: Como o Modelo foi Construído e Homologado no OSATE
+
+A engenharia do modelo AADL seguiu um rigoroso processo de refinamento em 5 etapas no ambiente OSATE (Eclipse AADL AS5506B):
+
+```
++---------------------------------------------------------------------------------------------------------+
+|                                FLUXO METODOLÓGICO DE CONSTRUÇÃO DO PILAR 2                               |
++---------------------------------------------------------------------------------------------------------+
+| 1. Decomposição de Tipos  -> Data_Types_Pkg.aadl (CAN_Frame_Data, Diagnostic_Packet_Data, CSV_Payload)  |
+| 2. Física de Barramentos  -> Buses_Pkg.aadl (CAN 500 kbps com 16 us/B, SPI 20 MHz com 1 us/B)          |
+| 3. Biblioteca Periférica  -> Library/devices/ (CAN_Devices_Pkg, Storage_Devices_Pkg, Comm_Devices_Pkg) |
+| 4. Pipeline de Software   -> Software_Threads_Pkg.aadl + Software_Processes_Pkg.aadl (RMS 5/20/50/100ms) |
+| 5. Integração Raiz        -> EdgeTelemetry_System_Pkg.aadl (Actual_Processor_Binding, Instance .aaxl2) |
++---------------------------------------------------------------------------------------------------------+
+```
+
+### 7.1. Separação em Pacotes Modulares vs. Modelo Monolítico
+- **Modelo Consolidado Único ([`EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl)):**  
+  Projetado para leitura contínua, auditoria rápida e submissão em anexo de relatório acadêmico sem dependências cruzadas de múltiplos arquivos.
+- **Projeto Modular em Pacotes ([`EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/)):**  
+  Projetado com estrutura de diretórios padronizada (`packages/` e `Library/devices/`), atendendo às diretrizes do analisador de compatibilidade do **Prof. Dr. Leandro Buss Becker (UFSC)** (`DevCompatibility`). Essa separação permite isolar componentes reutilizáveis de prateleira (*Commercial Off-The-Shelf - COTS*) e viabiliza as análises de variabilidade arquitetural do Pilar 4 (CAvA).
+
+### 7.2. Resolução de Escopo e Vínculos Semânticos no OSATE
+Durante a modelação no editor Xtext do OSATE, aplicaram-se regras estritas de amarração:
+1. **Cláusulas `with` e `renames`:**  
+   Cada pacote declara explicitamente suas dependências (`with Data_Types_Pkg; with Buses_Pkg; renames Buses_Pkg::all;`). Isso garantiu resolução imediata dos classificadores sem erros de referência cruzada no Eclipse.
+2. **Propriedade `Actual_Processor_Binding`:**  
+   Declarada tanto no nível do processo encapsulador (`applies to sw_telemetry`) quanto individualmente para cada uma das quatro threads (`applies to sw_telemetry.th_can_rx`, etc.), permitindo que o analisador de escalonabilidade associe os custos de WCET diretamente ao modelo computacional da CPU.
+3. **Propriedade `Actual_Connection_Binding`:**  
+   Vincula as portas lógicas aos barramentos físicos (`applies to p_can_to_sw` no `can_bus`; `applies to p_sw_to_sd` no `spi_bus`), permitindo que a análise de fluxo ponta a ponta calcule o atraso de transmissão física.
+
+### 7.3. Instanciação e Geração do Modelo Compilado (`.aaxl2`)
+1. No OSATE, selecionou-se a implementação raiz `EdgeTelemetry_System.immediate_impl` em `EdgeTelemetry_System_Pkg.aadl`.
+2. Acionou-se o menu de contexto: **`AADL` $\to$ `Instantiate System`**.
+3. O compilador semântico do OSATE gerou com êxito o modelo intermediário:  
+   [`instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2).
+4. O mesmo procedimento foi repetido para a variante `EdgeTelemetry_System.delayed_impl`.
+5. **Resultado da Verificação:** Zero erros, zero avisos de modelo inválido e conformidade total com o padrão AS5506B.
+
+---
+
+## 8. Avaliação de Integridade do Pilar 2: O que Foi Entregue e Conexão com os Próximos Pilares
+
+### 8.1. Status de Cumprimento dos Entregáveis (Checklist)
+- [x] **Tipagem de dados completa:** `CAN_Frame_Data` (16 B), `Diagnostic_Packet_Data` (8 B), `CSV_Payload_Data` (320 B), `Feature_Tensor_Data` (64 B), `Driver_Coaching_Data` (32 B).
+- [x] **Barramentos físicos parametrizados:** `CAN_Bus` (500 kbps, $16\ \mu\text{s/B}$), `SPI_Bus` (20 MHz, $1\ \mu\text{s/B}$), `InterCore_Bus` (240 MHz, $20\text{ ns/B}$).
+- [x] **Dispositivos periféricos encapsulados:** Transceptor CAN, Leitor MicroSD, Gateway Wi-Fi/MQTT e Emulador HIL Arduino UNO.
+- [x] **Processador de execução:** `ESP32S3_Processor` com escalonador preemptivo POSIX 1003 Highest Priority First e variante `ESP32S3_DualCore_Processor`.
+- [x] **Pipeline de software temporal:** 4 tarefas periódicas ($T = 5, 20, 50, 100\text{ ms}$; WCETs $0.8, 1.5, 3.0, 5.0\text{ ms}$; Prioridades $10, 8, 6, 4$).
+- [x] **Semânticas comparativas de conexão:** `immediate_impl` (zero atraso de ciclo) e `delayed_impl` (amostragem retardada).
+- [x] **Amarrações formais de hardware:** `Actual_Processor_Binding` e `Actual_Connection_Binding`.
+- [x] **Instanciação homologada no OSATE:** Arquivos `.aaxl2` compilados com zero erros.
+- [x] **Código AADL 100% comentado:** Todos os 11 arquivos AADL comentados detalhando funcionamento, FRET, SRS e critérios de aceite.
+
+### 8.2. Falta Algo no Pilar 2?
+**Não há nenhuma pendência estrutural ou sintática no Pilar 2.** A arquitetura de software e hardware foi integralmente descrita, validada no compilador do OSATE e amarrada aos requisitos formais do Pilar 1.
+
+### 8.3. Conexão com os Pilares Subsequentes
+- **Transição para o Pilar 3 (Análises Estáticas e Temporais):**  
+  O modelo instanciado `.aaxl2` construído aqui alimenta diretamente os plugins analíticos do OSATE:
+  - `Schedule Bound Threads` $\to$ Comprovação da taxa de utilização ($U = 34.5\%$) e tempos de resposta ($R_i \le D_i$).
+  - `Check Flow Latency` $\to$ Extração da latência mínima ($2.287\text{ ms}$) e máxima ($60.898\text{ ms}$) nos fluxos `end_to_end_can_to_sd` e `end_to_end_can_to_mqtt`.
+- **Transição para o Pilar 4 (Framework CAvA / Variabilidade e TinyML):**  
+  A biblioteca periférica modular (`Library/devices/`) e o processador dual-core (`Processors_Pkg.aadl`) estabelecem a infraestrutura necessária para integrar a pipeline de inteligência artificial de borda (`TinyML_Pkg.aadl` e `Evolved_System_Pkg.aadl`).
+
+---
+
+## 9. Localização dos Artefatos de Código do Pilar 2
 
 O modelo AADL foi disponibilizado em dois formatos complementares no repositório:
 1. **Ficheiro Consolidado Único (Inspeção Rápida):**  
-   [`docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl)  
-   *(Espelho em [`docs/MBSE/resultados/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_Pilar2.aadl))*
+   [`docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl)
 2. **Projeto Modular em Pacotes (Compatível com OSATE e `DevCompatibility`):**  
-   [`docs/MBSE/osate_project/packages/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/)  
-   - [`Data_Types_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Data_Types_Pkg.aadl)
-   - [`Buses_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Buses_Pkg.aadl)
-   - [`Processors_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Processors_Pkg.aadl)
-   - [`Software_Threads_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Software_Threads_Pkg.aadl)
-   - [`Software_Processes_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Software_Processes_Pkg.aadl)
-   - [`EdgeTelemetry_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/EdgeTelemetry_System_Pkg.aadl)
-   - [`Library/devices/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/Library/devices/)
+   - Diretório de Trabalho do OSATE: [`docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/)
+   - Cópia Espelhada no Repositório: [`docs/MBSE/osate_project/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/)
+   - Pacotes Principais:
+     * [`Data_Types_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Data_Types_Pkg.aadl)
+     * [`Buses_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Buses_Pkg.aadl)
+     * [`Processors_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Processors_Pkg.aadl)
+     * [`Software_Threads_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Software_Threads_Pkg.aadl)
+     * [`Software_Processes_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Software_Processes_Pkg.aadl)
+     * [`EdgeTelemetry_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/EdgeTelemetry_System_Pkg.aadl)
+     * [`Evolved_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Evolved_System_Pkg.aadl)
+     * [`TinyML_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/TinyML_Pkg.aadl)
+     * Periféricos: [`CAN_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/Library/devices/CAN_Devices_Pkg.aadl), [`Storage_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/Library/devices/Storage_Devices_Pkg.aadl), [`Comm_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/Library/devices/Comm_Devices_Pkg.aadl)
+
