@@ -64,72 +64,105 @@ $$R_i^{(k+1)} = C_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i^{(k)}}{T_j} \righ
 
 ---
 
+---
+
 ### 1.2. Tabela Consolidada de Resultados de Escalonabilidade
 
 | Tarefa (Thread) | Período ($T_i$) | WCET ($C_i$) | Prioridade ($P_i$) | Prazo Limite ($D_i$) | Tempo Resposta ($R_i$) | Folga Temporal (*Slack*) | Status no OSATE |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **`Task_CAN_RX`** | $5.0\text{ ms}$ | $0.80\text{ ms}$ | $10$ | $5.0\text{ ms}$ | **$0.80\text{ ms}$** | $+4.20\text{ ms}$ ($84.0\%$) | **Schedulable (Pass)** |
-| **`Task_Logger`** | $20.0\text{ ms}$ | $1.50\text{ ms}$ | $8$ | $20.0\text{ ms}$ | **$2.30\text{ ms}$** | $+17.70\text{ ms}$ ($88.5\%$) | **Schedulable (Pass)** |
-| **`Task_TX_Dispatch`** | $50.0\text{ ms}$ | $3.00\text{ ms}$ | $6$ | $50.0\text{ ms}$ | **$5.30\text{ ms}$** | $+44.70\text{ ms}$ ($89.4\%$) | **Schedulable (Pass)** |
-| **`Task_OBD_Poller`** | $100.0\text{ ms}$ | $5.00\text{ ms}$ | $4$ | $100.0\text{ ms}$ | **$11.90\text{ ms}$** | $+88.10\text{ ms}$ ($88.1\%$) | **Schedulable (Pass)** |
+| **`Task_CAN_RX`** | $5.0\text{ ms}$ | $0.80\text{ ms}$ | $10$ | $5.0\text{ ms}$ | **$0.80\text{ ms}$** | $+4.20\text{ ms}$ ($84.0\%$) | **true (Pass)** |
+| **`Task_Logger`** | $20.0\text{ ms}$ | $1.50\text{ ms}$ | $8$ | $20.0\text{ ms}$ | **$2.30\text{ ms}$** | $+17.70\text{ ms}$ ($88.5\%$) | **true (Pass)** |
+| **`Task_TX_Dispatch`** | $50.0\text{ ms}$ | $3.00\text{ ms}$ | $6$ | $50.0\text{ ms}$ | **$6.10\text{ ms}$** | $+43.90\text{ ms}$ ($87.8\%$) | **true (Pass)** |
+| **`Task_OBD_Poller`** | $100.0\text{ ms}$ | $5.00\text{ ms}$ | $4$ | $100.0\text{ ms}$ | **$11.90\text{ ms}$** | $+88.10\text{ ms}$ ($88.1\%$) | **true (Pass)** |
 | **UTILIZAÇÃO GLOBAL** | — | — | — | — | — | — | **$U = 34.5\% \le 75.68\%$** |
+
+> **Nota de Validação Analítica:** A convergência exata da equação recorrente executada pelo OSATE para a tarefa de menor prioridade (`Task_OBD_Poller`) resultou em $R_4 = 11.90\text{ ms}$, demonstrando que mesmo sob o pior caso de preempções acumuladas das três tarefas mais prioritárias, a folga temporal excede $88\%$.
 
 ---
 
-### 1.3. Procedimento de Extração no OSATE e Evidências Gráficas
+### 1.3. Relatório Oficial Extraído do OSATE (`Schedule Bound Threads`)
 
-#### Passo a Passo no OSATE:
-1. Abra o arquivo instanciado: `instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`.
-2. No menu superior do OSATE, selecione:  
-   **`Analyses`** $\to$ **`Timing`** $\to$ **`Check Schedulability`**.
-3. O OSATE apresentará o relatório textual na aba *Console / Schedulability Analysis* e gerará o arquivo de relatório em `reports/schedulability/`.
+A execução do comando **`Analyses` > `Timing` > `Schedule Bound Threads`** sobre os modelos instanciados gerou o arquivo de auditoria [EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/SchedulingAnalysis/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv):
 
-#### Captura de Tela da Ferramenta (*Placeholder para Submissão*):
-> Insira a imagem exportada do OSATE na pasta `docs/MBSE/resultados/` com o nome `check_schedulability_osate.png`:
+```text
+Test scheduability Report
 
-![Captura do Check Schedulability no OSATE](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/check_schedulability_osate.png)
-*(Legenda: Relatório de escalonabilidade extraído da ferramenta OSATE confirmando a viabilidade de todas as tarefas sob o processador ESP32-S3).*
+Processor Utilization/Scheduling Results
+Schedulability Results
+cpu: Processor EdgeTelemetry_System_immediate_impl_Instance.cpu is schedulable with utilization 34.5%
+thread name, period, deadline, execution time, phase offset, priority, max response time, schedulability 
+EdgeTelemetry_System_immediate_impl_Instance.sw_telemetry.th_can_rx, 5000, 5000, 800, 0, 10, 800.0, true
+EdgeTelemetry_System_immediate_impl_Instance.sw_telemetry.th_logger, 20000, 20000, 1500, 0, 8, 2300.0, true
+EdgeTelemetry_System_immediate_impl_Instance.sw_telemetry.th_tx_dispatch, 50000, 50000, 3000, 0, 6, 6100.0, true
+EdgeTelemetry_System_immediate_impl_Instance.sw_telemetry.th_obd_poller, 100000, 100000, 5000, 0, 4, 11900.0, true
+
+Thread binding report
+thread sw_telemetry.th_can_rx(0,000 MIPS) ==> processor cpu(0,000MIPS) No CPU capacity
+thread sw_telemetry.th_obd_poller(0,000 MIPS) ==> processor cpu(0,000MIPS) No CPU capacity
+thread sw_telemetry.th_logger(0,000 MIPS) ==> processor cpu(0,000MIPS) No CPU capacity
+thread sw_telemetry.th_tx_dispatch(0,000 MIPS) ==> processor cpu(0,000MIPS) No CPU capacity
+```
+
+#### Esclarecimentos Teóricos de Engenharia de Sistemas (MBSE):
+1. **Por que o Arduino UNO não gerou relatório de escalonabilidade de CPU?**  
+   No padrão AADL, a ferramenta de análise de escalonamento avalia estritamente componentes do tipo **`processor`** que possuam processos e tarefas amarrados via `Actual_Processor_Binding`. O Arduino UNO é modelado como **`device Uno_ECU_Emulator_Device`**, atuando como emulador HIL e gerador de estímulos do ambiente veicular externo. Ele não consome ciclos da CPU do coletor e não possui threads sob teste temporal, delimitando a fronteira de projeto da telemetria de borda.
+2. **O que significa a mensagem `No CPU capacity (0,000 MIPS)`?**  
+   Esta seção refere-se à análise estática de orçamento (*Budget Analysis*). Como o modelo parametrizou rigorosamente as grandezas temporais de tempo real (`Period`, `Compute_Execution_Time`, `Priority`), a análise de escalonamento Rate-Monotonic foi comprovada com sucesso absoluto (`schedulability: true`). A mensagem de MIPS apenas pontua que a contagem bruta de instruções por segundo não foi configurada, o que é irrelevante para o escalonamento temporal.
 
 ---
 
 ## 2. Análise de Latência Ponta a Ponta (Check Flow Latency - Seção 3.2)
 
-A análise de latência avalia o tempo total despendido desde o instante em que um quadro elétrico CAN atinge o transceptor até a persistência do registro serializado no cartão MicroSD ou sua transmissão via Wi-Fi/MQTT.
+A análise de latência avalia o tempo total despendido desde o instante em que um sinal elétrico atinge o transceptor CAN, percorre todas as tarefas do firmware no ESP32-S3 e é gravado fisicamente no MicroSD ou enviado via Wi-Fi/MQTT.
 
-O fluxo analisado é:
-$$\text{can\_transceiver.f\_source} \longrightarrow \text{Task\_CAN\_RX} \longrightarrow \text{Task\_Logger} \longrightarrow \text{Task\_TX\_Dispatch} \longrightarrow \text{sd\_card.f\_sink}$$
-
----
-
-### 2.1. Formulação Matemática: Semântica `immediate` vs `delayed`
-
-#### A. Modo `immediate` (Semântica Imediata):
-Em conexões imediatas, as tarefas são sincronizadas para executar encadeadas no mesmo ciclo de amostragem. A tarefa consumidora aguarda a finalização da produtora:
-* **Latência Mínima ($L_{\text{min}}$):** Ocorre no melhor caso de computação (BCET) com transmissão direta:
-  $$L_{\text{min}} = \text{BCET}_1 + \text{BCET}_2 + \text{BCET}_3 + T_{\text{bus\_tx}} \approx 0.20\text{ ms} + 0.50\text{ ms} + 1.00\text{ ms} + 0.05\text{ ms} \approx \mathbf{1.75\text{ ms}}$$
-* **Latência Máxima ($L_{\text{max}}$):** Ocorre no pior caso de computação (WCET), considerando preempções e retardo de barramento:
-  $$L_{\text{max}} = R_3 (\text{tempo de conclusão da cadeia}) + T_{\text{bus\_tx}} \approx 5.30\text{ ms} + 0.10\text{ ms} \approx \mathbf{5.40\text{ ms}}$$
-* **Jitter Total:** $J_{\text{immediate}} = L_{\text{max}} - L_{\text{min}} = 5.40 - 1.75 = \mathbf{3.65\text{ ms}}$.
-
-#### B. Modo `delayed` (Semântica Atrasada):
-Em conexões atrasadas, os dados gerados por uma tarefa são retidos em buffers e transferidos apenas na **fronteira do próximo período** da tarefa consumidora (*delayed sampling*):
-* **Retardo de Amostragem (*Sampling Delay*):** Cada etapa retém a amostra pelo período da tarefa receptora:
-  $$L_{\text{delayed\_min}} = T_{\text{CAN\_RX}} + T_{\text{Logger}} + T_{\text{TX\_Dispatch}} = 5.0\text{ ms} + 20.0\text{ ms} + 50.0\text{ ms} = \mathbf{75.0\text{ ms}}$$
-* **Latência Máxima com Jitter de Fase:** No pior caso de dessincronização de fase e tempo de computação:
-  $$L_{\text{delayed\_max}} = T_1 + T_2 + T_3 + R_3 \approx 5.0 + 20.0 + 50.0 + 5.30 = \mathbf{80.30\text{ ms}} \quad (\text{podendo atingir até } 125.0\text{ ms com atrasos de fila})$$
-* **Jitter Total:** $J_{\text{delayed}} \ge 50.0\text{ ms}$ (fortemente dependente dos ciclos dos timers).
+Os fluxos ponta a ponta avaliados no sistema são:
+- **`end_to_end_can_to_sd`:** $\text{can\_transceiver} \to \text{th\_can\_rx} \to \text{th\_logger} \to \text{th\_tx\_dispatch} \to \text{sd\_card}$
+- **`end_to_end_can_to_mqtt`:** $\text{can\_transceiver} \to \text{th\_can\_rx} \to \text{th\_logger} \to \text{th\_tx\_dispatch} \to \text{wifi\_module}$
 
 ---
 
-### 2.2. Quadro Comparativo Extraído do OSATE
+### 2.1. Resultados Numéricos Extraídos do OSATE
 
-| Parâmetro Temporal | Semântica Imediata (`immediate_impl`) | Semântica Atrasada (`delayed_impl`) | Variação ($\Delta$) | Comportamento no Firmware Real |
-| :--- | :---: | :---: | :---: | :--- |
-| **Latência Mínima** | **$1.75\text{ ms}$** | **$75.00\text{ ms}$** | $+73.25\text{ ms}$ ($42\times$) | No modo imediato, canais da RTE Embassy repassam o ponteiro sem esperar novos ticks. |
-| **Latência Máxima** | **$5.40\text{ ms}$** | **$125.00\text{ ms}$** | $+119.60\text{ ms}$ ($23\times$) | O modo delayed retém o dado até a fronteira de período de 50 ms da thread de despacho. |
-| **Jitter Temporal** | **$3.65\text{ ms}$** | **$50.00\text{ ms}$** | $+46.35\text{ ms}$ | A semântica imediata garante alta repetibilidade temporal para ensaios dinâmicos. |
-| **Throughput Sustentado** | $\ge 200\text{ pacotes/s}$ | $\approx 20\text{ pacotes/s}$ (restrito) | $-90\%$ | Conexões imediatas evitam o gargalo amostral das fronteiras periódicas. |
-| **Conformidade [AC-04]** | **Atendido Plenamente** | Degradado | — | Exigência de throughput de telemetria $\ge 200\text{ pkt/s}$ cumprida no modo imediato. |
+Os relatórios analíticos oficiais foram gerados e estão disponíveis no repositório:
+- [Relatório CSV (Immediate)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
+- [Relatório CSV (Delayed)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
+
+#### Decomposição Detalhada por Componente do Fluxo CAN $\to$ MicroSD (`end_to_end_can_to_sd`):
+
+| Etapa da Cadeia | Componente AADL | Latência Mínima (Melhor Caso) | Latência Máxima (Pior Caso) | Método / Justificativa |
+| :---: | :--- | :---: | :---: | :--- |
+| **1** | `can_transceiver` (Fonte) | $0.000\text{ ms}$ | $5.000\text{ ms}$ | Amostragem inicial do transceptor diferencial |
+| **2** | `can_bus` (Barramento CAN) | **$0.266\text{ ms}$** | **$0.276\text{ ms}$** | Tempo de transmissão do quadro a $500\text{ kbps}$ |
+| **3** | `th_can_rx` (Aquisição) | $0.200\text{ ms}$ | $0.800\text{ ms}$ | Tempo de computação (BCET $\to$ WCET) |
+| **4** | Conexão `c_rx_to_log` | $0.000\text{ ms}$ | $0.000\text{ ms}$ | Troca de dados em memória RAM no mesmo nó |
+| **5** | `th_logger` (Serialização) | $0.500\text{ ms}$ | $1.500\text{ ms}$ | Tempo de computação (BCET $\to$ WCET) |
+| **6** | Conexão `c_log_to_tx` | $0.000\text{ ms}$ | $0.000\text{ ms}$ | Troca de dados em memória RAM no mesmo nó |
+| **7** | `th_tx_dispatch` (Despacho) | $1.000\text{ ms}$ | $3.000\text{ ms}$ | Tempo de computação (BCET $\to$ WCET) |
+| **8** | `spi_bus` (Barramento SPI) | **$0.321\text{ ms}$** | **$0.322\text{ ms}$** | Tempo de transmissão do bloco CSV a $10\text{ MHz}$ |
+| **9** | `sd_card` (Mídia Flash MicroSD) | $0.000\text{ ms}$ | $50.000\text{ ms}$ | Prazo/deadline da gravação física de página |
+| **TOTAL** | **Latência Ponta a Ponta** | **`2.287 ms`** | **`60.898 ms`** | **Comprovada conformidade temporal com folga** |
+
+#### Decomposição do Fluxo CAN $\to$ Nuvem Wi-Fi MQTT (`end_to_end_can_to_mqtt`):
+- **Latência Mínima (Melhor Caso):** **`1.966 ms`**
+- **Latência Máxima (Pior Caso):** **`60.576 ms`**
+
+---
+
+### 2.2. Discussão Arquitetural: Domínios de Relógio e Semânticas de Comunicação
+
+#### A. Por que o Sistema é Classificado como Assíncrono (`Asynchronous System`)?
+Na ferramenta OSATE, a seleção entre `Asynchronous system (AS)` e `Synchronous system (SS)` dita como os relógios de disparo se relacionam:
+- **`Synchronous system (SS)`**: Pressupõe que todos os componentes da cadeia compartilham uma mesma base de tempo comum com alinhamento de fase em hardware (típico de redes TTP ou barramentos Time-Triggered com relógio global).
+- **`Asynchronous system (AS)`**: Modela a realidade de engenharia automotiva e embarcada, onde:
+  1. A ECU simulada no Arduino opera com oscilador a cristal próprio de $16\text{ MHz}$;
+  2. O ESP32-S3 executa o escalonador do RTOS em $240\text{ MHz}$;
+  3. O transceptor CAN e o cartão MicroSD operam com tempos de resposta físico e transição de barramento desacoplados do clock de despacho de software.
+Portanto, a análise assíncrona é a mais robusta, pois garante que nenhuma premissa irrealista de sincronismo de fase seja adotada.
+
+#### B. Semântica Imediata vs. Atrasada em Portas de Eventos (*Event Data Ports*)
+No padrão AADL:
+- A semântica `Timing => delayed` em **portas de dados puras (*Data Ports*)** impõe a retenção de ciclo até a fronteira periódica seguinte (*delayed sampling*), introduzindo atrasos de amostragem de $T_1 + T_2 + T_3 = 5 + 20 + 50 = 75\text{ ms}$.
+- Quando as portas são tipadas como **`event data port`**, as mensagens são enfileiradas em filas FIFO ativadas por evento. No modo assíncrono com suposição de fila desimpedida (*Empty Queue*), os eventos fluem imediatamente sem retenção forçada de ciclo, o que reflete com perfeição o comportamento dos canais assíncronos em memória RAM implementados no firmware em Rust (RTE Embassy / FreeRTOS queues).
 
 ---
 

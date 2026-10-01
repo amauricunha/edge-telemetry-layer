@@ -82,6 +82,21 @@ A infraestrutura física do coletor veicular e do ambiente Hardware-in-the-Loop 
 3. **`WiFi_Device`:** Gateway de comunicação sem fio com a nuvem (MQTT 3.1.1), atuando como `flow sink` de telemetria remota.
 4. **`Uno_ECU_Emulator_Device`:** Dispositivo simulador da ECU veicular (gerador de tráfego de estímulo HIL a 50 ms).
 
+### 1.4. Decisões de Arquitetura e Taxonomia AADL: Papel do Arduino UNO e Domínios de Relógio
+
+#### A. Por que o Arduino UNO é modelado como `device` e não como `processor`?
+No padrão internacional AADL (SAE AS5506), cada categoria de componente possui semântica estrita:
+- **`processor`:** Hardware de computação com unidade aritmética/lógica e sistema operacional capaz de hospedar e despachar processos e threads de software via amarração formal (`Actual_Processor_Binding`). No projeto, a única CPU de execução sob teste é a do **ESP32-S3**.
+- **`device`:** Representa um componente do ambiente externo ou periférico tratado como "caixa preta" (sensores, atuadores ou barramentos físicos externos). Possui portas lógicas, consumo de energia e atrasos de entrada/saída, mas **não possui código ou threads internas sob análise de escalonamento**.
+- **Fundamentação Acadêmica:** O escopo do projeto é o desenvolvimento e certificação temporal da **Edge Telemetry Layer** (o firmware do ESP32-S3). O Arduino UNO funciona estritamente como **bancada de testes / emulador HIL (Hardware-in-the-Loop)** para injetar tráfego CAN simulado. Caso fosse de interesse analisar também o código interno do Arduino, o AADL suporta nativamente sistemas distribuídos com múltiplos nós computacionais (`processor Uno_MCU; process Uno_App;`), gerando múltiplos relatórios independentes de CPU. Contudo, mantê-lo como `device` é a modelagem canônica de engenharia para delimitar a fronteira de projeto da telemetria de borda.
+
+#### B. Domínios de Relógio (Clock Domains) e a Natureza Assíncrona do Sistema
+Embora o MicroSD e o Transceptor CAN estejam interligados na mesma placa de circuito impresso:
+- O Arduino UNO opera com oscilador a cristal próprio de $16\text{ MHz}$;
+- O ESP32-S3 opera a $240\text{ MHz}$ sob o escalonador do RTOS (FreeRTOS/Embassy);
+- O controlador embutido no cartão MicroSD possui microcódigo interno de escrita Flash NAND com latências de barramento SPI assíncronas em relação ao loop do RTOS.
+Portanto, a interface do sistema com o mundo físico é inerentemente **assíncrona** (*Asynchronous System*), exigindo análise temporal que contemple o pior caso de fase e amostragem na chegada de estímulos.
+
 ---
 
 ## 2. Camada de Software: Processos e Tarefas (Seção 2.2)
