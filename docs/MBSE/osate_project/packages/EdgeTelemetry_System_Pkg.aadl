@@ -6,7 +6,6 @@ public
 	with Storage_Devices_Pkg;
 	with Comm_Devices_Pkg;
 	with Software_Processes_Pkg;
-	with Deployment_Properties;
 
 	---------------------------------------------------------------------------
 	-- SISTEMA INTEGRADO RAIZ (TOP LEVEL - PILAR 2 BASELINE MODULAR)
@@ -18,8 +17,8 @@ public
 	system implementation EdgeTelemetry_System.immediate_impl
 		subcomponents
 			cpu: processor Processors_Pkg::ESP32S3_Processor.impl;
-			can_bus: bus Buses_Pkg::CAN_Bus.impl;
-			spi_bus: bus Buses_Pkg::SPI_Bus.impl;
+			can_bus: bus Buses_Pkg::CAN_Bus;
+			spi_bus: bus Buses_Pkg::SPI_Bus;
 			ecu_emulator: device CAN_Devices_Pkg::Uno_ECU_Emulator_Device.impl;
 			can_transceiver: device CAN_Devices_Pkg::CAN_Transceiver.impl;
 			sd_card: device Storage_Devices_Pkg::MicroSD_Device.impl;
@@ -59,8 +58,8 @@ public
 	system implementation EdgeTelemetry_System.delayed_impl
 		subcomponents
 			cpu: processor Processors_Pkg::ESP32S3_Processor.impl;
-			can_bus: bus Buses_Pkg::CAN_Bus.impl;
-			spi_bus: bus Buses_Pkg::SPI_Bus.impl;
+			can_bus: bus Buses_Pkg::CAN_Bus;
+			spi_bus: bus Buses_Pkg::SPI_Bus;
 			ecu_emulator: device CAN_Devices_Pkg::Uno_ECU_Emulator_Device.impl;
 			can_transceiver: device CAN_Devices_Pkg::CAN_Transceiver.impl;
 			sd_card: device Storage_Devices_Pkg::MicroSD_Device.impl;

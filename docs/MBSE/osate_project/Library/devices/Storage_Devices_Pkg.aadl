@@ -8,7 +8,7 @@ public
 	---------------------------------------------------------------------------
 	device MicroSD_Device
 		features
-			spi_conn: requires bus access Buses_Pkg::SPI_Bus.impl;
+			spi_conn: requires bus access Buses_Pkg::SPI_Bus;
 			file_stream_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
 		flows
 			f_sink: flow sink file_stream_in;
@@ -26,7 +26,7 @@ public
 	---------------------------------------------------------------------------
 	device HighSpeed_Flash_Device
 		features
-			spi_conn: requires bus access Buses_Pkg::SPI_Bus.impl;
+			spi_conn: requires bus access Buses_Pkg::SPI_Bus;
 			raw_block_stream_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
 			write_complete_event: out event port;
 		flows

@@ -8,7 +8,7 @@ public
 	---------------------------------------------------------------------------
 	device CAN_Transceiver
 		features
-			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus.impl;
+			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus;
 			can_rx_frame: out event data port Data_Types_Pkg::CAN_Frame_Data;
 			can_tx_frame: in event data port Data_Types_Pkg::CAN_Frame_Data;
 		flows
@@ -28,7 +28,7 @@ public
 	---------------------------------------------------------------------------
 	device CAN_FD_Transceiver_Candidate
 		features
-			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus.impl;
+			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus;
 			can_fd_rx_frame: out event data port Data_Types_Pkg::CAN_Frame_Data;
 			can_fd_tx_frame: in event data port Data_Types_Pkg::CAN_Frame_Data;
 			bus_error_diag: out event port; -- Porta adicional incompatível com o baseline
@@ -48,7 +48,7 @@ public
 	---------------------------------------------------------------------------
 	device Uno_ECU_Emulator_Device
 		features
-			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus.impl;
+			can_bus_conn: requires bus access Buses_Pkg::CAN_Bus;
 			can_tx_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
 			can_rx_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
 		flows
