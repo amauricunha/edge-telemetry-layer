@@ -142,7 +142,7 @@ Para fundamentar as propriedades temporais atribuídas no modelo AADL (`Compute_
 - TensorFlow Lite Micro: *Deployment of 8-bit Quantized Models on Resource-Constrained Microcontrollers*.
 
 #### 2. Justificativa do Envelope Temporal Seguro no AADL:
-- No modelo formal AADL ([`TinyML_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/TinyML_Pkg.aadl)), fixou-se:
+- No modelo formal AADL ([`TinyML_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/TinyML_Pkg.aadl)), fixou-se:
   ```aadl
   Compute_Execution_Time => 10 ms .. 25 ms; -- BCET = 10 ms, WCET = 25 ms
   Period => 1000 ms;                         -- Frequência de 1 Hz
@@ -167,10 +167,10 @@ Para fundamentar as propriedades temporais atribuídas no modelo AADL (`Compute_
 
 ## 5. Estrutura Modular dos Arquivos AADL Gerados
 
-Para permitir a inspeção automatizada no OSATE e a importação direta pela ferramenta **`DevCompatibility`**, os modelos AADL foram desagregados e organizados na pasta de projeto:
+Para permitir a inspeção automatizada no OSATE e a importação direta pela ferramenta **`DevCompatibility`**, os modelos AADL foram desagregados e organizados na pasta canônica do projeto:
 
 ```
-c:\workspace\can-obd-telemetry\docs\MBSE\osate_project\
+c:\workspace\can-obd-telemetry\docs\MBSE\Entregas\Entrega 2 e 3\EdgeTelemetry_MBSE_OSATE\
 ├── packages/
 │   ├── Data_Types_Pkg.aadl          (Tipos de dados brutos e tensores de IA)
 │   ├── Buses_Pkg.aadl               (Barramentos CAN, SPI e InterCore)

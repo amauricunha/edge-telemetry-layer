@@ -82,7 +82,7 @@ $$R_i^{(k+1)} = C_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i^{(k)}}{T_j} \righ
 
 ### 1.3. Relatório Oficial Extraído do OSATE (`Schedule Bound Threads`)
 
-A execução do comando **`Analyses` > `Timing` > `Schedule Bound Threads`** sobre os modelos instanciados gerou o arquivo de auditoria [EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/SchedulingAnalysis/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv):
+A execução do comando **`Analyses` > `Timing` > `Schedule Bound Threads`** sobre os modelos instanciados gerou o arquivo de auditoria [EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/SchedulingAnalysis/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv):
 
 ```text
 Test scheduability Report
@@ -124,8 +124,8 @@ Os fluxos ponta a ponta avaliados no sistema são:
 ### 2.1. Resultados Numéricos Extraídos do OSATE
 
 Os relatórios analíticos oficiais foram gerados e estão disponíveis no repositório:
-- [Relatório CSV (Immediate)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
-- [Relatório CSV (Delayed)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
+- [Relatório CSV (Immediate)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
+- [Relatório CSV (Delayed)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
 
 #### Decomposição Detalhada por Componente do Fluxo CAN $\to$ MicroSD (`end_to_end_can_to_sd`):
 
@@ -172,12 +172,12 @@ Para garantir a reprodutibilidade exata dos resultados por auditores ou bancas e
 
 #### A. Como foi Executada a Análise de Escalonamento (`Schedule Bound Threads`):
 1. **Seleção do Modelo:** Na aba *AADL Navigator*, navegue até o diretório `instances/` e abra o modelo compilado:  
-   [`instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2).
+   [`instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance.aaxl2).
 2. **Disparo do Plugin:** No menu principal do Eclipse/OSATE, selecione:  
    **`Analyses`** $\to$ **`Timing`** $\to$ **`Schedule Bound Threads`** (ou clique com o botão direito sobre o arquivo `.aaxl2`).
 3. **Mecanismo Interno de Cálculo:** O OSATE lê as propriedades `Period`, `Compute_Execution_Time` (limite superior = WCET) e `Priority` de cada thread associada à CPU via `Actual_Processor_Binding`. Ele computa a taxa $U = \sum C_i / T_i$ e executa a equação recorrente de Joseph & Pandya (1986) para obter o $R_i$ de cada tarefa sob preempção por prioridades fixas POSIX.
 4. **Relatório Gerado:** Os resultados são exibidos no console e exportados para a pasta `reports/SchedulingAnalysis/`:  
-   [`EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/SchedulingAnalysis/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv).
+   [`EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/SchedulingAnalysis/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__SchedulingAnalysis.csv).
 
 #### B. Como foi Executada a Análise de Latência de Fluxos (`Check Flow Latency`):
 1. **Seleção do Modelo:** Selecione `EdgeTelemetry_System_immediate_impl_Instance.aaxl2` (e subsequentemente `EdgeTelemetry_System_delayed_impl_Instance.aaxl2`).
@@ -195,8 +195,8 @@ Para garantir a reprodutibilidade exata dos resultados por auditores ou bancas e
    - **`Queue latency`:** Selecionado **`Empty Queue (EQL)`**.  
      *Justificativa:* Modela o comportamento ideal das filas FIFO assíncronas do firmware (RTE Embassy em Rust), onde o buffer não acumula enfileiramento residual sob carga normal.
 4. **Relatórios Gerados:** O OSATE salva automaticamente as tabelas comparativas detalhadas em formato `.csv` e planilha `.xls` em `reports/latency/`:
-   - [Relatório CSV (Immediate)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
-   - [Relatório CSV (Delayed)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
+   - [Relatório CSV (Immediate)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
+   - [Relatório CSV (Delayed)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.csv) | [Planilha Excel (.xls)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/reports/latency/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_delayed_impl_Instance__latency_AS-PE-ET-FQ-EQL.xls)
 
 ---
 

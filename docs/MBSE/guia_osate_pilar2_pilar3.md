@@ -52,18 +52,18 @@ Toda a pilha concorrente foi modelada dentro do processo `Telemetry_Process` e d
 
 O projeto AADL foi estruturado em dois formatos complementares:
 - **Formato A — Projeto Modular por Componentes / Pacotes (Padrão Recomendado para `DevCompatibility`):**  
-  Localizado em [`docs/MBSE/osate_project/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/), organiza o sistema em pacotes AADL independentes (`packages/`) e uma biblioteca padronizada de periféricos candidatos (`Library/devices/`), atendendo aos requisitos da ferramenta **DevCompatibility** do grupo do Prof. Leandro Becker.
+  Localizado em [`docs/MBSE/Entregas/Entrega 2 e 3/EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/), organiza o sistema em pacotes AADL independentes (`packages/`) e uma biblioteca padronizada de periféricos candidatos (`Library/devices/`), atendendo aos requisitos da ferramenta **DevCompatibility** do grupo do Prof. Leandro Becker.
 - **Formato B — Ficheiro Consolidado Único:**  
-  Localizado em [`docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl), consolida todas as declarações em um único arquivo para inspeção rápida.
+  Localizado em [`docs/MBSE/Entregas/Entrega 2 e 3/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetryLayer_Pilar2.aadl), consolida todas as declarações em um único arquivo para inspeção rápida.
 
 ### 2.1. Como Importar o Projeto Modular no OSATE:
 1. Abra o **OSATE** no seu ambiente Eclipse.
 2. Certifique-se de que o workspace contém as bibliotecas padrão AADL (`Plugin_Resources` contendo `Base_Types`, `Deployment_Properties`, `Timing_Properties` e `Communication_Properties`). Caso não existam, crie um novo projeto AADL:
-   - `File` > `New` > `AADL Project` (Nome sugerido: `EdgeTelemetry_MBSE`).
+    - `File` > `New` > `AADL Project` (Nome sugerido: `EdgeTelemetry_MBSE`).
 3. Importe a pasta modular do projeto:
-   - Clique com o botão direito no projeto criado > `Import...` > `General` > `File System`.
-   - Aponte para a pasta `c:\workspace\can-obd-telemetry\docs\MBSE\osate_project`.
-   - Marque as pastas **`packages/`** e **`Library/`** e clique em **`Finish`**.
+    - Clique com o botão direito no projeto criado > `Import...` > `General` > `File System`.
+    - Aponte para a pasta `c:\workspace\can-obd-telemetry\docs\MBSE\Entregas\Entrega 2 e 3\EdgeTelemetry_MBSE_OSATE`.
+    - Marque as pastas **`packages/`** e **`Library/`** e clique em **`Finish`**.
 4. **Verificação no AADL Navigator:** A árvore de arquivos ficará organizada da seguinte forma:
    ```
    EdgeTelemetry_MBSE/
@@ -182,7 +182,7 @@ A comparação entre as duas políticas de conexão exigida no Pilar 3 demonstra
 O **Pilar 4** aplica o framework **CAvA (Component/Architecture Variability and Evolution approach)** e utiliza a ferramenta **`DevCompatibility`** desenvolvida no grupo de pesquisa do Prof. Leandro Becker (UFSC).
 
 ### 7.1. Como Funciona a Análise no `DevCompatibility`:
-A ferramenta `DevCompatibility` opera sobre o workspace modular (`docs/MBSE/osate_project/`) confrontando o sistema existente contra uma biblioteca de periféricos candidatos:
+A ferramenta `DevCompatibility` opera sobre o workspace modular ([`docs/MBSE/Entregas/Entrega 2 e 3/EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/)) confrontando o sistema existente contra uma biblioteca de periféricos candidatos:
 1. **Target Architecture (Arquitetura Alvo):** Seleciona o sistema baseline (`EdgeTelemetry_System_Pkg::EdgeTelemetry_System.immediate_impl`).
 2. **Componente sob Avaliação:** Seleciona o dispositivo `can_transceiver` (baseado em `CAN_Devices_Pkg::CAN_Transceiver`).
 3. **Candidate Library (Biblioteca de Candidatos):** A ferramenta faz a varredura automática na pasta `Library/devices/` e identifica os candidatos elegíveis em `CAN_Devices_Pkg.aadl`:
@@ -191,4 +191,4 @@ A ferramenta `DevCompatibility` opera sobre o workspace modular (`docs/MBSE/osat
    - **Incompatibilidade de Portas:** A porta `bus_error_diag` não possui correspondência no processo de telemetria existente.
    - **Incompatibilidade Temporal:** Aumento da taxa de injeção de frames de $200\text{ Hz}$ ($5\text{ ms}$) para $500\text{ Hz}$ ($2\text{ ms}$).
 5. **Mitigação Formal via Wrappers e Extensão TinyML:**  
-   O resultado do `DevCompatibility` direciona a criação de um adaptador de software intermediário (`TinyML_Input_Adapter`) e a evolução arquitetural para o **Sistema Dual-Core com TinyML** modelado em [`packages/Evolved_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/packages/Evolved_System_Pkg.aadl) e detalhado no [Relatório Técnico do Pilar 4](file:///c:/workspace/can-obd-telemetry/docs/MBSE/relatorio_pilar4_cava_tinyml.md).
+   O resultado do `DevCompatibility` direciona a criação de um adaptador de software intermediário (`TinyML_Input_Adapter`) e a evolução arquitetural para o **Sistema Dual-Core com TinyML** modelado em [`packages/Evolved_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Evolved_System_Pkg.aadl) e detalhado no [Relatório Técnico do Pilar 4](file:///c:/workspace/can-obd-telemetry/docs/MBSE/relatorio_pilar4_cava_tinyml.md).

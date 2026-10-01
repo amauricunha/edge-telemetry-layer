@@ -301,9 +301,9 @@ A engenharia do modelo AADL seguiu um rigoroso processo de refinamento em 5 etap
 ```
 
 ### 7.1. Separação em Pacotes Modulares vs. Modelo Monolítico
-- **Modelo Consolidado Único ([`EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl)):**  
+- **Modelo Consolidado Único ([`EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetryLayer_Pilar2.aadl)):**  
   Projetado para leitura contínua, auditoria rápida e submissão em anexo de relatório acadêmico sem dependências cruzadas de múltiplos arquivos.
-- **Projeto Modular em Pacotes ([`EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/)):**  
+- **Projeto Modular em Pacotes ([`EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/)):**  
   Projetado com estrutura de diretórios padronizada (`packages/` e `Library/devices/`), atendendo às diretrizes do analisador de compatibilidade do **Prof. Dr. Leandro Buss Becker (UFSC)** (`DevCompatibility`). Essa separação permite isolar componentes reutilizáveis de prateleira (*Commercial Off-The-Shelf - COTS*) e viabiliza as análises de variabilidade arquitetural do Pilar 4 (CAvA).
 
 ### 7.2. Resolução de Escopo e Vínculos Semânticos no OSATE
@@ -319,7 +319,7 @@ Durante a modelação no editor Xtext do OSATE, aplicaram-se regras estritas de 
 1. No OSATE, selecionou-se a implementação raiz `EdgeTelemetry_System.immediate_impl` em `EdgeTelemetry_System_Pkg.aadl`.
 2. Acionou-se o menu de contexto: **`AADL` $\to$ `Instantiate System`**.
 3. O compilador semântico do OSATE gerou com êxito o modelo intermediário:  
-   [`instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2).
+   [`instances/EdgeTelemetry_System_immediate_impl_Instance.aaxl2`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/instances/EdgeTelemetry_System_Pkg_EdgeTelemetry_System_immediate_impl_Instance.aaxl2).
 4. O mesmo procedimento foi repetido para a variante `EdgeTelemetry_System.delayed_impl`.
 5. **Resultado da Verificação:** Zero erros, zero avisos de modelo inválido e conformidade total com o padrão AS5506B.
 
@@ -353,20 +353,21 @@ Durante a modelação no editor Xtext do OSATE, aplicaram-se regras estritas de 
 
 ## 9. Localização dos Artefatos de Código do Pilar 2
 
-O modelo AADL foi disponibilizado em dois formatos complementares no repositório:
+O modelo AADL oficial está mantido na estrutura de entregas do repositório:
 1. **Ficheiro Consolidado Único (Inspeção Rápida):**  
-   [`docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_Pilar2.aadl)
+   [`docs/MBSE/Entregas/Entrega 2 e 3/EdgeTelemetryLayer_Pilar2.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetryLayer_Pilar2.aadl)
 2. **Projeto Modular em Pacotes (Compatível com OSATE e `DevCompatibility`):**  
-   - Diretório de Trabalho do OSATE: [`docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/)
-   - Cópia Espelhada no Repositório: [`docs/MBSE/osate_project/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/osate_project/)
+   - Diretório Canônico: [`docs/MBSE/Entregas/Entrega 2 e 3/EdgeTelemetry_MBSE_OSATE/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/)
+   - Workspace do Eclipse OSATE: `C:\workspace\osate2-2.20.90\workspace\EdgeTelemetry_MBSE\`
    - Pacotes Principais:
-     * [`Data_Types_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Data_Types_Pkg.aadl)
-     * [`Buses_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Buses_Pkg.aadl)
-     * [`Processors_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Processors_Pkg.aadl)
-     * [`Software_Threads_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Software_Threads_Pkg.aadl)
-     * [`Software_Processes_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Software_Processes_Pkg.aadl)
-     * [`EdgeTelemetry_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/EdgeTelemetry_System_Pkg.aadl)
-     * [`Evolved_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/Evolved_System_Pkg.aadl)
-     * [`TinyML_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/packages/TinyML_Pkg.aadl)
-     * Periféricos: [`CAN_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/Library/devices/CAN_Devices_Pkg.aadl), [`Storage_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/Library/devices/Storage_Devices_Pkg.aadl), [`Comm_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetry_MBSE_OSATE/Library/devices/Comm_Devices_Pkg.aadl)
+     * [`Data_Types_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Data_Types_Pkg.aadl)
+     * [`Buses_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Buses_Pkg.aadl)
+     * [`Processors_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Processors_Pkg.aadl)
+     * [`Software_Threads_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Software_Threads_Pkg.aadl)
+     * [`Software_Processes_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Software_Processes_Pkg.aadl)
+     * [`EdgeTelemetry_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/EdgeTelemetry_System_Pkg.aadl)
+     * [`Evolved_System_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/Evolved_System_Pkg.aadl)
+     * [`TinyML_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/packages/TinyML_Pkg.aadl)
+     * Periféricos: [`CAN_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/Library/devices/CAN_Devices_Pkg.aadl), [`Storage_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/Library/devices/Storage_Devices_Pkg.aadl), [`Comm_Devices_Pkg.aadl`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%202%20e%203/EdgeTelemetry_MBSE_OSATE/Library/devices/Comm_Devices_Pkg.aadl)
+
 
