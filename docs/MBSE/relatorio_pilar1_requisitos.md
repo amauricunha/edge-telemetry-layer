@@ -34,6 +34,11 @@ Os requisitos de engenharia foram concebidos para garantir paridade total entre 
 | **[AC-07]** | Detecção e auto-recuperação de Bus-Off com espera de 128 ms (ISO 11898) | `REQ_REC_001`<br>`REQ_REC_002`<br>`REQ_REC_003`<br>`REQ_REC_004`<br>`REQ_REC_005` | `esp32_recovery` | Detecção $\le 10\text{ ms}$, temporização de $128\text{ ms}$ via hardware/RTOS e reativação do TWAI $\le 1\text{ ms}$ |
 | **[AC-08]** | Gravação contínua no SD $\ge 72.000\text{ amostras}$ em ensaio de 1 hora | `REQ_SD_001`<br>`REQ_SD_004`<br>`REQ_SD_005` | `esp32_sd` | $\text{total\_dataset\_samples} \ge 72000$<br>Flush preventivo FAT32 a cada 2 s |
 
+> [!NOTE]
+> **Matriz de Rastreabilidade Bidirecional Exaustiva (SRS $\leftrightarrow$ FRETish):**  
+> A correlação minuciosa entre cada um dos 30 requisitos funcionais do sistema (`REQ-SYS-01` a `REQ-SYS-30`), seus 48 desdobramentos em sentenças FRETish por componente de software (SW-C), camadas arquiteturais e comprovantes formais no Kind 2 está compilada na planilha de auditoria do projeto:  
+> 📊 [**`docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.xlsx`**](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.xlsx) *(disponível também em [versão CSV delimitada](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.csv))*.
+
 ---
 
 ---
@@ -548,14 +553,36 @@ Durante as sessões analíticas no NASA FRET, foram identificados e superados tr
 
 ---
 
-## 7. Localização dos Artefatos do Pilar 1 para Submissão
+## 7. Pacote de Evidências e Artefatos Formais (Material Suplementar)
 
-Todos os artefatos formais foram compilados e persistidos no repositório do projeto, prontos para auditoria e importação imediata no FRET:
-1. **Projeto FRET Unificado (48 Requisitos):**  
-   [`docs/MBSE/EdgeTelemetryLayer_req_var.json`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/EdgeTelemetryLayer_req_var.json)
-2. **Subprojeto Coletor ESP32-S3 (40 Requisitos):**  
-   [`docs/MBSE/esp32s3_collector_req_var.json`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/esp32s3_collector_req_var.json)
-3. **Subprojeto Emulador Arduino UNO (8 Requisitos):**  
-   [`docs/MBSE/uno_ecu_emulator_req_var.json`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/uno_ecu_emulator_req_var.json)
-4. **Relatório Detalhado de Resolução de Problemas e SMT:**  
-   [`docs/MBSE/fret_realizability_troubleshooting.md`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/fret_realizability_troubleshooting.md)
+Para assegurar auditabilidade e reprodutibilidade acadêmica, todos os modelos, logs de execução do solver e matrizes de rastreabilidade foram estruturados como **Material Suplementar** na pasta [`docs/MBSE/resultados/`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados):
+
+### 7.1. Planilhas de Rastreabilidade e Auditoria de Requisitos
+1. **Planilha Eletrônica Formatada (Excel):**  
+   [`docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.xlsx`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.xlsx)  
+   *Contém a matriz completa de 48 requisitos relacionando `SRS_Req_ID`, `SRS_Descricao`, `FRET_Req_ID`, `Componente_FRET`, `Camada`, `Objetivo_Engenharia`, `Sentenca_FRETish`, `Criterio_Aceitacao` e status formal do Kind 2.*
+2. **Matriz em Texto Delimitado (CSV UTF-8 com BOM):**  
+   [`docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.csv`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/Tabela_Rastreabilidade_SRS_FRET.csv)  
+   *Arquivo para importação direta em ferramentas estatísticas ou no Excel.*
+
+### 7.2. Banco de Dados Oficial do NASA FRET
+3. **Projeto FRET Unificado (Coletor + Emulador — 48 Requisitos e 121 Variáveis):**  
+   [`docs/MBSE/resultados/EdgeTelemetryLayer_req_var.json`](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_req_var.json)  
+   *Arquivo exportado pronto para importação direta na interface web do NASA FRET.*
+
+### 7.3. Laudos Oficiais de Prova Matemática do Kind 2 / Z3 (SMT Proof Logs)
+4. **Relatórios JSON de Realizabilidade Composicional por Componente:**
+   - [`uno_ecu_emulator` (8 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_UNO_ECU_EMULATOR_analisys%20-%20Compositional.json)
+   - [`esp32_twai` (Driver CAN — 6 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20twai.json)
+   - [`esp32_obd` (Poller Diagnóstico — 4 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20odb.json)
+   - [`esp32_logger` (Estruturação e Memória — 9 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20logger.json)
+   - [`esp32_sd` (Armazenamento FAT32 — 5 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20sd.json)
+   - [`esp32_telemetry` (Wi-Fi e MQTT — 5 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20telemetry.json)
+   - [`esp32_fsm` (Fallback e Rede — 2 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20fsm.json)
+   - [`esp32_cmd` (Comandos Remotos — 2 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20cmd.json)
+   - [`esp32_recovery` (Bus-Off e Watchdog — 7 Requisitos)](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/EdgeTelemetryLayer_ESPS3_COLETOR_analysis%20-%20Compositional%20-%20recovery.json)
+
+### 7.4. Evidências Gráficas da Interface NASA FRET
+5. **Capturas de Tela da Bancada MBSE:**
+   - [Interface do FRET com Status de Realizabilidade](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/Captura%20de%20tela%202026-09-25%20115240.png)
+   - [Resultados da Execução SMT Kind 2](file:///c:/workspace/can-obd-telemetry/docs/MBSE/resultados/Captura%20de%20tela%202026-09-29%20162527.png)
