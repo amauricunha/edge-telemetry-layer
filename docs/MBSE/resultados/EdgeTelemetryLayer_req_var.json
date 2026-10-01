@@ -2664,7 +2664,7 @@
         },
         {
             "reqid": "REQ_EMU_003",
-            "parent_reqid": "REQ_SYS_01",
+            "parent_reqid": "",
             "project": "EdgeTelemetryLayer_UNO_ECU_EMULATOR",
             "rationale": "Atualização do Modelo Físico da ECU [REQ-SYS-01]\nA cada ciclo de 50 ms do Timer1 sob perfil ativo válido (`active_profile >= 1`), a CPU do emulador deve calcular as 6 grandezas físicas simuladas do motor (`speed_kmh`, `rpm`, `throttle_pct`, `load_pct`, `maf_g_s`, `coolant_temp_c`) a partir da tabela senoidal modulada pelo perfil em menos de 1 ms de tempo de execução da ISR, assegurando invariantes válidos.",
             "comments": "",

@@ -78,12 +78,16 @@ O estudo de caso do drone *ProVANT Emergentia* documenta que formalizar requisit
 
 ---
 
-### 2.2. Fundamentação Teórica da Decomposição por Componentes de Software (SW-C)
+### 2.2. Fundamentação Teórica: Físico vs. Software (O porquê da decomposição)
 
-A divisão em 8 componentes formais no ESP32-S3 fundamenta-se nas melhores práticas de MBSE para sistemas embarcados críticos:
-1. **Conceito Normativo (NASA e AUTOSAR):** Nas normas **NASA-STD-8739.8**, **DO-178C** e na arquitetura **AUTOSAR Classic/Adaptive**, o termo *Componente* designa um **Componente de Software (SW-C)** — uma unidade lógica e modular com interfaces tipadas e orçamentos temporais de pior caso (WCET) rigorosamente delimitados sobre o RTOS (*Embassy* em Rust).
-2. **Precedente Oficial da NASA (Caso de Estudo `LMCPS`):** No projeto oficial da NASA Ames (`LMCPS` — *Lockheed Martin Cyber-Physical Systems*), foram definidos **13 componentes formais concorrentes executando no mesmo processador físico**.
-3. **Composição por Contratos (*Assume-Guarantee Reasoning*):** A modularidade viabilizou provar formalmente a integração entre produtor e consumidor de dados. O driver TWAI (`esp32_twai`) garante entregar o frame na fila em $\le 1\text{ ms}$, enquanto o módulo de log (`esp32_logger`) assume a presença do frame e garante serializá-lo em $\le 1\text{ ms}$, provando a ausência de contenções na fila assíncrona por indução composicional.
+No artigo da RefSQ 2025 (*ProVANT Drone*), a equipe modelou componentes baseados em **Nós Físicos** (ex: Placa Nucleo, Jetson, Raspberry). Essa abordagem foi escolhida porque o drone é um sistema distribuído em múltiplos hardwares. Em contraste, o nosso coletor OBD-II roda integralmente sobre um único microcontrolador (ESP32-S3). Por que, então, fragmentamos em 8 componentes no FRET?
+
+A divisão em **Componentes de Software (SW-Cs)** fundamenta-se nas melhores práticas de MBSE para sistemas embarcados de tempo real:
+1. **Conceito Normativo (NASA e AUTOSAR):** Nas normas **NASA-STD-8739.8** e na arquitetura **AUTOSAR**, uma tarefa assíncrona concorrente gerenciada por um RTOS (*Embassy* em Rust) é a unidade fundamental de verificação. O precedente oficial da NASA Ames (Caso de Estudo `LMCPS`) modelou com sucesso **13 componentes formais de software executando no mesmo processador físico**.
+2. **Separação de Preocupações (FRET vs. OSATE):** É imperativo compreender o limite de escopo de cada ferramenta no MBSE:
+   - **O que o FRET prova (Lógica de Componente):** O solver Kind 2 verifica a *Realizabilidade* de forma isolada (cada SW-C). Ele garante matematicamente que a lógica interna do `esp32_twai` não possui contradições e que existe uma implementação factível dadas suas entradas e saídas.
+   - **O que o FRET *NÃO* prova (Concorrência de Sistema):** O FRET **não** avalia se o ESP32-S3 tem poder de processamento suficiente para rodar todos os componentes juntos, nem prova a ausência de deadlocks de CPU entre componentes concorrentes.
+3. **Delegação ao Pilar 3 (OSATE):** A análise de integração, contenção de recursos, ausência de deadlocks inter-tarefas e escalonabilidade global no mesmo processador físico é responsabilidade estrita das simulações de fluxo e latência no AADL/OSATE (Pilar 3), e não do FRET. O FRET garante que as peças do quebra-cabeça estão corretas individualmente; o OSATE garante que todas as peças cabem no mesmo quadro de tempo do processador.
 
 ---
 
