@@ -7,6 +7,7 @@ public
 	with Comm_Devices_Pkg;
 	with Software_Processes_Pkg;
 	with TinyML_Pkg;
+	renames Buses_Pkg::all;
 
 	---------------------------------------------------------------------------
 	-- SISTEMA EVOLUÍDO PILAR 4 (FRAMEWORK CAvA: AIoT EDGE TELEMETRY + DRIVER COACHING)
@@ -18,8 +19,8 @@ public
 		subcomponents
 			-- Processador Dual-Core (Core 0: Telemetria BSW | Core 1: TinyML IA)
 			cpu: processor Processors_Pkg::ESP32S3_DualCore_Processor.impl;
-			can_bus: bus Buses_Pkg::CAN_Bus;
-			spi_bus: bus Buses_Pkg::SPI_Bus;
+			can_bus: bus CAN_Bus;
+			spi_bus: bus SPI_Bus;
 
 			-- Dispositivos Físicos
 			ecu_emulator: device CAN_Devices_Pkg::Uno_ECU_Emulator_Device.impl;
