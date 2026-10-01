@@ -19,11 +19,12 @@ A resposta reside na distinção canônica entre **Arquitetura de Hardware (Nív
    - No maior caso de estudo oficial da NASA (`LMCPS` — *Lockheed Martin Cyber-Physical Systems*, disponível na pasta `docs/MBSE/FRET_docs/LMCPS`), composto por 97 requisitos formais, a NASA dividiu o sistema em **13 componentes funcionais independentes**:
      `Autopilot`, `RollAutopilot`, `Euler`, `Regulator`, `Tustin_Integrator`, `FSM_Sensor`, etc.
    - **Todos esses 13 módulos executam na mesma CPU física** do computador de controle de voo (*Flight Control Computer*). A NASA adotou essa decomposição porque modelar tarefas concorrentes como uma única caixa-preta opaca é metodologicamente inadequado e gera modelos intratáveis.
-3. **Validação Rigorosa dos Requisitos ENTRE os Módulos (Design por Contrato / Assume-Guarantee):**
-   - Ao modelar cada subsistema como um componente formal, **validamos com máximo rigor as interfaces entre as tarefas**:
-     - O módulo **Produtor** (`esp32_twai` - MCAL) garante colocar o registro decodificado no canal assíncrono da RTE em até $1\text{ ms}$ (`telemetry_frame_parsed = true`).
+3. **Validação Rigorosa dos Requisitos e Interfaces Modulares:**
+   - Ao modelar cada subsistema como um componente formal, delimitamos com rigor as variáveis de entrada (`Input`), saída (`Output`) e internas (`Internal`) de cada SW-C:
+     - O módulo **Produtor** (`esp32_twai` - MCAL) garante colocar o registro decodificado no canal assíncrono da RTE em até $1\text{ ms}$ (`rte_channel_pushed = true`).
      - O módulo **Consumidor** (`esp32_logger` - Aplicação) assume como premissa de entrada a chegada desse dado e garante formatá-lo em linha CSV e colocá-lo no buffer SRAM em até $1\text{ ms}$.
-     - Se o provador formal Kind 2 comprova a realizabilidade de ambos os contratos, **a comunicação inter-tarefas através da RTE está matematicamente provada por indução composicional (Assume-Guarantee)**.
+     - O Kind 2 comprova matematicamente que as regras de cada componente são internamente realizáveis e livres de contradições lógicas.
+   - A garantia de que a integração entre produtor e consumidor na RTE não sofre contenção ou estouro de deadline na CPU compartilhada é então formalmente comprovada pelas análises de escalonabilidade e latência de fluxo do OSATE (Pilar 3).
    - Se unificássemos tudo em uma "caixa-preta de CPU", as filas da RTE (`TELEMETRY_CHANNEL`, `CAN_CMD_CHANNEL`) e os buffers em SRAM virariam variáveis internas invisíveis, e o FRET não conseguiria verificar se os prazos de pior caso (WCET) de cada camada de software são respeitados.
 4. **Prevenção de Falsos Conflitos de Atribuição no Solver SMT:**
    - Evita que o solver SMT aponte falsos conflitos de concorrência causados pela tentativa de modelar múltiplas tarefas assíncronas concorrentes em uma única equação de transição de estados.
