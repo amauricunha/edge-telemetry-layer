@@ -78,7 +78,6 @@ public
 		properties
 			-- G. Amarração de Processador no CORE 0 (Tempo Real Estrito / Aquisição e Armazenamento)
 			-- Garante que nenhuma preempção causada por redes neurais interfira no pipeline BSW
-			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry;
 			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_can_rx;
 			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_obd_poller;
 			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_logger;
@@ -86,7 +85,6 @@ public
 
 			-- H. Amarração de Processador no CORE 1 (Inteligência de Borda / Inferência TinyML)
 			-- Aloca todas as tarefas de extração, inferência e coaching no segundo núcleo físico
-			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml;
 			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_adapter;
 			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_extractor;
 			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_inference;

@@ -1,9 +1,6 @@
 package EdgeTelemetry_Pkg
 public
-	with Base_Types;
-	with Deployment_Properties;
-	with Timing_Properties;
-	with Communication_Properties;
+	with SEI;
 
 	---------------------------------------------------------------------------
 	-- PILAR 2: MODELAÇÃO ARQUITETURAL EM AADL NO OSATE (ARQUIVO CONSOLIDADO)
@@ -40,7 +37,7 @@ public
 	-- - 2 bytes: Timestamp relativo de hardware (resolução de 10 us)
 	data CAN_Frame_Data
 		properties
-			Source_Data_Size => 16 Bytes;
+			Data_Size => 16 Bytes;
 	end CAN_Frame_Data;
 
 	-- 1.2. Pacote de Diagnóstico OBD-II ISO 15765-4 (Data_Size => 8 Bytes)
@@ -52,7 +49,7 @@ public
 	-- - Bytes 3-7: Bytes de preenchimento (Padding fixo 0xAA ou 0x55)
 	data Diagnostic_Packet_Data
 		properties
-			Source_Data_Size => 8 Bytes;
+			Data_Size => 8 Bytes;
 	end Diagnostic_Packet_Data;
 
 	-- 1.3. Linha Tabular CSV Formatada em Buffer Estático (Data_Size => 320 Bytes)
@@ -63,8 +60,24 @@ public
 	-- - Pré-alocada em buffer estático para evitar fragmentação de heap em tempo real
 	data CSV_Payload_Data
 		properties
-			Source_Data_Size => 320 Bytes;
+			Data_Size => 320 Bytes;
 	end CSV_Payload_Data;
+
+	-- 1.4. Tensor de Atributos Normalizados para TinyML (Data_Size => 128 Bytes)
+	-- Rastreabilidade: REQ-SYS-31, REQ_TINYML_001 e Critério AC-08
+	-- Estrutura da Janela Deslizante de 100 amostras pré-processadas em float/INT8
+	data Feature_Tensor_Data
+		properties
+			Data_Size => 128 Bytes;
+	end Feature_Tensor_Data;
+
+	-- 1.5. Pacote Semântico de Driver Coaching (Data_Size => 64 Bytes)
+	-- Rastreabilidade: REQ-SYS-32, REQ_TINYML_002 e Critério AC-05
+	-- Estrutura: Score de pilotagem (0-100), recomendação acionável e flags de corte
+	data Driver_Coaching_Data
+		properties
+			Data_Size => 64 Bytes;
+	end Driver_Coaching_Data;
 
 	---------------------------------------------------------------------------
 	-- 2. BARRAMENTOS FÍSICOS (BUS COMPONENTS)
@@ -159,8 +172,10 @@ public
 	device WiFi_Device
 		features
 			mqtt_stream_in: in event data port CSV_Payload_Data;
+			coaching_stream_in: in event data port Driver_Coaching_Data;
 		flows
 			f_sink: flow sink mqtt_stream_in;
+			f_sink_coaching: flow sink coaching_stream_in;
 		properties
 			Dispatch_Protocol => Periodic;
 			Period => 50 ms;
@@ -188,10 +203,43 @@ public
 		properties
 			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
 			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 240.0 MIPS;
 	end ESP32S3_Processor;
 
 	processor implementation ESP32S3_Processor.impl
 	end ESP32S3_Processor.impl;
+
+	-- 4.2. Núcleo Virtual de Processamento Xtensa LX7 (240 MHz com FPU)
+	-- Modela um core individual do microcontrolador com seu respectivo escalonador
+	virtual processor Xtensa_LX7_Core
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 240.0 MIPS;
+	end Xtensa_LX7_Core;
+
+	virtual processor implementation Xtensa_LX7_Core.impl
+	end Xtensa_LX7_Core.impl;
+
+	-- 4.3. Processador ESP32-S3 Dual-Core (Evolução CAvA / Pilar 4)
+	-- Arquitetura Assimétrica de Execução:
+	-- - Core 0 (core0): Alocado para Telemetria BSW em Tempo Real Estrito
+	-- - Core 1 (core1): Alocado para Inteligência de Borda / Inferência TinyML
+	processor ESP32S3_DualCore_Processor
+		features
+			can_bus_access: requires bus access CAN_Bus.impl;
+			spi_bus_access: requires bus access SPI_Bus.impl;
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 480.0 MIPS;
+	end ESP32S3_DualCore_Processor;
+
+	processor implementation ESP32S3_DualCore_Processor.impl
+		subcomponents
+			core0: virtual processor Xtensa_LX7_Core.impl;
+			core1: virtual processor Xtensa_LX7_Core.impl;
+	end ESP32S3_DualCore_Processor.impl;
 
 	---------------------------------------------------------------------------
 	-- 5. CAMADA DE SOFTWARE: THREADS PERIÓDICAS (PIPELINE DE TEMPO REAL)
@@ -326,9 +374,11 @@ public
 			can_raw_in: in event data port CAN_Frame_Data;
 			sd_stream_out: out event data port CSV_Payload_Data;
 			mqtt_stream_out: out event data port CSV_Payload_Data;
+			telemetry_for_ai_out: out event data port CAN_Frame_Data;
 		flows
 			f_can_to_sd: flow path can_raw_in -> sd_stream_out;
 			f_can_to_mqtt: flow path can_raw_in -> mqtt_stream_out;
+			f_can_to_ai: flow path can_raw_in -> telemetry_for_ai_out;
 	end Telemetry_Process;
 
 	-- 6.1. Implementação com Semântica Imediata (Immediate Semantics - Baseline Real)
@@ -345,9 +395,11 @@ public
 			c_log_to_tx: port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => immediate;};
 			c_tx_to_sd: port th_tx_dispatch.sd_record_out -> sd_stream_out;
 			c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+			c_rx_to_ai: port th_can_rx.telemetry_out -> telemetry_for_ai_out;
 		flows
 			f_can_to_sd: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
 			f_can_to_mqtt: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+			f_can_to_ai: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_ai -> telemetry_for_ai_out;
 	end Telemetry_Process.immediate_impl;
 
 	-- 6.2. Implementação com Semântica Atrasada (Delayed Semantics - Estudo Teórico)
@@ -364,19 +416,116 @@ public
 			c_log_to_tx: port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => delayed;};
 			c_tx_to_sd: port th_tx_dispatch.sd_record_out -> sd_stream_out;
 			c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+			c_rx_to_ai: port th_can_rx.telemetry_out -> telemetry_for_ai_out;
 		flows
 			f_can_to_sd: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
 			f_can_to_mqtt: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+			f_can_to_ai: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_ai -> telemetry_for_ai_out;
 	end Telemetry_Process.delayed_impl;
 
 	---------------------------------------------------------------------------
-	-- 7. NÓ EMULADOR ARDUINO UNO (SUBSISTEMA HIL EXTERNO)
-	--
-	-- Papel Semântico no AADL:
-	-- O Arduino UNO é modelado como 'device' (e não como 'processor') porque atua
-	-- estritamente como estimulador externo / bancada de testes HIL (Hardware-in-the-Loop).
-	-- Ele emite quadros veiculares simulados (RPM, Velocidade, TPS) no barramento CAN
-	-- a cada 50 ms sem consumir ciclos computacionais da CPU do coletor sob teste.
+	-- 7. PIPELINE DE INTELIGÊNCIA DE BORDA (TINYML / DRIVER COACHING - PILAR 4)
+	---------------------------------------------------------------------------
+
+	-- 7.1. Wrapper Adaptador de Dados (Exigência Fase 3 CAvA)
+	thread TinyML_Input_Adapter
+		features
+			telemetry_in: in event data port CAN_Frame_Data;
+			normalized_sample_out: out event data port Feature_Tensor_Data;
+		flows
+			f_adapt: flow path telemetry_in -> normalized_sample_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 20 ms;
+			Compute_Execution_Time => 100 us .. 500 us;
+			Deadline => 20 ms;
+			Priority => 9;
+	end TinyML_Input_Adapter;
+
+	thread implementation TinyML_Input_Adapter.impl
+	end TinyML_Input_Adapter.impl;
+
+	-- 7.2. Extrator de Características em Janela Deslizante
+	thread Task_Feature_Extractor
+		features
+			sample_in: in event data port Feature_Tensor_Data;
+			window_tensor_out: out event data port Feature_Tensor_Data;
+		flows
+			f_extract: flow path sample_in -> window_tensor_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 500 ms;
+			Compute_Execution_Time => 500 us .. 2000 us;
+			Deadline => 500 ms;
+			Priority => 7;
+	end Task_Feature_Extractor;
+
+	thread implementation Task_Feature_Extractor.impl
+	end Task_Feature_Extractor.impl;
+
+	-- 7.3. Motor de Inferência INT8 Quantizado (TFLite Micro / ESP-NN)
+	thread Task_TinyML_Inference
+		features
+			tensor_in: in event data port Feature_Tensor_Data;
+			prediction_out: out event data port Driver_Coaching_Data;
+		flows
+			f_infer: flow path tensor_in -> prediction_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 1000 ms;
+			Compute_Execution_Time => 10 ms .. 25 ms;
+			Deadline => 1000 ms;
+			Priority => 5;
+	end Task_TinyML_Inference;
+
+	thread implementation Task_TinyML_Inference.impl
+	end Task_TinyML_Inference.impl;
+
+	-- 7.4. Consultor de Pilotagem em Tempo Real (Driver Coaching Advisor)
+	thread Task_Coaching_Advisor
+		features
+			prediction_in: in event data port Driver_Coaching_Data;
+			coaching_out: out event data port Driver_Coaching_Data;
+		flows
+			f_coach: flow path prediction_in -> coaching_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 1000 ms;
+			Compute_Execution_Time => 200 us .. 1000 us;
+			Deadline => 1000 ms;
+			Priority => 4;
+	end Task_Coaching_Advisor;
+
+	thread implementation Task_Coaching_Advisor.impl
+	end Task_Coaching_Advisor.impl;
+
+	-- 7.5. Processo de IA Concorrente (Core 1)
+	process TinyML_Process
+		features
+			telemetry_in: in event data port CAN_Frame_Data;
+			coaching_out: out event data port Driver_Coaching_Data;
+		flows
+			f_infer_flow: flow path telemetry_in -> coaching_out;
+	end TinyML_Process;
+
+	process implementation TinyML_Process.impl
+		subcomponents
+			th_adapter: thread TinyML_Input_Adapter.impl;
+			th_extractor: thread Task_Feature_Extractor.impl;
+			th_inference: thread Task_TinyML_Inference.impl;
+			th_coach: thread Task_Coaching_Advisor.impl;
+		connections
+			c_in: port telemetry_in -> th_adapter.telemetry_in;
+			c_adapt_to_ext: port th_adapter.normalized_sample_out -> th_extractor.sample_in {Timing => immediate;};
+			c_ext_to_infer: port th_extractor.window_tensor_out -> th_inference.tensor_in {Timing => immediate;};
+			c_infer_to_coach: port th_inference.prediction_out -> th_coach.prediction_in {Timing => immediate;};
+			c_coach_out: port th_coach.coaching_out -> coaching_out;
+		flows
+			f_infer_flow: flow path telemetry_in -> c_in -> th_adapter.f_adapt -> c_adapt_to_ext -> th_extractor.f_extract -> c_ext_to_infer -> th_inference.f_infer -> c_infer_to_coach -> th_coach.f_coach -> c_coach_out -> coaching_out;
+	end TinyML_Process.impl;
+
+	---------------------------------------------------------------------------
+	-- 8. NÓ EMULADOR ARDUINO UNO (SUBSISTEMA HIL EXTERNO)
 	---------------------------------------------------------------------------
 	device Uno_ECU_Emulator_Device
 		features
@@ -395,18 +544,12 @@ public
 	end Uno_ECU_Emulator_Device.impl;
 
 	---------------------------------------------------------------------------
-	-- 8. SISTEMA INTEGRADO RAIZ (TOP LEVEL SYSTEM & BINDINGS)
-	--
-	-- Papel Semântico no AADL:
-	-- O componente 'system' agrega todos os elementos físicos (CPU, barramentos, periféricos)
-	-- e lógicos (processos e threads), aplicando as amarrações formais:
-	-- - Actual_Processor_Binding: Aloca as threads de software na CPU ESP32-S3.
-	-- - Actual_Connection_Binding: Vincula o tráfego de dados aos barramentos físicos.
+	-- 9. SISTEMA INTEGRADO BASELINE (TOP LEVEL SYSTEM & BINDINGS - PILAR 2)
 	---------------------------------------------------------------------------
 	system EdgeTelemetry_System
 	end EdgeTelemetry_System;
 
-	-- 8.1. Implementação Raiz com Semântica Imediata (Modo Immediate)
+	-- 9.1. Implementação Raiz com Semântica Imediata (Modo Immediate)
 	system implementation EdgeTelemetry_System.immediate_impl
 		subcomponents
 			cpu: processor ESP32S3_Processor.impl;
@@ -436,7 +579,6 @@ public
 			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
 		properties
 			-- D. Alocação Formal de Processador (Actual_Processor_Binding)
-			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
@@ -448,7 +590,7 @@ public
 			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
 	end EdgeTelemetry_System.immediate_impl;
 
-	-- 8.2. Implementação Raiz com Semântica Atrasada (Modo Delayed)
+	-- 9.2. Implementação Raiz com Semântica Atrasada (Modo Delayed)
 	system implementation EdgeTelemetry_System.delayed_impl
 		subcomponents
 			cpu: processor ESP32S3_Processor.impl;
@@ -478,7 +620,6 @@ public
 			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
 		properties
 			-- D. Alocação Formal de Processador (Actual_Processor_Binding)
-			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
@@ -489,5 +630,64 @@ public
 			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
 			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
 	end EdgeTelemetry_System.delayed_impl;
+
+	---------------------------------------------------------------------------
+	-- 10. SISTEMA EVOLUÍDO COM INTELIGÊNCIA DE BORDA (PILAR 4 - CAvA DUAL-CORE)
+	---------------------------------------------------------------------------
+	system Evolved_EdgeTelemetry_System
+	end Evolved_EdgeTelemetry_System;
+
+	system implementation Evolved_EdgeTelemetry_System.impl
+		subcomponents
+			cpu: processor ESP32S3_DualCore_Processor.impl;
+			can_bus: bus CAN_Bus.impl;
+			spi_bus: bus SPI_Bus.impl;
+			ecu_emulator: device Uno_ECU_Emulator_Device.impl;
+			can_transceiver: device CAN_Transceiver.impl;
+			sd_card: device MicroSD_Device.impl;
+			wifi_module: device WiFi_Device.impl;
+			sw_telemetry: process Telemetry_Process.immediate_impl;
+			sw_tinyml: process TinyML_Process.impl;
+		connections
+			-- Barramentos
+			b_can_cpu: bus access can_bus <-> cpu.can_bus_access;
+			b_can_transceiver: bus access can_bus <-> can_transceiver.can_bus_conn;
+			b_can_emulator: bus access can_bus <-> ecu_emulator.can_bus_conn;
+			b_spi_cpu: bus access spi_bus <-> cpu.spi_bus_access;
+			b_spi_sd: bus access spi_bus <-> sd_card.spi_conn;
+
+			-- Conexões de Telemetria
+			p_can_wire: port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+			p_can_to_sw: port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+			p_sw_to_sd: port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+			p_sw_to_wifi: port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+
+			-- Conexão Inter-Core (Core 0 -> Core 1)
+			p_sw_to_ai: port sw_telemetry.telemetry_for_ai_out -> sw_tinyml.telemetry_in;
+
+			-- Saída de Alertas de Driver Coaching para a Nuvem
+			p_ai_to_wifi: port sw_tinyml.coaching_out -> wifi_module.coaching_stream_in;
+		flows
+			end_to_end_can_to_sd: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
+			end_to_end_can_to_coaching: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_ai -> p_sw_to_ai -> sw_tinyml.f_infer_flow -> p_ai_to_wifi -> wifi_module.f_sink_coaching;
+		properties
+			-- Amarração Estrita no CORE 0 (Tempo Real / Aquisição)
+			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_can_rx;
+			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_obd_poller;
+			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_logger;
+			Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_tx_dispatch;
+
+			-- Amarração Estrita no CORE 1 (Inteligência Artificial / TinyML)
+			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_adapter;
+			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_extractor;
+			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_inference;
+			Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_coach;
+
+			-- Amarrações de Barramento
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+	end Evolved_EdgeTelemetry_System.impl;
 
 end EdgeTelemetry_Pkg;

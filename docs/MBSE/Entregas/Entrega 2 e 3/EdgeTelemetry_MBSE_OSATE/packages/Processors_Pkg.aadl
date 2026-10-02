@@ -1,6 +1,7 @@
 package Processors_Pkg
 public
 	with Buses_Pkg;
+	with SEI;
 	renames Buses_Pkg::all;
 
 	---------------------------------------------------------------------------
@@ -22,6 +23,7 @@ public
 		properties
 			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
 			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 240.0 MIPS;
 	end Xtensa_LX7_Core;
 
 	virtual processor implementation Xtensa_LX7_Core.impl
@@ -42,6 +44,7 @@ public
 		properties
 			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
 			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 240.0 MIPS;
 	end ESP32S3_Processor;
 
 	processor implementation ESP32S3_Processor.impl
@@ -64,6 +67,10 @@ public
 		features
 			can_bus_access: requires bus access CAN_Bus;
 			spi_bus_access: requires bus access SPI_Bus;
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 480.0 MIPS;
 	end ESP32S3_DualCore_Processor;
 
 	processor implementation ESP32S3_DualCore_Processor.impl

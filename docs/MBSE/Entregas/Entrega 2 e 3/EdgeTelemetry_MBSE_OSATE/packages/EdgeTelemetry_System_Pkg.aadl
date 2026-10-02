@@ -76,7 +76,6 @@ public
 		properties
 			-- D. Amarração Formal de Software na CPU (Actual_Processor_Binding)
 			-- Garante que todas as threads de software executem na CPU do ESP32-S3
-			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
@@ -121,7 +120,6 @@ public
 			end_to_end_can_to_sd: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
 			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink_telemetry;
 		properties
-			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
 			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
