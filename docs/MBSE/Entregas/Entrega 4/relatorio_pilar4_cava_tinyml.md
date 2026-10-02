@@ -34,14 +34,128 @@ A linha de base é a arquitetura formalizada no **Pilar 2** ([`EdgeTelemetryLaye
 
 A evolução arquitetural abrange dois níveis complementares:
 
-### 2.1. Cenário A: Biblioteca de Dispositivos e Compatibilidade com o `DevCompatibility`
-Na ferramenta **DevCompatibility**, a arquitetura existente é confrontada contra uma biblioteca de componentes candidatos (`Library > devices`):
-1. **Componente Baseline:** `CAN_Transceiver` (Transceptor diferencial clássico via pinos TWAI).
-2. **Componente Candidato:** `CAN_FD_Transceiver_Candidate` (Transceptor com taxa de amostragem de 2 ms e porta dedicada de diagnóstico de erros elétricos `bus_error_diag`).
-3. **Mapeamento de Incompatibilidade:**  
-   O analisador do `DevCompatibility` acusa:
-   - *Incompatibilidade de Portas:* Presença da porta adicional `bus_error_diag: out event port`, ausente na interface do processo de telemetria existente.
-   - *Incompatibilidade Temporal:* Frequência de despacho elevada de 5 ms para 2 ms ($500\text{ Hz}$).
+### 2.1. Cenário A: Avaliação Automatizada de Substituição de Dispositivo no `DevCompatibility`
+Para validar a compatibilidade de componentes e demonstrar a automação de evolução arquitetural proposta pelo framework CAvA (Sales & Becker, UFSC), a arquitetura foi submetida à ferramenta **DevCompatibility (AEW - *Architecture Evolution Workbench*)**:
+
+1. **Componente Baseline a ser substituído:** `wifi_module: device WiFi_Device.impl` (Módulo Wi-Fi local 2.4 GHz com interface de saída MQTT nominal de 50 ms).
+2. **Componente Candidato Avaliado:** `Cellular_LTE_Device: device Comm_Devices_Pkg::Cellular_LTE_Device` (Modem celular 4G/LTE COTS para operação em frotas veiculares abertas sem cobertura de rede local).
+3. **Detecção Formal de Incompatibilidade de Interface (Port Mismatch):**  
+   - A conexão original de saída do processo de telemetria era direcionada à porta `mqtt_stream_in` do `WiFi_Device`.
+   - O dispositivo candidato `Cellular_LTE_Device` expõe uma interface com portas distintas: `coaching_stream_in` e `cellular_stream_in`, além de uma porta adicional de telemetria de sinal celular `network_status_out`.
+   - O mecanismo de correspondência de portas do DevCompatibility identificou a quebra na ligação `p_sw_to_wifi`.
+4. **Síntese Automática de Adaptador (Wrapper Process):**  
+   A ferramenta sintetizou automaticamente um processo intermediário adaptador (`wrapper_coaching_stream_in_to_mqtt_stream_out`) para compatibilizar as portas `sw_telemetry.mqtt_stream_out` e `Cellular_LTE_Device.coaching_stream_in`, preservando a consistência do sistema.
+
+#### Evidências Experimentais Obtidas no DevCompatibility:
+
+##### 1. Diagnóstico Inicial e Resolução de Namespace
+Na primeira tentativa de carregamento modular, o motor interno do analisador (`AadlEvaluator-Core`) acusou falha de ponteiro nulo (`Subcomponent.getComponent() is null`) decorrente da resolução de classificadores de subcomponentes com prefixos de pacote cruzados (`Processors_Pkg::...`). A unificação no pacote consolidado (`EdgeTelemetry_Pkg`) permitiu o parsing completo e correto da árvore do sistema.
+
+![Erro de resolução de subcomponente em arquivos fragmentados](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/01_devcompatibility_erro_subcomponent_null.png)
+*Figura 2.1: Diagnóstico de resolução de classificadores cruzados no DevCompatibility.*
+
+##### 2. Seleção do Subcomponente Alvo (`wifi_module`)
+No assistente de evolução (*Evolution Wizard*), o componente `wifi_module` foi selecionado para substituição:
+
+![Seleção do subcomponente wifi_module no DevCompatibility](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/02_devcompatibility_selecao_wifi_device.png)
+*Figura 2.2: Seleção do subcomponente wifi_module para evolução arquitetural.*
+
+##### 3. Filtragem de Candidatos da Biblioteca (Filtro por Features)
+O DevCompatibility aplica um algoritmo de filtragem baseado em características (*features*). No modo automático (*Auto*), a ferramenta filtra candidatos que possuam portas homônimas (`mqtt_stream_in`):
+
+![Filtragem de candidatos no assistente Candidate Edit](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/03_devcompatibility_candidate_edit_filtro_auto.png)
+*Figura 2.3: Assistente de seleção de candidatos com filtro automático de portas.*
+
+##### 4. Identificação da Incompatibilidade nas Ligações Físicas/Lógicas
+Ao associar o `Cellular_LTE_Device`, o DevCompatibility listou a conexão `p_sw_to_wifi` como afetada e abriu opções para roteamento e compatibilização:
+
+![Identificação de ligações afetadas pela substituição](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/04_devcompatibility_incompatibilidade_conexoes.png)
+*Figura 2.4: Matriz de conexões e identificação de incompatibilidade na ligação p_sw_to_wifi.*
+
+##### 5. Código AADL Evoluído com Wrapper Gerado Automaticamente
+A ferramenta gerou a nova especificação formal do sistema incorporando o subcomponente `Cellular_LTE_Device` e o processo adaptador `wrapper_coaching_stream_in_to_mqtt_stream_out`:
+
+```aadl
+system implementation EdgeTelemetry_System.immediate_impl
+  subcomponents
+    can_bus : bus CAN_Bus.impl;
+    can_transceiver : device CAN_Transceiver.impl;
+    Cellular_LTE_Device : device Comm_Devices_Pkg::Cellular_LTE_Device;
+    cpu : processor ESP32S3_Processor.impl;
+    ecu_emulator : device Uno_ECU_Emulator_Device.impl;
+    sd_card : device MicroSD_Device.impl;
+    spi_bus : bus SPI_Bus.impl;
+    sw_telemetry : process Telemetry_Process.immediate_impl;
+    wrapper_coaching_stream_in_to_mqtt_stream_out : process wrapper_coaching_stream_in_to_mqtt_stream_out;
+
+  connections
+    b_can_cpu : bus access can_bus <-> cpu.can_bus_access;
+    b_can_emulator : bus access can_bus <-> ecu_emulator.can_bus_conn;
+    b_can_transceiver : bus access can_bus <-> can_transceiver.can_bus_conn;
+    b_spi_cpu : bus access spi_bus <-> cpu.spi_bus_access;
+    b_spi_sd : bus access spi_bus <-> sd_card.spi_conn;
+    c9 : port sw_telemetry.mqtt_stream_out -> wrapper_coaching_stream_in_to_mqtt_stream_out.partB;
+    p_can_to_sw : port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+    p_can_wire : port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+    p_sw_to_sd : port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+    p_sw_to_wifi : port wrapper_coaching_stream_in_to_mqtt_stream_out.partA -> Cellular_LTE_Device.coaching_stream_in;
+
+  properties
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+    Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+    Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+    Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+end EdgeTelemetry_System.immediate_impl;
+```
+
+![Código AADL gerado com síntese de Wrapper no DevCompatibility](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/05_devcompatibility_aadl_result_wrapper_sintetizado.png)
+*Figura 2.5: Código AADL resultante da evolução arquitetural com o processo adaptador sintetizado.*
+
+##### 6. Detalhes das Modificações Declaradas (Change Details)
+Na visualização detalhada do cenário evoluído (*Change Details*), a ferramenta registrou explicitamente as operações no metamodelo:
+- **`declaration added`:** Adição do subcomponente `Cellular_LTE_Device`, do subcomponente `wrapper_coaching_stream_in_to_mqtt_stream_out` e da conexão `c9`.
+- **`declaration changed`:** Alteração e redirecionamento da conexão `p_sw_to_wifi`.
+- **`declaration deleted`:** Remoção do subcomponente legado `wifi_module`.
+
+![Detalhes das declarações adicionadas, modificadas e removidas](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/07_devcompatibility_change_details_cellular_lte.png)
+*Figura 2.6: Painel Change Details documentando formalmente a evolução de componentes e portas.*
+
+##### 7. Análise de Fatores de Trade-off e Comparação Quantitativa (Fase 4 CAvA)
+A ferramenta calculou automaticamente o impacto estrutural da mudança nos atributos de qualidade do sistema (norma ISO/IEC 25010), gerando a matriz comparativa oficial entre o sistema original e a evolução gerada:
+
+| Característica (ISO 25010) | Atributo de Qualidade | Arquitetura Original | Cenário Evoluído | Resultado da Análise CAvA / DevCompatibility |
+| :--- | :--- | :---: | :---: | :--- |
+| **Geral** | Fator Geral (*General Factor*) | $0.23077$ | $0.00000$ | Redução de $0.231$ decorrente da inclusão de wrapper de interface |
+| **Funcionalidade** | *Functionality* | $0$ | $0$ | Equivalência funcional mantida |
+| **Manutenibilidade** | Conexões Totais (*Connections total*) | $9$ | $10$ | $+1$ conexão ($+10.0\%$) devido ao processo intermediário |
+| **Manutenibilidade** | Subcomponentes Totais (*Subcomponents Total*) | $8$ | $9$ | $+1$ subcomponente ($+11.11\%$) devido ao wrapper sintetizado |
+| **Desempenho** | Preço Total (*Price Total*) | $\$0.00$ | $\$0.00$ | Custo de hardware equivalente na modelagem |
+| **Desempenho** | Peso Total (*Weight Total*) | $0.00\text{ Kg}$ | $0.00\text{ Kg}$ | Peso físico equivalente na modelagem |
+| **Desempenho** | Carga CAN Máxima (*can_bus Usage Max*) | $0.0\text{ Kbps}$ | $0.0\text{ Kbps}$ | Carga de barramento nominal idêntica |
+| **Desempenho** | Carga CAN Mínima (*can_bus Usage Min*) | $0.0\text{ Kbps}$ | $0.0\text{ Kbps}$ | Carga de barramento nominal idêntica |
+| **Desempenho** | Carga CPU Máxima (*cpu Usage Max*) | $1.03\text{ MIPS}$ | $1.03\text{ MIPS}$ | Carga de pico da CPU mantida dentro do limite seguro |
+| **Desempenho** | Carga CPU Mínima (*cpu Usage Min*) | $0.27\text{ MIPS}$ | $0.27\text{ MIPS}$ | Carga mínima da CPU sem sobrecarga de baseline |
+| **Desempenho** | Carga SPI Máxima (*spi_bus Usage Max*) | $0.0\text{ Kbps}$ | $0.0\text{ Kbps}$ | Barramento de armazenamento inalterado |
+| **Desempenho** | Carga SPI Mínima (*spi_bus Usage Min*) | $0.0\text{ Kbps}$ | $0.0\text{ Kbps}$ | Barramento de armazenamento inalterado |
+
+![Tela de análise comparativa de atributos de qualidade no DevCompatibility](file:///c:/workspace/can-obd-telemetry/docs/MBSE/Entregas/Entrega%204/images/08_devcompatibility_analysis_comparativa_cava.png)
+*Figura 2.7: Painel Analysis do DevCompatibility exibindo o comparativo quantitativo Original vs Evolução.*
+
+##### 8. Segundo Caso de Teste Experimental: Substituição de Armazenamento (`sd_card` $\to$ `HighSpeed_Flash_Device`)
+Para atestar a generalidade do método em diferentes subsistemas da camada de telemetria, realizou-se um segundo teste automatizado substituindo o leitor de cartão microSD (`MicroSD_Device`) pela memória flash industrial de alta velocidade (`HighSpeed_Flash_Device`):
+- **Quebra de Interface Detectada:** O `MicroSD_Device` recebia fluxo de arquivo formatado via porta `file_stream_in`, enquanto o `HighSpeed_Flash_Device` grava em blocos brutos através da porta `raw_block_stream_in`.
+- **Wrapper Sintetizado:** A ferramenta sintetizou com sucesso o processo `wrapper_raw_block_stream_in_to_sd_stream_out`, conectando a saída `sw_telemetry.sd_stream_out` na porta `partB` e a porta `partA` na entrada `raw_block_stream_in` da nova memória flash.
+- **Impacto no Metamodelo:**
+  - `declaration added:` Subcomponentes `HighSpeed_Flash_Device` e `wrapper_raw_block_stream_in_to_sd_stream_out`; Conexão `c9`.
+  - `declaration changed:` Conexões de barramento `b_spi_sd` e de porta `p_sw_to_sd`.
+  - `declaration deleted:` Subcomponente `sd_card`.
+  - **Métricas:** Conexões $+1$ ($+10\%$), Subcomponentes $+1$ ($+11.11\%$), comprovando a mesma previsibilidade métrica da substituição de conectividade.
+
+---
 
 ### 2.2. Cenário B: Inteligência de Borda para Driver Coaching (TinyML Edge AIoT)
 Em vez de sobrecarregar a rede celular/MQTT com streaming contínuo de dados brutos (200 pacotes/s), o sistema evolui para processar predições locais no próprio veículo:
