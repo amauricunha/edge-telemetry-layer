@@ -1,0 +1,82 @@
+package Processors_Pkg
+public
+	with Buses_Pkg;
+	with SEI;
+	renames Buses_Pkg::all;
+
+	---------------------------------------------------------------------------
+	-- PILAR 2: MODELAGEM DO PROCESSADOR DE EXECUÇÃO (PROCESSOR)
+	--
+	-- Papel Semântico no AADL:
+	-- O componente 'processor' modela o hardware de processamento (SoC) responsável
+	-- por agendar e executar as tarefas de software.
+	--
+	-- Rastreabilidade com Especificação de Requisitos e Critérios de Aceitação:
+	-- - AC-08: Utilização global da CPU <= 40% (Comprovado formalmente U = 34.5%)
+	-- - AC-06: Modos de baixo consumo de energia no SoC
+	-- - Protocolo POSIX: Prioridades preemptivas estáticas (Rate-Monotonic)
+	---------------------------------------------------------------------------
+
+	-- 1. Núcleo Virtual de Processamento Xtensa LX7 (240 MHz com FPU)
+	-- Modela um core individual do microcontrolador com seu respectivo escalonador
+	virtual processor Xtensa_LX7_Core
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 240.0 MIPS;
+	end Xtensa_LX7_Core;
+
+	virtual processor implementation Xtensa_LX7_Core.impl
+	end Xtensa_LX7_Core.impl;
+
+	---------------------------------------------------------------------------
+	-- 2. Processador ESP32-S3 Mono-Núcleo Lógico (Baseline Pilar 2)
+	--
+	-- Arquitetura:
+	-- - Hospeda as 4 tarefas concorrentes de telemetria no mesmo núcleo
+	-- - Suporta acesso direto aos controladores de barramento físico CAN e SPI
+	-- - Validação OSATE: Schedule Bound Threads comprovou viabilidade (U = 34.5%)
+	---------------------------------------------------------------------------
+	processor ESP32S3_Processor
+		features
+			can_bus_access: requires bus access CAN_Bus;
+			spi_bus_access: requires bus access SPI_Bus;
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 240.0 MIPS;
+	end ESP32S3_Processor;
+
+	processor implementation ESP32S3_Processor.impl
+	end ESP32S3_Processor.impl;
+
+	---------------------------------------------------------------------------
+	-- 3. Processador ESP32-S3 Dual-Core (Evolução CAvA / Pilar 4)
+	--
+	-- Arquitetura Assimétrica de Execução:
+	-- - Core 0 (core0): Alocado exclusivamente para Telemetria BSW em Tempo Real Estrito
+	--   (Task_CAN_RX, Task_OBD_Poller, Task_Logger, Task_TX_Dispatch)
+	-- - Core 1 (core1): Alocado para Inteligência de Borda / Inferência TinyML
+	--   (Task_Feature_Extractor, Task_TinyML_Inference, Task_Driver_Coach)
+	--
+	-- Benefício de Engenharia:
+	-- O isolamento de núcleos garante que o processamento pesado de redes neurais
+	-- (tensores e matrizes) no Core 1 não degrade a taxa de ingestão de 200 Hz do Core 0.
+	---------------------------------------------------------------------------
+	processor ESP32S3_DualCore_Processor
+		features
+			can_bus_access: requires bus access CAN_Bus;
+			spi_bus_access: requires bus access SPI_Bus;
+		properties
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 64;
+			SEI::MIPSCapacity => 480.0 MIPS;
+	end ESP32S3_DualCore_Processor;
+
+	processor implementation ESP32S3_DualCore_Processor.impl
+		subcomponents
+			core0: virtual processor Xtensa_LX7_Core.impl;
+			core1: virtual processor Xtensa_LX7_Core.impl;
+	end ESP32S3_DualCore_Processor.impl;
+
+end Processors_Pkg;

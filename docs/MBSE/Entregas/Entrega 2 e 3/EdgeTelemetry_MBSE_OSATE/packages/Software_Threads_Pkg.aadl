@@ -1,0 +1,157 @@
+package Software_Threads_Pkg
+public
+	with Data_Types_Pkg;
+
+	---------------------------------------------------------------------------
+	-- PILAR 2: MODELAGEM DAS TAREFAS DE SOFTWARE EM TEMPO REAL (THREAD)
+	--
+	-- Diretrizes de Escalonamento Rate-Monotonic (RMS) e Prioridades POSIX:
+	-- Pela teoria clássica de Liu & Layland (1973), a prioridade é inversamente
+	-- proporcional ao período da tarefa (menor período = maior prioridade).
+	--
+	-- Mapeamento das Tarefas no Firmware Rust (Embassy Executor / FreeRTOS):
+	-- 1. Task_CAN_RX      | T = 5 ms   | C = 0.8 ms | P = 10 (Prioridade Máxima)
+	-- 2. Task_Logger      | T = 20 ms  | C = 1.5 ms | P = 8
+	-- 3. Task_TX_Dispatch | T = 50 ms  | C = 3.0 ms | P = 6
+	-- 4. Task_OBD_Poller  | T = 100 ms | C = 5.0 ms | P = 4  (Prioridade Mínima)
+	--
+	-- Validação Formal de Escalonabilidade no OSATE (Pilar 3.1):
+	-- Taxa de utilização da CPU: U = 34.5% <= 75.68% (Incondicionalmente Escalonável)
+	-- Todas as tarefas cumprem seus deadlines (schedulability: true).
+	---------------------------------------------------------------------------
+
+	---------------------------------------------------------------------------
+	-- 1. Task_CAN_RX: Aquisição de Quadros do Controlador TWAI
+	--
+	-- Rastreabilidade:
+	-- - SRS: REQ-SYS-01 (Leitura contínua CAN), REQ-SYS-02 (Buffer ring 64 quadros)
+	-- - FRET: REQ_TWAI_001 (Leitura da ISR sem perda), REQ_TWAI_002 (Push no canal)
+	-- - Critério de Aceitação: AC-01 (Perda de pacotes CAN <= 1.0%)
+	--
+	-- Parâmetros Temporais:
+	-- - Período: 5 ms (Taxa de amostragem de 200 Hz para captura de transientes)
+	-- - WCET: 800 us (Leitura de registradores TWAI, filtragem e envio para a RTE)
+	-- - Deadline: 5 ms (Implicit Deadline D = T)
+	-- - Tempo de Resposta Máximo no OSATE: R1 = 0.80 ms (Folga temporal: 84.0%)
+	---------------------------------------------------------------------------
+	thread Task_CAN_RX
+		features
+			can_frame_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			telemetry_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_path: flow path can_frame_in -> telemetry_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 5 ms;
+			Compute_Execution_Time => 200 us .. 800 us;
+			Deadline => 5 ms;
+			Priority => 10;
+	end Task_CAN_RX;
+
+	thread implementation Task_CAN_RX.impl
+	end Task_CAN_RX.impl;
+
+	---------------------------------------------------------------------------
+	-- 2. Task_OBD_Poller: Polling Ativo de Diagnóstico Veicular
+	--
+	-- Rastreabilidade:
+	-- - SRS: REQ-SYS-05 (Polling a 10 Hz), REQ-SYS-06 (Rotação Round-Robin dos 6 PIDs),
+	--        REQ-SYS-10 (Detecção de Timeout de Diagnóstico em 50 ms)
+	-- - FRET: REQ_OBD_001 (Disparo em 0x7DF), REQ_OBD_002 (Incremento de PID)
+	-- - Critério de Aceitação: AC-02 (Latência média de resposta OBD-II < 10 ms)
+	--
+	-- Parâmetros Temporais:
+	-- - Período: 100 ms (Frequência de 10 Hz para conformidade com a norma SAE J1979)
+	-- - WCET: 5.0 ms (Montagem do quadro ISO 15765-4 e espera da resposta da ECU 0x7E8)
+	-- - Deadline: 100 ms
+	-- - Tempo de Resposta Máximo no OSATE: R4 = 11.90 ms (Folga temporal: 88.1%)
+	--   Mesmo sofrendo preempções acumuladas das três tarefas mais rápidas, conclui
+	--   com ampla margem antes do próximo disparo de 100 ms.
+	---------------------------------------------------------------------------
+	thread Task_OBD_Poller
+		features
+			obd_resp_in: in event data port Data_Types_Pkg::Diagnostic_Packet_Data;
+			obd_req_out: out event data port Data_Types_Pkg::Diagnostic_Packet_Data;
+			telemetry_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_path: flow path obd_resp_in -> telemetry_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 100 ms;
+			Compute_Execution_Time => 1 ms .. 5 ms;
+			Deadline => 100 ms;
+			Priority => 4;
+	end Task_OBD_Poller;
+
+	thread implementation Task_OBD_Poller.impl
+	end Task_OBD_Poller.impl;
+
+	---------------------------------------------------------------------------
+	-- 3. Task_Logger: Serialização Tabular e Gerenciamento de Buffers
+	--
+	-- Rastreabilidade:
+	-- - SRS: REQ-SYS-11 (Serialização sem alocação dinâmica), REQ-SYS-12 (Ausência de nulos),
+	--        REQ-SYS-13 (Buffer circular em SRAM de 4096 bytes)
+	-- - FRET: REQ_LOG_001 (Formatação em <= 1 ms), REQ_LOG_002 (Integridade estrutural),
+	--         REQ_LOG_003 (Enfileiramento estático)
+	-- - Critérios de Aceitação: AC-03 (Persistência íntegra), AC-04 (Throughput >= 200 pkt/s)
+	--
+	-- Parâmetros Temporais:
+	-- - Período: 20 ms (Frequência de 50 Hz para agregação e formatação CSV)
+	-- - WCET: 1.5 ms (Conversão de inteiros/floats para ASCII e montagem da linha CSV)
+	-- - Deadline: 20 ms
+	-- - Tempo de Resposta Máximo no OSATE: R2 = 2.30 ms (Folga temporal: 88.5%)
+	---------------------------------------------------------------------------
+	thread Task_Logger
+		features
+			telemetry_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			csv_payload_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+		flows
+			f_path: flow path telemetry_in -> csv_payload_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 20 ms;
+			Compute_Execution_Time => 500 us .. 1500 us;
+			Deadline => 20 ms;
+			Priority => 8;
+	end Task_Logger;
+
+	thread implementation Task_Logger.impl
+	end Task_Logger.impl;
+
+	---------------------------------------------------------------------------
+	-- 4. Task_TX_Dispatch: Despacho Físico para MicroSD e Wi-Fi / MQTT
+	--
+	-- Rastreabilidade:
+	-- - SRS: REQ-SYS-14 (Flush híbrido por limiar de 3584B ou timeout 2s),
+	--        REQ-SYS-15 (Escrita fatiada em chunks), REQ-SYS-23 (Fallback SD)
+	-- - FRET: REQ_LOG_004 (Flush por ocupação), REQ_LOG_005 (Flush timer 2s),
+	--         REQ_FSM_001 (Comutação em falha de rede), REQ_SD_004 (Flush atômico)
+	-- - Critérios de Aceitação: AC-04 (Throughput de telemetria), AC-05 (Reconexão rede)
+	--
+	-- Parâmetros Temporais:
+	-- - Período: 50 ms (Ciclo de esvaziamento em blocos para I/O externo)
+	-- - WCET: 3.0 ms (Transferência DMA SPI para o MicroSD e publicação no socket TCP)
+	-- - Deadline: 50 ms
+	-- - Tempo de Resposta Máximo no OSATE: R3 = 6.10 ms (Folga temporal: 87.8%)
+	---------------------------------------------------------------------------
+	thread Task_TX_Dispatch
+		features
+			csv_payload_in: in event data port Data_Types_Pkg::CSV_Payload_Data;
+			sd_record_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+			mqtt_packet_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+		flows
+			f_path_sd: flow path csv_payload_in -> sd_record_out;
+			f_path_mqtt: flow path csv_payload_in -> mqtt_packet_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+			Compute_Execution_Time => 1 ms .. 3 ms;
+			Deadline => 50 ms;
+			Priority => 6;
+	end Task_TX_Dispatch;
+
+	thread implementation Task_TX_Dispatch.impl
+	end Task_TX_Dispatch.impl;
+
+end Software_Threads_Pkg;

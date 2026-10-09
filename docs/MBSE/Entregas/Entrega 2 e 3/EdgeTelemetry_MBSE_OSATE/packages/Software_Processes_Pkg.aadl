@@ -1,0 +1,95 @@
+package Software_Processes_Pkg
+public
+	with Data_Types_Pkg;
+	with Software_Threads_Pkg;
+
+	---------------------------------------------------------------------------
+	-- PILAR 2: PROCESSO ENCAPSULADOR DO PIPELINE DE TELEMETRIA (PROCESS)
+	--
+	-- Papel Semântico no AADL:
+	-- O componente 'process' define um espaço protegido de endereçamento de memória
+	-- (partição de software) dentro do qual as tarefas concorrentes (threads)
+	-- compartilham estruturas de dados e canais assíncronos de comunicação.
+	--
+	-- Rastreabilidade com Critérios de Aceitação:
+	-- - AC-01: Ingestão de quadros CAN sem perda
+	-- - AC-03: Persistência íntegra em MicroSD
+	-- - AC-04: Throughput de telemetria >= 200 pacotes/s (Modo Immediate)
+	-- - AC-05: Streaming contínuo via Wi-Fi / MQTT
+	---------------------------------------------------------------------------
+	process Telemetry_Process
+		features
+			can_raw_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			sd_stream_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+			mqtt_stream_out: out event data port Data_Types_Pkg::CSV_Payload_Data;
+			telemetry_for_ai_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_can_to_sd: flow path can_raw_in -> sd_stream_out;
+			f_can_to_mqtt: flow path can_raw_in -> mqtt_stream_out;
+			f_can_to_ai: flow path can_raw_in -> telemetry_for_ai_out;
+	end Telemetry_Process;
+
+	---------------------------------------------------------------------------
+	-- A. Implementação Imediata (Immediate Semantics - Baseline do Firmware Real)
+	--
+	-- Conexões com {Timing => immediate;}:
+	-- A tarefa consumidora consome o dado produzido pela tarefa emissora dentro
+	-- da mesma janela temporal (encadeamento síncrono). Reflete perfeitamente
+	-- os canais assíncronos da RTE Embassy em Rust (onde a emissão acorda o
+	-- consumidor imediatamente via Waker/Notifier sem esperar o próximo ciclo).
+	--
+	-- Latência Resultante no OSATE (Pilar 3.2):
+	-- Min: 2.287 ms | Max: 60.898 ms (incluindo tempo de escrita Flash do MicroSD)
+	-- Atende plenamente ao critério AC-04.
+	---------------------------------------------------------------------------
+	process implementation Telemetry_Process.immediate_impl
+		subcomponents
+			th_can_rx: thread Software_Threads_Pkg::Task_CAN_RX.impl;
+			th_obd_poller: thread Software_Threads_Pkg::Task_OBD_Poller.impl;
+			th_logger: thread Software_Threads_Pkg::Task_Logger.impl;
+			th_tx_dispatch: thread Software_Threads_Pkg::Task_TX_Dispatch.impl;
+		connections
+			c_in: port can_raw_in -> th_can_rx.can_frame_in;
+			c_rx_to_log: port th_can_rx.telemetry_out -> th_logger.telemetry_in {Timing => immediate;};
+			c_rx_to_ai: port th_can_rx.telemetry_out -> telemetry_for_ai_out;
+			c_log_to_tx: port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => immediate;};
+			c_tx_to_sd: port th_tx_dispatch.sd_record_out -> sd_stream_out;
+			c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+		flows
+			f_can_to_sd: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
+			f_can_to_mqtt: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+			f_can_to_ai: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_ai -> telemetry_for_ai_out;
+	end Telemetry_Process.immediate_impl;
+
+	---------------------------------------------------------------------------
+	-- B. Implementação com Amostragem Atrasada (Delayed Semantics - Estudo Comparativo)
+	--
+	-- Conexões com {Timing => delayed;}:
+	-- Os dados gerados são retidos nos buffers de saída da tarefa emissora até
+	-- a fronteira periódica seguinte, sendo transferidos ao consumidor somente
+	-- no próximo ciclo (delayed sampling).
+	--
+	-- Finalidade Acadêmica (Pilar 3):
+	-- Permite contrastar a semântica de comunicação por amostragem desacoplada
+	-- contra a semântica imediata exigida no roteiro de avaliação.
+	---------------------------------------------------------------------------
+	process implementation Telemetry_Process.delayed_impl
+		subcomponents
+			th_can_rx: thread Software_Threads_Pkg::Task_CAN_RX.impl;
+			th_obd_poller: thread Software_Threads_Pkg::Task_OBD_Poller.impl;
+			th_logger: thread Software_Threads_Pkg::Task_Logger.impl;
+			th_tx_dispatch: thread Software_Threads_Pkg::Task_TX_Dispatch.impl;
+		connections
+			c_in: port can_raw_in -> th_can_rx.can_frame_in;
+			c_rx_to_log: port th_can_rx.telemetry_out -> th_logger.telemetry_in {Timing => delayed;};
+			c_rx_to_ai: port th_can_rx.telemetry_out -> telemetry_for_ai_out;
+			c_log_to_tx: port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => delayed;};
+			c_tx_to_sd: port th_tx_dispatch.sd_record_out -> sd_stream_out;
+			c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+		flows
+			f_can_to_sd: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
+			f_can_to_mqtt: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+			f_can_to_ai: flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_ai -> telemetry_for_ai_out;
+	end Telemetry_Process.delayed_impl;
+
+end Software_Processes_Pkg;

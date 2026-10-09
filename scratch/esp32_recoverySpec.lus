@@ -1,0 +1,79 @@
+
+--Historically
+node H(X:bool) returns (Y:bool);
+let
+    Y = X -> (X and (pre Y));
+tel
+
+--Y since inclusive X
+node SI(X,Y: bool) returns (Z:bool);
+let
+Z = Y and (X or (false -> pre Z));
+tel
+
+--Y since X
+node S(X,Y: bool) returns (Z:bool);
+let
+Z = X or (Y and (false -> pre Z));
+tel
+
+--Y triggered X
+node T(X,Y: bool) returns(Z:bool);
+let
+Z = (X and (Y or (true -> pre Z)));
+tel
+
+--Once
+node O(X:bool) returns (Y:bool);
+let
+ Y = X or (false -> pre Y);
+tel
+
+node YtoPre(X:bool) returns (Y:bool);
+let
+    Y = false -> pre X;
+tel
+
+node ZtoPre(X:bool) returns (Y:bool);
+let
+    Y = true -> pre X;
+tel
+
+
+node imported esp32_recoverySpec( __bus_off_error_detected:boolean ; __bus_off_flag_active:boolean ; __bus_off_pause_started:boolean ; __logger_stall_30s_detected:boolean ; __system_tasks_healthy:boolean ; __recovery_timer_128ms_expired:boolean ; __wdt_feed_tick:boolean ) returns ( __bus_off_clear_signaled:boolean ; __bus_off_flag_set:boolean ; __bus_off_pause_signaled:boolean ; __hw_watchdog_fed:boolean ; __recovery_window_elapsed:boolean ; __stall_diag_logged:boolean ; __twai_reset_mode_cleared:boolean ; __recovery_timer_128ms_start:boolean );
+(*@contract
+
+var __FTP : bool = true -> false;
+
+var __active_session : boolean = true;
+
+(* Req text: upon recovery_timer_128ms_expired the esp32_recovery shall within 1 MILLISECOND satisfy twai_reset_mode_cleared *)
+var __REQ_REC_004 : bool = H((OT(1, 1, ((__recovery_timer_128ms_expired and ZtoPre(not (__recovery_timer_128ms_expired))) and not (__twai_reset_mode_cleared))) => OT(0, 0, (ZtoPre(false) or __twai_reset_mode_cleared))));
+
+(* Req text: upon twai_reset_mode_cleared the esp32_recovery shall within 5 MILLISECOND satisfy bus_off_clear_signaled *)
+var __REQ_REC_005 : bool = H((OT(5, 5, ((__twai_reset_mode_cleared and ZtoPre(not (__twai_reset_mode_cleared))) and not (__bus_off_clear_signaled))) => OT(4, 0, (ZtoPre(false) or __bus_off_clear_signaled))));
+
+(* Req text: in active_session upon bus_off_error_detected the esp32_recovery shall within 1 MILLISECOND satisfy bus_off_flag_set *)
+var __REQ_REC_001 : bool = (H(((not (__active_session) and YtoPre(__active_session)) => YtoPre(SI((__active_session and ZtoPre(not (__active_session))),(OT(1, 1, ((__bus_off_error_detected and (YtoPre(not (__bus_off_error_detected)) or (__active_session and ZtoPre(not (__active_session))))) and not (__bus_off_flag_set))) => OT(0, 0, ((__active_session and ZtoPre(not (__active_session))) or __bus_off_flag_set))))))) and (SI((__active_session and ZtoPre(not (__active_session))),not ((not (__active_session) and YtoPre(__active_session)))) => SI((__active_session and ZtoPre(not (__active_session))),(OT(1, 1, ((__bus_off_error_detected and (YtoPre(not (__bus_off_error_detected)) or (__active_session and ZtoPre(not (__active_session))))) and not (__bus_off_flag_set))) => OT(0, 0, ((__active_session and ZtoPre(not (__active_session))) or __bus_off_flag_set))))));
+
+(* Req text: upon bus_off_flag_active the esp32_recovery shall within 10 MILLISECOND satisfy bus_off_pause_signaled *)
+var __REQ_REC_002 : bool = H((OT(10, 10, ((__bus_off_flag_active and ZtoPre(not (__bus_off_flag_active))) and not (__bus_off_pause_signaled))) => OT(9, 0, (ZtoPre(false) or __bus_off_pause_signaled))));
+
+(* Req text: in active_session upon logger_stall_30s_detected the esp32_recovery shall within 10 MILLISECOND satisfy stall_diag_logged *)
+var __REQ_REC_006 : bool = (H(((not (__active_session) and YtoPre(__active_session)) => YtoPre(SI((__active_session and ZtoPre(not (__active_session))),(OT(10, 10, ((__logger_stall_30s_detected and (YtoPre(not (__logger_stall_30s_detected)) or (__active_session and ZtoPre(not (__active_session))))) and not (__stall_diag_logged))) => OT(9, 0, ((__active_session and ZtoPre(not (__active_session))) or __stall_diag_logged))))))) and (SI((__active_session and ZtoPre(not (__active_session))),not ((not (__active_session) and YtoPre(__active_session)))) => SI((__active_session and ZtoPre(not (__active_session))),(OT(10, 10, ((__logger_stall_30s_detected and (YtoPre(not (__logger_stall_30s_detected)) or (__active_session and ZtoPre(not (__active_session))))) and not (__stall_diag_logged))) => OT(9, 0, ((__active_session and ZtoPre(not (__active_session))) or __stall_diag_logged))))));
+
+(* Req text: upon bus_off_pause_started the esp32_recovery shall immediately satisfy recovery_timer_128ms_start *)
+var __REQ_REC_003 : bool = H(((__bus_off_pause_started and ZtoPre(not (__bus_off_pause_started))) => __recovery_timer_128ms_start));
+
+(* Req text: in active_session when system_tasks_healthy upon wdt_feed_tick the esp32_recovery shall within 1 MILLISECOND satisfy hw_watchdog_fed *)
+var __REQ_REC_007 : bool = (H(((not (__active_session) and YtoPre(__active_session)) => YtoPre(SI((__active_session and ZtoPre(not (__active_session))),(OT(1, 1, (((__system_tasks_healthy and __wdt_feed_tick) and (YtoPre(not ((__system_tasks_healthy and __wdt_feed_tick))) or (__active_session and ZtoPre(not (__active_session))))) and not (__hw_watchdog_fed))) => OT(0, 0, ((__active_session and ZtoPre(not (__active_session))) or __hw_watchdog_fed))))))) and (SI((__active_session and ZtoPre(not (__active_session))),not ((not (__active_session) and YtoPre(__active_session)))) => SI((__active_session and ZtoPre(not (__active_session))),(OT(1, 1, (((__system_tasks_healthy and __wdt_feed_tick) and (YtoPre(not ((__system_tasks_healthy and __wdt_feed_tick))) or (__active_session and ZtoPre(not (__active_session))))) and not (__hw_watchdog_fed))) => OT(0, 0, ((__active_session and ZtoPre(not (__active_session))) or __hw_watchdog_fed))))));
+
+guarantee __REQ_REC_004;
+guarantee __REQ_REC_005;
+guarantee __REQ_REC_001;
+guarantee __REQ_REC_002;
+guarantee __REQ_REC_006;
+guarantee __REQ_REC_003;
+guarantee __REQ_REC_007;
+
+*)

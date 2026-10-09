@@ -1,0 +1,132 @@
+package EdgeTelemetry_System_Pkg
+public
+	with Buses_Pkg;
+	with Processors_Pkg;
+	with CAN_Devices_Pkg;
+	with Storage_Devices_Pkg;
+	with Comm_Devices_Pkg;
+	with Software_Processes_Pkg;
+	renames Buses_Pkg::all;
+
+	---------------------------------------------------------------------------
+	-- PILAR 2: SISTEMA INTEGRADO RAIZ (TOP-LEVEL SYSTEM IMPLEMENTATION)
+	--
+	-- Papel Semântico no AADL:
+	-- O componente 'system' modela a arquitetura holística de sistemas ciber-físicos,
+	-- agregando a camada de hardware (processador, barramentos, transceptores e memórias)
+	-- e a camada de software (processos, threads e filas).
+	--
+	-- Rastreabilidade com os Critérios de Aceitação da Dissertação:
+	-- - AC-01: Perda de pacotes CAN <= 1.0% (Garantida pelo pipeline CAN_RX no ESP32-S3)
+	-- - AC-02: Latência média OBD-II < 10 ms (Garantida pelo polling determinístico a 10 Hz)
+	-- - AC-03: Zero corrupção de dados no MicroSD após corte de alimentação
+	-- - AC-04: Throughput de telemetria >= 200 pacotes/s (Modo Immediate)
+	-- - AC-05: Detecção e reconexão de rede Wi-Fi / MQTT em <= 5 s
+	-- - AC-06: Modos de baixo consumo de energia no microcontrolador
+	-- - AC-07: Auto-recuperação de falhas elétricas de Bus-Off sem reinício do SoC
+	-- - AC-08: Utilização global da CPU <= 40% (Comprovada no OSATE com U = 34.5%)
+	---------------------------------------------------------------------------
+	system EdgeTelemetry_System
+	end EdgeTelemetry_System;
+
+	---------------------------------------------------------------------------
+	-- 1. IMPLEMENTAÇÃO IMEDIATA (EdgeTelemetry_System.immediate_impl)
+	--
+	-- Características:
+	-- - Emprega o processo de software Telemetry_Process.immediate_impl
+	-- - Conexões síncronas com encadeamento de despacho {Timing => immediate;}
+	-- - Utilizado para a Análise de Latência Mínima no OSATE (Pilar 3.2):
+	--   * end_to_end_can_to_sd: Min 2.287 ms | Max 60.898 ms
+	--   * end_to_end_can_to_mqtt: Min 1.966 ms | Max 60.576 ms
+	---------------------------------------------------------------------------
+	system implementation EdgeTelemetry_System.immediate_impl
+		subcomponents
+			-- Processador Central (ESP32-S3 @ 240 MHz com RTOS)
+			cpu: processor Processors_Pkg::ESP32S3_Processor.impl;
+
+			-- Barramentos Físicos de Comunicação
+			can_bus: bus CAN_Bus;
+			spi_bus: bus SPI_Bus;
+
+			-- Dispositivos e Periféricos de Entrada/Saída
+			ecu_emulator: device CAN_Devices_Pkg::Uno_ECU_Emulator_Device.impl;
+			can_transceiver: device CAN_Devices_Pkg::CAN_Transceiver.impl;
+			sd_card: device Storage_Devices_Pkg::MicroSD_Device.impl;
+			wifi_module: device Comm_Devices_Pkg::WiFi_Device.impl;
+
+			-- Processo de Software com as 4 Threads Periódicas Concorrentes
+			sw_telemetry: process Software_Processes_Pkg::Telemetry_Process.immediate_impl;
+		connections
+			-- A. Conexões de Barramento Físico (Bus Access)
+			b_can_cpu: bus access can_bus <-> cpu.can_bus_access;
+			b_can_transceiver: bus access can_bus <-> can_transceiver.can_bus_conn;
+			b_can_emulator: bus access can_bus <-> ecu_emulator.can_bus_conn;
+			b_spi_cpu: bus access spi_bus <-> cpu.spi_bus_access;
+			b_spi_sd: bus access spi_bus <-> sd_card.spi_conn;
+
+			-- B. Conexões de Portas Físicas e Lógicas
+			p_can_wire: port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+			p_can_to_sw: port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+			p_sw_to_sd: port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+			p_sw_to_wifi: port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+		flows
+			-- C. Fluxos Analíticos Ponta a Ponta (End-to-End Flows para o Check Flow Latency)
+			end_to_end_can_to_sd: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink_telemetry;
+		properties
+			-- D. Amarração Formal de Software na CPU (Actual_Processor_Binding)
+			-- Garante que todas as threads de software executem na CPU do ESP32-S3
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+
+			-- E. Amarração Formal de Portas nos Barramentos (Actual_Connection_Binding)
+			-- Vincula a transmissão de sinais elétricos aos barramentos físicos para o cálculo de latência
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+	end EdgeTelemetry_System.immediate_impl;
+
+	---------------------------------------------------------------------------
+	-- 2. IMPLEMENTAÇÃO ATRASADA (EdgeTelemetry_System.delayed_impl)
+	--
+	-- Características:
+	-- - Emprega o processo Telemetry_Process.delayed_impl com semântica delayed
+	-- - Utilizado para comprovar o impacto da amostragem periódica desacoplada
+	-- - Mantém rigorosamente a mesma amarração de hardware e conexões lógicas
+	---------------------------------------------------------------------------
+	system implementation EdgeTelemetry_System.delayed_impl
+		subcomponents
+			cpu: processor Processors_Pkg::ESP32S3_Processor.impl;
+			can_bus: bus CAN_Bus;
+			spi_bus: bus SPI_Bus;
+			ecu_emulator: device CAN_Devices_Pkg::Uno_ECU_Emulator_Device.impl;
+			can_transceiver: device CAN_Devices_Pkg::CAN_Transceiver.impl;
+			sd_card: device Storage_Devices_Pkg::MicroSD_Device.impl;
+			wifi_module: device Comm_Devices_Pkg::WiFi_Device.impl;
+			sw_telemetry: process Software_Processes_Pkg::Telemetry_Process.delayed_impl;
+		connections
+			b_can_cpu: bus access can_bus <-> cpu.can_bus_access;
+			b_can_transceiver: bus access can_bus <-> can_transceiver.can_bus_conn;
+			b_can_emulator: bus access can_bus <-> ecu_emulator.can_bus_conn;
+			b_spi_cpu: bus access spi_bus <-> cpu.spi_bus_access;
+			b_spi_sd: bus access spi_bus <-> sd_card.spi_conn;
+			p_can_wire: port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+			p_can_to_sw: port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+			p_sw_to_sd: port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+			p_sw_to_wifi: port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+		flows
+			end_to_end_can_to_sd: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+			end_to_end_can_to_mqtt: end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink_telemetry;
+		properties
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+			Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+			Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+			Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+	end EdgeTelemetry_System.delayed_impl;
+
+end EdgeTelemetry_System_Pkg;

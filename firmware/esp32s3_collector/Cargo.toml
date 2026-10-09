@@ -1,0 +1,54 @@
+[package]
+name = "esp32s3-edge-telemetry-layer"
+version = "0.2.0"
+edition = "2024"
+
+[dependencies]
+# HAL e runtime
+esp-hal = { version = "1.1.1", features = ["esp32s3", "unstable"] }
+esp-backtrace = { version = "0.15", features = ["esp32s3", "panic-handler", "println"] }
+esp-println = { version = "0.13", features = ["esp32s3", "log", "jtag-serial", "critical-section"], default-features = false }
+esp-rtos = { version = "0.3.0", features = ["embassy", "esp32s3", "esp-radio"] }
+
+# Embassy async runtime
+embassy-executor = { version = "0.10" }
+embassy-time = "0.5"
+embassy-sync = "0.8"
+embassy-futures = "0.1"
+
+# Coleções sem heap e utilitários
+heapless = "0.9"
+static_cell = "2.1"
+
+# Logging
+log = "0.4"
+
+# Tipos CAN e MQTT no_std (D-05)
+embedded-can = "0.4"
+embedded-hal = "1.0"
+embedded-hal-bus = "0.3"
+embedded-sdmmc = "0.7"
+rust-mqtt = { version = "0.3", default-features = false }
+
+# Atomics portáveis
+portable-atomic = { version = "1.11", features = ["critical-section"] }
+
+# Critical section para Embassy
+critical-section = "1"
+esp-bootloader-esp-idf = { version = "0.5.0", features = ["esp32s3"] }
+# Wi-Fi, stack TCP/IP e heap (D-05, D-06)
+# esp-radio é o sucessor do esp-wifi, requer esp-hal ~1.1.0 (compatível com 1.1.1)
+esp-radio = { version = "1.0.0-beta.0", features = ["esp32s3", "wifi", "log-04"] }
+embedded-io-async-06 = { package = "embedded-io-async", version = "0.6.1" }
+esp-alloc = { version = "0.10.0", features = ["global-allocator"] }
+embassy-net = { version = "0.9.1", default-features = false, features = ["tcp", "dhcpv4", "medium-ethernet"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+debug = true       # Manter debug info para cargo-size e defmt
+strip = false
+
+[profile.dev]
+opt-level = 1      # Necessário para Embassy funcionar corretamente

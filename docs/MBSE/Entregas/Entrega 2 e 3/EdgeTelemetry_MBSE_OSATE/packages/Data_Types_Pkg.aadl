@@ -1,0 +1,72 @@
+package Data_Types_Pkg
+public
+
+	---------------------------------------------------------------------------
+	-- PILAR 2: MODELAGEM DE TIPOS DE DADOS DO SISTEMA DE TELEMETRIA
+	--
+	-- Rastreabilidade com Especificação de Requisitos (SRS) e FRET:
+	-- - REQ-SYS-01 / REQ_TWAI_001: Aquisição de quadros CAN sem perda (AC-01)
+	-- - REQ-SYS-05 / REQ_OBD_001: Consultas de diagnóstico OBD-II a 10 Hz (AC-02)
+	-- - REQ-SYS-11 / REQ_LOG_001: Serialização tabular determinística em CSV (AC-04)
+	-- - REQ-SYS-31 / REQ_TINYML_001: Vetor de tensores para inferência de borda
+	---------------------------------------------------------------------------
+
+	-- 1. Quadro CAN Padronizado (Data_Size => 16 Bytes)
+	-- Atende a: REQ-SYS-01, REQ_TWAI_001 e Critério de Aceite AC-01
+	-- Composição no Firmware Rust:
+	-- - 8 bytes de Carga Útil (Payload bruto do barramento)
+	-- - 4 bytes de Identificador CAN (Standard 11-bit ou Extended 29-bit)
+	-- - 1 byte de DLC (Data Length Code: 0 a 8)
+	-- - 1 byte de Flags (RTR, Extended Frame, Loopback)
+	-- - 2 bytes de Timestamp relativo em hardware (timer de 10 us)
+	data CAN_Frame_Data
+		properties
+			Data_Size => 16 Bytes;
+	end CAN_Frame_Data;
+
+	-- 2. Pacote de Diagnóstico OBD-II ISO 15765-4 (Data_Size => 8 Bytes)
+	-- Atende a: REQ-SYS-05, REQ_OBD_001 e Critério de Aceite AC-02
+	-- Formato Single Frame CAN (SF):
+	-- - Byte 0: Comprimento dos dados (0x02 para consultas de modo 01)
+	-- - Byte 1: Modo de serviço (0x01 = Show current data)
+	-- - Byte 2: PID requisitado (ex: 0x0C RPM, 0x0D Velocidade, 0x11 TPS)
+	-- - Bytes 3-7: Padding padronizado 0xAA ou 0x55
+	data Diagnostic_Packet_Data
+		properties
+			Data_Size => 8 Bytes;
+	end Diagnostic_Packet_Data;
+
+	-- 3. Linha Tabular CSV Formatada em Buffer Estático (Data_Size => 320 Bytes)
+	-- Atende a: REQ-SYS-11, REQ-SYS-12, REQ_LOG_001, REQ_LOG_002 e Critério AC-04
+	-- Estrutura:
+	-- - Linha de texto ASCII/UTF-8 formatada com 11 colunas numéricas
+	-- - Ex: "1727789012345,2850,84,35.2,88,14.2,-0.12,0.85,0.02,0,OK\n"
+	-- - Alocada em buffer estático pré-dimensionado para evitar fragmentação de heap
+	data CSV_Payload_Data
+		properties
+			Data_Size => 320 Bytes;
+	end CSV_Payload_Data;
+
+	-- 4. Vetor de Características para Inteligência de Borda (Data_Size => 64 Bytes)
+	-- Atende a: REQ-SYS-31, REQ_TINYML_001 (Pilar 4 - Evolução Arquitetural CAvA)
+	-- Estrutura:
+	-- - Vetor com 8 variáveis normalizadas em ponto flutuante (f32):
+	--   [RPM_norm, Speed_norm, Throttle_norm, Engine_Load_norm, Accel_Y, Brake_Deriv, Steering_Rate, Gear]
+	-- - 8 variáveis x 4 bytes (f32) = 32 bytes de dados + 32 bytes de metadados de janela
+	data Feature_Tensor_Data
+		properties
+			Data_Size => 64 Bytes;
+	end Feature_Tensor_Data;
+
+	-- 5. Pacote Semântico de Recomendação ao Motorista (Data_Size => 32 Bytes)
+	-- Atende a: REQ-SYS-32, REQ_TINYML_002 (Pilar 4 - Driver Coaching)
+	-- Estrutura:
+	-- - Score de condução eficiente (0 a 100)
+	-- - Perfil predito pelo classificador (Eco, Moderado, Agressivo)
+	-- - Código de alerta acústico/visual e ação sugerida para a nuvem MQTT
+	data Driver_Coaching_Data
+		properties
+			Data_Size => 32 Bytes;
+	end Driver_Coaching_Data;
+
+end Data_Types_Pkg;

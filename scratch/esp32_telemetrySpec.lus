@@ -1,0 +1,73 @@
+
+--Historically
+node H(X:bool) returns (Y:bool);
+let
+    Y = X -> (X and (pre Y));
+tel
+
+--Y since inclusive X
+node SI(X,Y: bool) returns (Z:bool);
+let
+Z = Y and (X or (false -> pre Z));
+tel
+
+--Y since X
+node S(X,Y: bool) returns (Z:bool);
+let
+Z = X or (Y and (false -> pre Z));
+tel
+
+--Y triggered X
+node T(X,Y: bool) returns(Z:bool);
+let
+Z = (X and (Y or (true -> pre Z)));
+tel
+
+--Once
+node O(X:bool) returns (Y:bool);
+let
+ Y = X or (false -> pre Y);
+tel
+
+node YtoPre(X:bool) returns (Y:bool);
+let
+    Y = false -> pre X;
+tel
+
+node ZtoPre(X:bool) returns (Y:bool);
+let
+    Y = true -> pre X;
+tel
+
+
+node imported esp32_telemetrySpec( __binary_batch_full:boolean ; __boot_trigger:boolean ; __dispatch_cycle_50ms:boolean ; __ip_dhcp_assigned:boolean ; __mqtt_broker_connected:boolean ; __mqtt_credentials_valid:boolean ; __status_timer_5s:boolean ; __wifi_credentials_configured:boolean ) returns ( __data_packets_dispatched:boolean ; __mqtt_batch_published:boolean ; __status_json_published:boolean ; __wifi_dhcp_timer_start:boolean ; __mqtt_connect_timer_start:boolean );
+(*@contract
+
+var __FTP : bool = true -> false;
+
+var __active_session : boolean = true;
+var __boot_mode : boolean = true -> false;
+var __connected_mode : boolean = true;
+
+(* Req text: in boot_mode upon boot_trigger & wifi_credentials_configured the esp32_telemetry shall immediately satisfy wifi_dhcp_timer_start *)
+var __REQ_COM_001 : bool = (H(((not (__boot_mode) and YtoPre(__boot_mode)) => YtoPre(SI((__boot_mode and ZtoPre(not (__boot_mode))),(((__boot_trigger and __wifi_credentials_configured) and (YtoPre(not ((__boot_trigger and __wifi_credentials_configured))) or (__boot_mode and ZtoPre(not (__boot_mode))))) => __wifi_dhcp_timer_start))))) and (SI((__boot_mode and ZtoPre(not (__boot_mode))),not ((not (__boot_mode) and YtoPre(__boot_mode)))) => SI((__boot_mode and ZtoPre(not (__boot_mode))),(((__boot_trigger and __wifi_credentials_configured) and (YtoPre(not ((__boot_trigger and __wifi_credentials_configured))) or (__boot_mode and ZtoPre(not (__boot_mode))))) => __wifi_dhcp_timer_start))));
+
+(* Req text: in boot_mode upon ip_dhcp_assigned & mqtt_credentials_valid the esp32_telemetry shall immediately satisfy mqtt_connect_timer_start *)
+var __REQ_COM_005 : bool = (H(((not (__boot_mode) and YtoPre(__boot_mode)) => YtoPre(SI((__boot_mode and ZtoPre(not (__boot_mode))),(((__ip_dhcp_assigned and __mqtt_credentials_valid) and (YtoPre(not ((__ip_dhcp_assigned and __mqtt_credentials_valid))) or (__boot_mode and ZtoPre(not (__boot_mode))))) => __mqtt_connect_timer_start))))) and (SI((__boot_mode and ZtoPre(not (__boot_mode))),not ((not (__boot_mode) and YtoPre(__boot_mode)))) => SI((__boot_mode and ZtoPre(not (__boot_mode))),(((__ip_dhcp_assigned and __mqtt_credentials_valid) and (YtoPre(not ((__ip_dhcp_assigned and __mqtt_credentials_valid))) or (__boot_mode and ZtoPre(not (__boot_mode))))) => __mqtt_connect_timer_start))));
+
+(* Req text: in connected_mode upon binary_batch_full the esp32_telemetry shall within 10 MILLISECOND satisfy mqtt_batch_published *)
+var __REQ_COM_002 : bool = (H(((not (__connected_mode) and YtoPre(__connected_mode)) => YtoPre(SI((__connected_mode and ZtoPre(not (__connected_mode))),(OT(10, 10, ((__binary_batch_full and (YtoPre(not (__binary_batch_full)) or (__connected_mode and ZtoPre(not (__connected_mode))))) and not (__mqtt_batch_published))) => OT(9, 0, ((__connected_mode and ZtoPre(not (__connected_mode))) or __mqtt_batch_published))))))) and (SI((__connected_mode and ZtoPre(not (__connected_mode))),not ((not (__connected_mode) and YtoPre(__connected_mode)))) => SI((__connected_mode and ZtoPre(not (__connected_mode))),(OT(10, 10, ((__binary_batch_full and (YtoPre(not (__binary_batch_full)) or (__connected_mode and ZtoPre(not (__connected_mode))))) and not (__mqtt_batch_published))) => OT(9, 0, ((__connected_mode and ZtoPre(not (__connected_mode))) or __mqtt_batch_published))))));
+
+(* Req text: in connected_mode upon status_timer_5s the esp32_telemetry shall immediately satisfy status_json_published *)
+var __REQ_COM_003 : bool = (H(((not (__connected_mode) and YtoPre(__connected_mode)) => YtoPre(SI((__connected_mode and ZtoPre(not (__connected_mode))),((__status_timer_5s and (YtoPre(not (__status_timer_5s)) or (__connected_mode and ZtoPre(not (__connected_mode))))) => __status_json_published))))) and (SI((__connected_mode and ZtoPre(not (__connected_mode))),not ((not (__connected_mode) and YtoPre(__connected_mode)))) => SI((__connected_mode and ZtoPre(not (__connected_mode))),((__status_timer_5s and (YtoPre(not (__status_timer_5s)) or (__connected_mode and ZtoPre(not (__connected_mode))))) => __status_json_published))));
+
+(* Req text: in active_session upon dispatch_cycle_50ms the esp32_telemetry shall within 3 MILLISECOND satisfy data_packets_dispatched *)
+var __REQ_COM_004 : bool = (H(((not (__active_session) and YtoPre(__active_session)) => YtoPre(SI((__active_session and ZtoPre(not (__active_session))),(OT(3, 3, ((__dispatch_cycle_50ms and (YtoPre(not (__dispatch_cycle_50ms)) or (__active_session and ZtoPre(not (__active_session))))) and not (__data_packets_dispatched))) => OT(2, 0, ((__active_session and ZtoPre(not (__active_session))) or __data_packets_dispatched))))))) and (SI((__active_session and ZtoPre(not (__active_session))),not ((not (__active_session) and YtoPre(__active_session)))) => SI((__active_session and ZtoPre(not (__active_session))),(OT(3, 3, ((__dispatch_cycle_50ms and (YtoPre(not (__dispatch_cycle_50ms)) or (__active_session and ZtoPre(not (__active_session))))) and not (__data_packets_dispatched))) => OT(2, 0, ((__active_session and ZtoPre(not (__active_session))) or __data_packets_dispatched))))));
+
+guarantee __REQ_COM_001;
+guarantee __REQ_COM_005;
+guarantee __REQ_COM_002;
+guarantee __REQ_COM_003;
+guarantee __REQ_COM_004;
+
+*)

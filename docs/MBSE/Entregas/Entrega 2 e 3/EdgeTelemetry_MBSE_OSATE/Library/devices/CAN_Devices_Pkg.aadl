@@ -1,0 +1,101 @@
+package CAN_Devices_Pkg
+public
+	with Buses_Pkg;
+	with Data_Types_Pkg;
+	renames Buses_Pkg::all;
+
+	---------------------------------------------------------------------------
+	-- PILAR 2: MODELAGEM DOS DISPOSITIVOS DE REDE CAN (DEVICE)
+	--
+	-- Papel Semântico no AADL:
+	-- Componentes do tipo 'device' representam periféricos ou entidades físicas
+	-- do ambiente externo ("caixa preta") que não executam processos AADL.
+	--
+	-- Rastreabilidade com Requisitos e Critérios:
+	-- - AC-01: Ingestão contínua com perda <= 1.0%
+	-- - REQ-SYS-01 / REQ_TWAI_001: Aquisição determinística via TWAI
+	-- - Pilar 4: Avaliação de variabilidade de componentes via CAvA / DevCompatibility
+	---------------------------------------------------------------------------
+
+	---------------------------------------------------------------------------
+	-- 1. DISPOSITIVO PADRÃO: Transceptor CAN Diferencial Físico (Baseline)
+	--
+	-- Hardware Real: Texas Instruments SN65HVD230 ou Microchip MCP2551
+	-- Função: Converte os níveis lógicos TTL/CMOS do ESP32-S3 em níveis diferenciais
+	--         automotivos (CAN_H e CAN_L) no barramento ISO 11898-2.
+	-- Papel no Fluxo: Atua como 'flow source' (origem física) do pipeline de dados.
+	---------------------------------------------------------------------------
+	device CAN_Transceiver
+		features
+			can_bus_conn: requires bus access CAN_Bus;
+			can_rx_frame: out event data port Data_Types_Pkg::CAN_Frame_Data;
+			can_tx_frame: in event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_source: flow source can_rx_frame;
+			f_sink: flow sink can_tx_frame;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 5 ms;
+	end CAN_Transceiver;
+
+	device implementation CAN_Transceiver.impl
+	end CAN_Transceiver.impl;
+
+	---------------------------------------------------------------------------
+	-- 2. DISPOSITIVO CANDIDATO (Pilar 4 - CAvA / DevCompatibility): Transceptor CAN-FD
+	--
+	-- Cenário de Evolução Tecnológica:
+	-- Dispositivo candidato para modernização do hardware para CAN Flexible Datarate.
+	--
+	-- Quebras de Compatibilidade com o Baseline:
+	-- - Período reduzido de 5 ms para 2 ms (taxa de amostragem mais agressiva);
+	-- - Inserção de uma porta adicional de diagnóstico 'bus_error_diag';
+	-- - Detectado pela ferramenta DevCompatibility do Prof. Becker como uma
+	--   extensão de interface que exige adaptação nos fluxos arquiteturais.
+	---------------------------------------------------------------------------
+	device CAN_FD_Transceiver_Candidate
+		features
+			can_bus_conn: requires bus access CAN_Bus;
+			can_fd_rx_frame: out event data port Data_Types_Pkg::CAN_Frame_Data;
+			can_fd_tx_frame: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			bus_error_diag: out event port; -- Porta adicional incompatível com o baseline
+		flows
+			f_source: flow source can_fd_rx_frame;
+			f_sink: flow sink can_fd_tx_frame;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 2 ms;
+	end CAN_FD_Transceiver_Candidate;
+
+	device implementation CAN_FD_Transceiver_Candidate.impl
+	end CAN_FD_Transceiver_Candidate.impl;
+
+	---------------------------------------------------------------------------
+	-- 3. EMULADOR DE ECU EXTERNO: Bancada de Testes HIL (Hardware-in-the-Loop)
+	--
+	-- Hardware Real: Arduino UNO R3 (ATmega328P @ 16 MHz) + MCP2515 CAN Shield
+	--
+	-- Papel Semântico e Justificativa de Engenharia:
+	-- - Modelado estritamente como 'device' (e não como 'processor') porque funciona
+	--   como estimulador do ambiente veicular externo (Testbed HIL).
+	-- - Não consome recursos de computação da CPU do coletor ESP32-S3.
+	-- - Emite periodicamente a cada 50 ms quadros simulados de RPM, Velocidade,
+	--   Temperatura do Motor e Posição do Acelerador (TPS).
+	---------------------------------------------------------------------------
+	device Uno_ECU_Emulator_Device
+		features
+			can_bus_conn: requires bus access CAN_Bus;
+			can_tx_out: out event data port Data_Types_Pkg::CAN_Frame_Data;
+			can_rx_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+		flows
+			f_ecu_source: flow source can_tx_out;
+			f_ecu_sink: flow sink can_rx_in;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 50 ms;
+	end Uno_ECU_Emulator_Device;
+
+	device implementation Uno_ECU_Emulator_Device.impl
+	end Uno_ECU_Emulator_Device.impl;
+
+end CAN_Devices_Pkg;

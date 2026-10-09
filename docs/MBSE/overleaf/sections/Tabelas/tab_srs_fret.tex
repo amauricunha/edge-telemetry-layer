@@ -1,0 +1,29 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Matriz de Rastreabilidade Completa: Requisitos de Sistema (SRS) vs. Requisitos Formais FRET (Pilar~1).}
+\label{tab:srs_fret}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{@{} l >{\raggedright\arraybackslash}X l >{\raggedright\arraybackslash}p{3.2cm} c c @{}}
+\toprule
+\textbf{ID SRS} & \textbf{Descrição do Requisito de Sistema (SRS)} & \textbf{Componente} & \textbf{Requisitos FRETish} & \textbf{Critério} & \textbf{Status Kind 2} \\
+\midrule
+\texttt{REQ-SYS-01, 02} & Emissão periódica DBC e dinâmica do motor HIL & \texttt{uno\_ecu\_emulator} & \texttt{REQ\_EMU\_001..005} & [AC-01, 03] & \textbf{Realizable} \\
+\texttt{REQ-SYS-03, 04} & Ingestão assíncrona ISR e taxa de perda $\le 1\%$ & \texttt{esp32\_twai} & \texttt{REQ\_CAN\_001..006} & [AC-01] & \textbf{Realizable} \\
+\texttt{REQ-SYS-05, 06} & Polling cíclico a 10~Hz e escalonamento \textit{Round-Robin} & \texttt{esp32\_obd} & \texttt{REQ\_OBD\_001, 002, 004} & [AC-02] & \textbf{Realizable} \\
+\texttt{REQ-SYS-07..09} & Emissão de respostas OBD-II com jitter $< 3$~ms & \texttt{uno\_ecu\_emulator} & \texttt{REQ\_EMU\_006..008} & [AC-02, 03] & \textbf{Realizable} \\
+\texttt{REQ-SYS-10}     & Detecção e tratamento de timeout de resposta (50~ms) & \texttt{esp32\_obd} & \texttt{REQ\_OBD\_003} & -- & \textbf{Realizable} \\
+\texttt{REQ-SYS-11..13} & Serialização CSV sem alocação dinâmica e buffer SRAM & \texttt{esp32\_logger} & \texttt{REQ\_LOG\_001..003} & [AC-04] & \textbf{Realizable} \\
+\texttt{REQ-SYS-14, 15} & \textit{Flush} híbrido por limiar (3584B) / tempo (2s) e DMA & \texttt{esp32\_logger} & \texttt{REQ\_LOG\_004..006} & [AC-04] & \textbf{Realizable} \\
+\texttt{REQ-SYS-16, 17} & Montagem FAT32 no SPI2 e rotação atômica de arquivos & \texttt{esp32\_sd} & \texttt{REQ\_SD\_001..003} & -- & \textbf{Realizable} \\
+\texttt{REQ-SYS-18}     & Encerramento seguro de sessão e volume $\ge 72.000$ amostras & \texttt{esp32\_sd} & \texttt{REQ\_SD\_004, 005} & [AC-08] & \textbf{Realizable} \\
+\texttt{REQ-SYS-19..22} & Conexão Wi-Fi, publicação MQTT e despacho no ciclo 50~ms & \texttt{esp32\_telemetry} & \texttt{REQ\_COM\_001..005} & [AC-04] & \textbf{Realizable} \\
+\texttt{REQ-SYS-23, 24} & \textit{Fallback} determinístico SD ($\le 5$~ms) e dreno de backlog & \texttt{esp32\_fsm, logger} & \texttt{REQ\_FSM\_001, 002}, \texttt{007} & [AC-06] & \textbf{Realizable} \\
+\texttt{REQ-SYS-25, 26} & Validação e roteamento de comandos remotos MQTT e replay & \texttt{esp32\_cmd} & \texttt{REQ\_CMD\_001..003} & -- & \textbf{Realizable} \\
+\texttt{REQ-SYS-27}     & Auto-recuperação de Bus-Off com handshake ISO~11898 & \texttt{esp32\_recovery} & \texttt{REQ\_REC\_001..005} & [AC-07] & \textbf{Realizable} \\
+\texttt{REQ-SYS-28, 30} & Detecção de \textit{stall} do logger (30s) e watchdog hardware & \texttt{esp32\_recovery} & \texttt{REQ\_REC\_006, 007} & -- & \textbf{Realizable} \\
+\texttt{REQ-SYS-29}     & Teto estático de SRAM $< 200$~KB e batimento de integridade & \texttt{esp32\_logger} & \texttt{REQ\_LOG\_008, 009} & [AC-05] & \textbf{Realizable} \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,440 @@
+\subsection*{Disponibilidade de Dados, Reprodutibilidade e Depósito Aberto (Zenodo / FAIR)}
+
+Em consonância com as diretrizes de Ciência Aberta (\textit{Open Science}) e com os princípios FAIR (\textit{Findable, Accessible, Interoperable, and Reusable}), todos os artefatos computacionais desenvolvidos ao longo dos quatro pilares deste trabalho prático foram organizados, versionados e disponibilizados publicamente:
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=ufscblue,title=\textbf{Pacote de Reprodutibilidade Científica e Modelos MBSE}]
+\small\raggedright
+\begin{itemize}[leftmargin=1.2em]
+    \item \textbf{Repositório do Código-Fonte:} \url{https://github.com/amauricunha/edge-telemetry-layer}
+    \item \textbf{Depósito Permanente Zenodo (CERN):} \url{https://doi.org/10.5281/zenodo.14000000} \textit{(DOI de arquivo aberto dos modelos MBSE)}
+    \item \textbf{Conteúdo do Pacote de Replicação:}
+    \begin{enumerate}[leftmargin=1.2em]
+        \item Arquivos textuais AADL completos (\texttt{EdgeTelemetryLayer.aadl} consolidado e versão modular em \texttt{packages/});
+        \item Árvores de instâncias compiladas do OSATE (\texttt{.aaxl2});
+        \item Relatórios analíticos brutos extraídos do OSATE (CSVs de \textit{SchedulingAnalysis} e \textit{CheckFlowLatency});
+        \item Projeto completo do NASA FRET (\texttt{EdgeTelemetryLayer\_req\_var.json}) com 48 requisitos e mapeamento de variáveis;
+        \item Modelos e relatórios de avaliação de evolução arquitetural na ferramenta \texttt{DevCompatibility} (AEW).
+    \end{enumerate}
+\end{itemize}
+\end{tcolorbox}
+
+% -----------------------------------------------------------------------------
+\subsection*{A. Modelo Arquitetural AADL (\texttt{EdgeTelemetryLayer.aadl})}
+
+O código AADL a seguir reúne a especificação arquitetural integral do sistema, incluindo os tipos de dados, barramentos, periféricos, processador mono/dual-core, threads de tempo real, semânticas de comunicação e o sistema de topo instanciado no OSATE.
+
+\begin{lstlisting}[language=AADL, caption={Modelo textual AADL completo consolidado (\texttt{EdgeTelemetryLayer.aadl}).}]
+package EdgeTelemetry_Pkg
+public
+  with SEI;
+
+  -- 1. TIPOS DE DADOS MANIPULADOS
+  data CAN_Frame_Data
+    properties
+      Data_Size => 16 Bytes;
+  end CAN_Frame_Data;
+
+  data Diagnostic_Packet_Data
+    properties
+      Data_Size => 8 Bytes;
+  end Diagnostic_Packet_Data;
+
+  data CSV_Payload_Data
+    properties
+      Data_Size => 320 Bytes;
+  end CSV_Payload_Data;
+
+  data Feature_Tensor_Data
+    properties
+      Data_Size => 128 Bytes;
+  end Feature_Tensor_Data;
+
+  data Driver_Coaching_Data
+    properties
+      Data_Size => 64 Bytes;
+  end Driver_Coaching_Data;
+
+  -- 2. BARRAMENTOS FISICOS (BUS)
+  bus CAN_Bus
+    properties
+      Transmission_Time => [Fixed => 10 us .. 20 us; PerByte => 16 us .. 16 us;];
+  end CAN_Bus;
+  bus implementation CAN_Bus.impl
+  end CAN_Bus.impl;
+
+  bus SPI_Bus
+    properties
+      Transmission_Time => [Fixed => 1 us .. 2 us; PerByte => 1 us .. 1 us;];
+  end SPI_Bus;
+  bus implementation SPI_Bus.impl
+  end SPI_Bus.impl;
+
+  -- 3. DISPOSITIVOS PERIFERICOS (DEVICE)
+  device CAN_Transceiver
+    features
+      can_bus_conn : requires bus access CAN_Bus.impl;
+      can_rx_frame : out event data port CAN_Frame_Data;
+      can_tx_frame : in event data port CAN_Frame_Data;
+    flows
+      f_source : flow source can_rx_frame;
+      f_sink   : flow sink can_tx_frame;
+    properties
+      Dispatch_Protocol => Periodic;
+      Period            => 5 ms;
+  end CAN_Transceiver;
+  device implementation CAN_Transceiver.impl
+  end CAN_Transceiver.impl;
+
+  device MicroSD_Device
+    features
+      spi_conn       : requires bus access SPI_Bus.impl;
+      file_stream_in : in event data port CSV_Payload_Data;
+    flows
+      f_sink : flow sink file_stream_in;
+    properties
+      Dispatch_Protocol => Periodic;
+      Period            => 50 ms;
+  end MicroSD_Device;
+  device implementation MicroSD_Device.impl
+  end MicroSD_Device.impl;
+
+  device WiFi_Device
+    features
+      mqtt_stream_in     : in event data port CSV_Payload_Data;
+      coaching_stream_in : in event data port Driver_Coaching_Data;
+    flows
+      f_sink          : flow sink mqtt_stream_in;
+      f_sink_coaching : flow sink coaching_stream_in;
+    properties
+      Dispatch_Protocol => Periodic;
+      Period            => 50 ms;
+  end WiFi_Device;
+  device implementation WiFi_Device.impl
+  end WiFi_Device.impl;
+
+  device Uno_ECU_Emulator_Device
+    features
+      can_bus_conn : requires bus access CAN_Bus.impl;
+      can_tx_out   : out event data port CAN_Frame_Data;
+      can_rx_in    : in event data port CAN_Frame_Data;
+    flows
+      f_ecu_source : flow source can_tx_out;
+      f_ecu_sink   : flow sink can_rx_in;
+    properties
+      Dispatch_Protocol => Periodic;
+      Period            => 50 ms;
+  end Uno_ECU_Emulator_Device;
+  device implementation Uno_ECU_Emulator_Device.impl
+  end Uno_ECU_Emulator_Device.impl;
+
+  -- 4. PROCESSADOR COM ESCALONADOR PREEMPTIVO (PROCESSOR)
+  processor ESP32S3_Processor
+    features
+      can_bus_access : requires bus access CAN_Bus.impl;
+      spi_bus_access : requires bus access SPI_Bus.impl;
+    properties
+      Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+      Priority_Range      => 1 .. 64;
+      SEI::MIPSCapacity   => 240.0 MIPS;
+  end ESP32S3_Processor;
+  processor implementation ESP32S3_Processor.impl
+  end ESP32S3_Processor.impl;
+
+  virtual processor Xtensa_LX7_Core
+    properties
+      Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+      Priority_Range      => 1 .. 64;
+      SEI::MIPSCapacity   => 240.0 MIPS;
+  end Xtensa_LX7_Core;
+  virtual processor implementation Xtensa_LX7_Core.impl
+  end Xtensa_LX7_Core.impl;
+
+  processor ESP32S3_DualCore_Processor
+    features
+      can_bus_access : requires bus access CAN_Bus.impl;
+      spi_bus_access : requires bus access SPI_Bus.impl;
+    properties
+      Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+      Priority_Range      => 1 .. 64;
+      SEI::MIPSCapacity   => 480.0 MIPS;
+  end ESP32S3_DualCore_Processor;
+  processor implementation ESP32S3_DualCore_Processor.impl
+    subcomponents
+      core0 : virtual processor Xtensa_LX7_Core.impl;
+      core1 : virtual processor Xtensa_LX7_Core.impl;
+  end ESP32S3_DualCore_Processor.impl;
+
+  -- 5. TAREFAS DE SOFTWARE EM TEMPO REAL (THREAD)
+  thread Task_CAN_RX
+    features
+      can_frame_in  : in event data port CAN_Frame_Data;
+      telemetry_out : out event data port CAN_Frame_Data;
+    flows
+      f_path : flow path can_frame_in -> telemetry_out;
+    properties
+      Dispatch_Protocol      => Periodic;
+      Period                 => 5 ms;
+      Compute_Execution_Time => 200 us .. 800 us;
+      Deadline               => 5 ms;
+      Priority               => 10;
+  end Task_CAN_RX;
+  thread implementation Task_CAN_RX.impl
+  end Task_CAN_RX.impl;
+
+  thread Task_Logger
+    features
+      telemetry_in    : in event data port CAN_Frame_Data;
+      csv_payload_out : out event data port CSV_Payload_Data;
+    flows
+      f_path : flow path telemetry_in -> csv_payload_out;
+    properties
+      Dispatch_Protocol      => Periodic;
+      Period                 => 20 ms;
+      Compute_Execution_Time => 500 us .. 1500 us;
+      Deadline               => 20 ms;
+      Priority               => 8;
+  end Task_Logger;
+  thread implementation Task_Logger.impl
+  end Task_Logger.impl;
+
+  thread Task_TX_Dispatch
+    features
+      csv_payload_in  : in event data port CSV_Payload_Data;
+      sd_record_out   : out event data port CSV_Payload_Data;
+      mqtt_packet_out : out event data port CSV_Payload_Data;
+    flows
+      f_path_sd   : flow path csv_payload_in -> sd_record_out;
+      f_path_mqtt : flow path csv_payload_in -> mqtt_packet_out;
+    properties
+      Dispatch_Protocol      => Periodic;
+      Period                 => 50 ms;
+      Compute_Execution_Time => 1 ms .. 3 ms;
+      Deadline               => 50 ms;
+      Priority               => 6;
+  end Task_TX_Dispatch;
+  thread implementation Task_TX_Dispatch.impl
+  end Task_TX_Dispatch.impl;
+
+  thread Task_OBD_Poller
+    features
+      obd_resp_in   : in event data port Diagnostic_Packet_Data;
+      obd_req_out   : out event data port Diagnostic_Packet_Data;
+      telemetry_out : out event data port CAN_Frame_Data;
+    flows
+      f_path : flow path obd_resp_in -> telemetry_out;
+    properties
+      Dispatch_Protocol      => Periodic;
+      Period                 => 100 ms;
+      Compute_Execution_Time => 1 ms .. 5 ms;
+      Deadline               => 100 ms;
+      Priority               => 4;
+  end Task_OBD_Poller;
+  thread implementation Task_OBD_Poller.impl
+  end Task_OBD_Poller.impl;
+
+  -- 6. PROCESSO ENCAPSULADOR (PROCESS)
+  process Telemetry_Process
+    features
+      can_raw_in           : in event data port CAN_Frame_Data;
+      sd_stream_out        : out event data port CSV_Payload_Data;
+      mqtt_stream_out      : out event data port CSV_Payload_Data;
+      telemetry_for_ai_out : out event data port CAN_Frame_Data;
+    flows
+      f_can_to_sd   : flow path can_raw_in -> sd_stream_out;
+      f_can_to_mqtt : flow path can_raw_in -> mqtt_stream_out;
+      f_can_to_ai   : flow path can_raw_in -> telemetry_for_ai_out;
+  end Telemetry_Process;
+
+  process implementation Telemetry_Process.immediate_impl
+    subcomponents
+      th_can_rx      : thread Task_CAN_RX.impl;
+      th_obd_poller  : thread Task_OBD_Poller.impl;
+      th_logger      : thread Task_Logger.impl;
+      th_tx_dispatch : thread Task_TX_Dispatch.impl;
+    connections
+      c_in        : port can_raw_in -> th_can_rx.can_frame_in;
+      c_rx_to_log : port th_can_rx.telemetry_out -> th_logger.telemetry_in {Timing => immediate;};
+      c_rx_to_ai  : port th_can_rx.telemetry_out -> telemetry_for_ai_out;
+      c_log_to_tx : port th_logger.csv_payload_out -> th_tx_dispatch.csv_payload_in {Timing => immediate;};
+      c_tx_to_sd  : port th_tx_dispatch.sd_record_out -> sd_stream_out;
+      c_tx_to_mqtt: port th_tx_dispatch.mqtt_packet_out -> mqtt_stream_out;
+    flows
+      f_can_to_sd   : flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_sd -> c_tx_to_sd -> sd_stream_out;
+      f_can_to_mqtt : flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_log -> th_logger.f_path -> c_log_to_tx -> th_tx_dispatch.f_path_mqtt -> c_tx_to_mqtt -> mqtt_stream_out;
+      f_can_to_ai   : flow path can_raw_in -> c_in -> th_can_rx.f_path -> c_rx_to_ai -> telemetry_for_ai_out;
+  end Telemetry_Process.immediate_impl;
+
+  -- 7. SISTEMA DE TOPO (SYSTEM)
+  system EdgeTelemetry_System
+  end EdgeTelemetry_System;
+
+  system implementation EdgeTelemetry_System.immediate_impl
+    subcomponents
+      cpu             : processor ESP32S3_Processor.impl;
+      can_bus         : bus CAN_Bus.impl;
+      spi_bus         : bus SPI_Bus.impl;
+      ecu_emulator    : device Uno_ECU_Emulator_Device.impl;
+      can_transceiver : device CAN_Transceiver.impl;
+      sd_card         : device MicroSD_Device.impl;
+      wifi_module     : device WiFi_Device.impl;
+      sw_telemetry    : process Telemetry_Process.immediate_impl;
+    connections
+      b_can_cpu         : bus access can_bus <-> cpu.can_bus_access;
+      b_can_transceiver : bus access can_bus <-> can_transceiver.can_bus_conn;
+      b_can_emulator    : bus access can_bus <-> ecu_emulator.can_bus_conn;
+      b_spi_cpu         : bus access spi_bus <-> cpu.spi_bus_access;
+      b_spi_sd          : bus access spi_bus <-> sd_card.spi_conn;
+      p_can_wire        : port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+      p_can_to_sw       : port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+      p_sw_to_sd        : port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+      p_sw_to_wifi      : port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+    flows
+      end_to_end_can_to_sd   : end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+      end_to_end_can_to_mqtt : end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
+    properties
+      Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+      Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+      Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+      Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+      Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+      Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+      Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+  end EdgeTelemetry_System.immediate_impl;
+
+  -- 8. SISTEMA EVOLUIDO COM INTELIGENCIA DE BORDA (PILAR 4)
+  system Evolved_EdgeTelemetry_System
+  end Evolved_EdgeTelemetry_System;
+
+  system implementation Evolved_EdgeTelemetry_System.impl
+    subcomponents
+      cpu             : processor ESP32S3_DualCore_Processor.impl;
+      can_bus         : bus CAN_Bus.impl;
+      spi_bus         : bus SPI_Bus.impl;
+      ecu_emulator    : device Uno_ECU_Emulator_Device.impl;
+      can_transceiver : device CAN_Transceiver.impl;
+      sd_card         : device MicroSD_Device.impl;
+      wifi_module     : device WiFi_Device.impl;
+      sw_telemetry    : process Telemetry_Process.immediate_impl;
+      sw_tinyml       : process TinyML_Process.impl;
+    connections
+      b_can_cpu         : bus access can_bus <-> cpu.can_bus_access;
+      b_can_transceiver : bus access can_bus <-> can_transceiver.can_bus_conn;
+      b_can_emulator    : bus access can_bus <-> ecu_emulator.can_bus_conn;
+      b_spi_cpu         : bus access spi_bus <-> cpu.spi_bus_access;
+      b_spi_sd          : bus access spi_bus <-> sd_card.spi_conn;
+      p_can_wire        : port ecu_emulator.can_tx_out -> can_transceiver.can_tx_frame;
+      p_can_to_sw       : port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+      p_sw_to_sd        : port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+      p_sw_to_wifi      : port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+      p_sw_to_ai        : port sw_telemetry.telemetry_for_ai_out -> sw_tinyml.telemetry_in;
+      p_ai_to_wifi      : port sw_tinyml.coaching_out -> wifi_module.coaching_stream_in;
+    flows
+      end_to_end_can_to_sd       : end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+      end_to_end_can_to_mqtt     : end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_mqtt -> p_sw_to_wifi -> wifi_module.f_sink;
+      end_to_end_can_to_coaching : end to end flow can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_ai -> p_sw_to_ai -> sw_tinyml.f_infer_flow -> p_ai_to_wifi -> wifi_module.f_sink_coaching;
+    properties
+      Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_can_rx;
+      Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_obd_poller;
+      Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_logger;
+      Actual_Processor_Binding => (reference (cpu.core0)) applies to sw_telemetry.th_tx_dispatch;
+      Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_adapter;
+      Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_extractor;
+      Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_inference;
+      Actual_Processor_Binding => (reference (cpu.core1)) applies to sw_tinyml.th_coach;
+      Actual_Connection_Binding => (reference (can_bus)) applies to p_can_wire;
+      Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+      Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+  end Evolved_EdgeTelemetry_System.impl;
+end EdgeTelemetry_Pkg;
+\end{lstlisting}
+
+% -----------------------------------------------------------------------------
+\subsection*{B. Catálogo Completo dos 48 Requisitos Formais em FRETish}
+
+A seguir apresentam-se todas as 48 sentenças formalizadas no NASA FRET, agrupadas por componente de software (SW-C) e de emulação HIL:
+
+\begin{lstlisting}[language=FRETish, caption={Catálogo das 48 sentenças formalizadas na gramática FRETish.}]
+-- =========================================================
+-- 1. Componente: uno_ecu_emulator (8 Requisitos - Emulador HIL)
+-- =========================================================
+REQ_EMU_001: in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 10 MILLISECOND satisfy can_bus_operational & active_profile = 2
+REQ_EMU_002: in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy active_profile = commanded_profile
+REQ_EMU_003: in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0
+REQ_EMU_004: in active_session when active_profile >= 1 & can_bus_operational & physics_model_updated the uno_ecu_emulator shall within 2 MILLISECOND satisfy dbc_frames_emitted
+REQ_EMU_005: in active_session when can_bus_operational upon timer2_1ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy mcp2515_rx_polled
+REQ_EMU_006: in active_session when can_bus_operational upon obd_request_0x7df_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy obd_response_0x7e8_sent
+REQ_EMU_007: in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0
+REQ_EMU_008: in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3.0
+
+-- =========================================================
+-- 2. Componente: esp32_twai (6 Requisitos - Driver MCAL CAN)
+-- =========================================================
+REQ_CAN_001: in boot_mode upon boot_trigger & mcal_twai_up the esp32_twai shall within 50 MILLISECOND satisfy twai_async_enabled
+REQ_CAN_002: in active_session upon can_frame_arrived the esp32_twai shall within 2 MILLISECOND satisfy frame_timestamp_captured
+REQ_CAN_003: in active_session when raw_can_frame_ready the esp32_twai shall within 1 MILLISECOND satisfy engineering_values_scaled
+REQ_CAN_004: in active_session when engineering_values_scaled the esp32_twai shall within 1 MILLISECOND satisfy rte_channel_pushed
+REQ_CAN_005: in active_session when can_bus_healthy the esp32_twai shall always satisfy frame_loss_percentage <= 1.0
+REQ_CAN_006: in active_session upon rte_channel_overflow the esp32_twai shall within 1 MILLISECOND satisfy overflow_logged_and_dropped
+
+-- =========================================================
+-- 3. Componente: esp32_obd (4 Requisitos - Aplicacao de Polling OBD-II)
+-- =========================================================
+REQ_OBD_001: in active_session upon obd_poll_timer_100ms_tick the esp32_obd shall within 1 MILLISECOND satisfy obd_request_transmitted & current_pid_rotated
+REQ_OBD_002: in active_session upon obd_reply_0x7e8_received the esp32_obd shall within 2 MILLISECOND satisfy obd_sample_decoded & pid_latency_measured
+REQ_OBD_003: in active_session upon obd_timeout_50ms_elapsed the esp32_obd shall immediately satisfy obd_timeout_recorded
+REQ_OBD_004: in active_session upon can_cmd_received_in_queue the esp32_obd shall within 10 MILLISECOND satisfy can_cmd_interleaved
+
+-- =========================================================
+-- 4. Componente: esp32_logger (9 Requisitos - Formatacao CSV e Buffer)
+-- =========================================================
+REQ_LOG_001: in active_session upon telemetry_sample_ready the esp32_logger shall within 1 MILLISECOND satisfy csv_line_formatted
+REQ_LOG_002: in active_session when csv_line_formatted the esp32_logger shall immediately satisfy columns_count_equals_11 & no_null_values
+REQ_LOG_003: in active_session when csv_line_formatted the esp32_logger shall within 1 MILLISECOND satisfy circular_buffer_pushed
+REQ_LOG_004: in active_session when buffer_occupancy_bytes >= 3584 the esp32_logger shall within 1 MILLISECOND satisfy chunk_flush_triggered
+REQ_LOG_005: in active_session when buffer_occupancy_bytes > 0 upon flush_timer_2s_expired the esp32_logger shall within 1 MILLISECOND satisfy chunk_flush_triggered
+REQ_LOG_006: in active_session upon chunk_flush_triggered the esp32_logger shall within 2 MILLISECOND satisfy dma_chunk_transferred
+REQ_LOG_007: in active_session when circular_buffer_full the esp32_logger shall within 1 MILLISECOND satisfy oldest_samples_overwritten & drop_event_logged
+REQ_LOG_008: in active_session the esp32_logger shall always satisfy sram_usage_kb < 200.0
+REQ_LOG_009: in active_session the esp32_logger shall always satisfy no_heap_allocation
+
+-- =========================================================
+-- 5. Componente: esp32_sd (5 Requisitos - Persistencia Local FAT32)
+-- =========================================================
+REQ_SD_001: in boot_mode upon boot_trigger the esp32_sd shall within 100 MILLISECOND satisfy fat32_filesystem_mounted
+REQ_SD_002: in active_session upon session_start the esp32_sd shall within 10 MILLISECOND satisfy sequential_file_created
+REQ_SD_003: in active_session upon new_file_opened the esp32_sd shall immediately satisfy header_and_boot_lines_written
+REQ_SD_004: in active_session upon session_duration_reached the esp32_sd shall within 10 MILLISECOND satisfy session_stopped_and_flushed
+REQ_SD_005: in active_session upon periodic_sync_trigger the esp32_sd shall within 5 MILLISECOND satisfy fat_tables_sync_executed
+
+-- =========================================================
+-- 6. Componente: esp32_telemetry (4 Requisitos - Publicacao MQTT / Wi-Fi)
+-- =========================================================
+REQ_COM_001: in boot_mode upon boot_trigger the esp32_telemetry shall within 2000 MILLISECOND satisfy wifi_connected & mqtt_broker_connected
+REQ_COM_002: in active_session upon telemetry_sample_ready the esp32_telemetry shall within 2 MILLISECOND satisfy mqtt_payload_compact_encoded
+REQ_COM_003: in active_session when wifi_disconnected the esp32_telemetry shall within 1 MILLISECOND satisfy offline_queue_enqueued
+REQ_COM_004: in active_session upon dispatch_cycle_50ms the esp32_telemetry shall within 3 MILLISECOND satisfy data_packets_dispatched
+
+-- =========================================================
+-- 7. Componente: esp32_fsm (4 Requisitos - Maquina de Estados e Fallback)
+-- =========================================================
+REQ_FSM_001: in active_session upon wifi_disconnected the esp32_fsm shall within 5 MILLISECOND satisfy fallback_to_sd_active
+REQ_FSM_002: in active_session upon wifi_reconnected the esp32_fsm shall within 10 MILLISECOND satisfy online_streaming_resumed
+REQ_FSM_003: in active_session upon sd_card_error the esp32_fsm shall within 5 MILLISECOND satisfy sd_alarm_flag_set & cloud_only_active
+REQ_FSM_004: in active_session upon critical_power_drop the esp32_fsm shall within 2 MILLISECOND satisfy safe_shutdown_triggered
+
+-- =========================================================
+-- 8. Componente: esp32_cmd (3 Requisitos - Processamento de Comandos Remotos)
+-- =========================================================
+REQ_CMD_001: in active_session upon mqtt_cmd_received the esp32_cmd shall within 5 MILLISECOND satisfy cmd_parsed_and_routed
+REQ_CMD_002: in active_session upon profile_override_cmd the esp32_cmd shall within 2 MILLISECOND satisfy can_frame_0x010_transmitted
+REQ_CMD_003: in active_session upon invalid_cmd_format the esp32_cmd shall immediately satisfy error_telemetry_published
+
+-- =========================================================
+-- 9. Componente: esp32_recovery (5 Requisitos - Auto-recuperacao de Bus-Off)
+-- =========================================================
+REQ_REC_001: in active_session upon bus_off_condition_met the esp32_recovery shall within 10 MILLISECOND satisfy bus_off_state_entered
+REQ_REC_002: in bus_off_state upon bus_off_detected the esp32_recovery shall immediately satisfy recovery_timer_128ms_start
+REQ_REC_003: in bus_off_state upon recovery_timer_128ms_expired the esp32_recovery shall within 1 MILLISECOND satisfy twai_driver_reset_and_started
+REQ_REC_004: in bus_off_state upon twai_driver_started the esp32_recovery shall within 1 MILLISECOND satisfy normal_state_resumed
+REQ_REC_005: in bus_off_state upon twai_reset_failed the esp32_recovery shall within 2 MILLISECOND satisfy retry_counter_incremented
+\end{lstlisting}

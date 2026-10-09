@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Comparação Quantitativa de Latência: Modo Imediato vs. Modo Atrasado.}
+\label{tab:latencia_comparada}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{3.0cm} cccc @{}}
+\toprule
+\textbf{Fluxo Ponta a Ponta} & \textbf{Métrica} & \textbf{Modo Imediato} & \textbf{Modo Atrasado} & \textbf{Diferença ($\Delta$)} & \textbf{Ganho} \\
+\midrule
+\multirow{2}{*}{\texttt{can\_to\_sd}}   & Latência Mínima & $\mathbf{2{,}287}$~ms & $70{,}898$~ms  & $-68{,}611$~ms & $96{,}8\%$ \\
+                                         & Latência Máxima & $\mathbf{60{,}898}$~ms & $160{,}898$~ms & $-100{,}000$~ms & \textbf{62,1\%} \\
+\midrule
+\multirow{2}{*}{\texttt{can\_to\_mqtt}} & Latência Mínima & $\mathbf{1{,}966}$~ms & $70{,}576$~ms  & $-68{,}610$~ms & $97{,}2\%$ \\
+                                         & Latência Máxima & $\mathbf{60{,}576}$~ms & $160{,}576$~ms & $-100{,}000$~ms & \textbf{62,3\%} \\
+\bottomrule
+\end{tabular}
+\end{table}

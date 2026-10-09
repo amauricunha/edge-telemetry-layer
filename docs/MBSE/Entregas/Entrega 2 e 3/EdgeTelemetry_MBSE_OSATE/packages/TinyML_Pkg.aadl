@@ -1,0 +1,134 @@
+package TinyML_Pkg
+public
+	with Data_Types_Pkg;
+
+	---------------------------------------------------------------------------
+	-- PILAR 4: MODELAGEM DA CAMADA DE INTELIGÊNCIA DE BORDA (TINYML / CAvA)
+	--
+	-- Metodologia CAvA (Fase 3 - Wrapper / Adaptador e Pipeline de Inferência):
+	-- Modela a inserção de inteligência analítica de direção veicular na borda:
+	-- 1. TinyML_Input_Adapter: Converte amostras CAN heterogêneas para tensores normalizados.
+	-- 2. Task_Feature_Extractor: Agrega janela temporal deslizante de 100 amostras (2s @ 50Hz).
+	-- 3. Task_TinyML_Inference: Executa o modelo quantizado INT8 (TFLite Micro / ESP-NN).
+	-- 4. Task_Coaching_Advisor: Gera métricas acionáveis de feedback (Driver Coaching).
+	--
+	-- Rastreabilidade com Requisitos:
+	-- - REQ-SYS-31 / REQ_TINYML_001: Extração e normalização de atributos (AC-08)
+	-- - REQ-SYS-32 / REQ_TINYML_002: Classificação e emissão de alertas via MQTT
+	---------------------------------------------------------------------------
+
+	---------------------------------------------------------------------------
+	-- 1. WRAPPER / ADAPTADOR DE DADOS (EXIGÊNCIA FASE 3 DO FRAMEWORK CAvA)
+	-- Converte fluxo assíncrono heterogêneo de CAN/OBD no formato tensorial tabular
+	-- normalizado esperado pelo motor de inferência (Tensor Arena)
+	---------------------------------------------------------------------------
+	thread TinyML_Input_Adapter
+		features
+			telemetry_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			normalized_sample_out: out event data port Data_Types_Pkg::Feature_Tensor_Data;
+		flows
+			f_adapt: flow path telemetry_in -> normalized_sample_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 20 ms; -- Amostra a 50 Hz em sincronia com o pipeline
+			Compute_Execution_Time => 100 us .. 500 us; -- Sobrecarga computacional do wrapper (WCET = 0.5 ms)
+			Deadline => 20 ms;
+			Priority => 9;
+	end TinyML_Input_Adapter;
+
+	thread implementation TinyML_Input_Adapter.impl
+	end TinyML_Input_Adapter.impl;
+
+	---------------------------------------------------------------------------
+	-- 2. EXTRATOR DE CARACTERÍSTICAS EM JANELA DESLIZANTE
+	-- Agrega 100 amostras (2 segundos @ 50 Hz): média, variância, gradiente de aceleração
+	---------------------------------------------------------------------------
+	thread Task_Feature_Extractor
+		features
+			sample_in: in event data port Data_Types_Pkg::Feature_Tensor_Data;
+			window_tensor_out: out event data port Data_Types_Pkg::Feature_Tensor_Data;
+		flows
+			f_extract: flow path sample_in -> window_tensor_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 500 ms; -- Atualização a cada 500 ms
+			Compute_Execution_Time => 500 us .. 2000 us; -- WCET = 2.0 ms
+			Deadline => 500 ms;
+			Priority => 7;
+	end Task_Feature_Extractor;
+
+	thread implementation Task_Feature_Extractor.impl
+	end Task_Feature_Extractor.impl;
+
+	---------------------------------------------------------------------------
+	-- 3. MOTOR DE INFERÊNCIA INT8 QUANTIZADO (TFLITE MICRO / ESP-NN)
+	-- Modelo de rede neural feedforward/1D-CNN treinado em servidor e quantizado em INT8
+	-- Alocado para execução isolada no Core 1 da CPU
+	---------------------------------------------------------------------------
+	thread Task_TinyML_Inference
+		features
+			tensor_in: in event data port Data_Types_Pkg::Feature_Tensor_Data;
+			prediction_out: out event data port Data_Types_Pkg::Driver_Coaching_Data;
+		flows
+			f_infer: flow path tensor_in -> prediction_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 1000 ms; -- Inferência periódica a cada 1 segundo (1 Hz)
+			Compute_Execution_Time => 10 ms .. 25 ms; -- WCET = 25 ms (Inclusão de operadores vetorizados ESP-NN)
+			Deadline => 1000 ms;
+			Priority => 5;
+	end Task_TinyML_Inference;
+
+	thread implementation Task_TinyML_Inference.impl
+	end Task_TinyML_Inference.impl;
+
+	---------------------------------------------------------------------------
+	-- 4. CONSULTOR DE PILOTAGEM EM TEMPO REAL (DRIVER COACHING ADVISOR)
+	-- Converte classes de predição em métricas e mensagens acionáveis de alto valor:
+	-- Score (0-100), "Aliviar aceleração", "Antecipar frenagem", "Trocar marcha"
+	---------------------------------------------------------------------------
+	thread Task_Coaching_Advisor
+		features
+			prediction_in: in event data port Data_Types_Pkg::Driver_Coaching_Data;
+			coaching_out: out event data port Data_Types_Pkg::Driver_Coaching_Data;
+		flows
+			f_coach: flow path prediction_in -> coaching_out;
+		properties
+			Dispatch_Protocol => Periodic;
+			Period => 1000 ms;
+			Compute_Execution_Time => 200 us .. 1000 us; -- WCET = 1.0 ms
+			Deadline => 1000 ms;
+			Priority => 4;
+	end Task_Coaching_Advisor;
+
+	thread implementation Task_Coaching_Advisor.impl
+	end Task_Coaching_Advisor.impl;
+
+	---------------------------------------------------------------------------
+	-- PROCESSO ENCAPSULADOR DA CAMADA DE INTELIGÊNCIA DE BORDA (CORE 1)
+	---------------------------------------------------------------------------
+	process TinyML_Process
+		features
+			telemetry_in: in event data port Data_Types_Pkg::CAN_Frame_Data;
+			coaching_out: out event data port Data_Types_Pkg::Driver_Coaching_Data;
+		flows
+			f_infer_flow: flow path telemetry_in -> coaching_out;
+	end TinyML_Process;
+
+	process implementation TinyML_Process.impl
+		subcomponents
+			th_adapter: thread TinyML_Input_Adapter.impl;
+			th_extractor: thread Task_Feature_Extractor.impl;
+			th_inference: thread Task_TinyML_Inference.impl;
+			th_coach: thread Task_Coaching_Advisor.impl;
+		connections
+			c_in: port telemetry_in -> th_adapter.telemetry_in;
+			c_adapt_to_ext: port th_adapter.normalized_sample_out -> th_extractor.sample_in {Timing => immediate;};
+			c_ext_to_infer: port th_extractor.window_tensor_out -> th_inference.tensor_in {Timing => immediate;};
+			c_infer_to_coach: port th_inference.prediction_out -> th_coach.prediction_in {Timing => immediate;};
+			c_coach_out: port th_coach.coaching_out -> coaching_out;
+		flows
+			f_infer_flow: flow path telemetry_in -> c_in -> th_adapter.f_adapt -> c_adapt_to_ext -> th_extractor.f_extract -> c_ext_to_infer -> th_inference.f_infer -> c_infer_to_coach -> th_coach.f_coach -> c_coach_out -> coaching_out;
+	end TinyML_Process.impl;
+
+end TinyML_Pkg;

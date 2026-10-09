@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Matriz Comparativa de Qualidade de Evolução Arquitetural (ISO/IEC 25010).}
+\label{tab:iso25010_comparada}
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{} >{\raggedright\arraybackslash}p{3.2cm} >{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X @{}}
+\toprule
+\textbf{Característica ISO} & \textbf{Métrica Avaliada} & \textbf{Baseline (Pilar 2)} & \textbf{Evoluído (Pilar 4)} \\
+\midrule
+\textbf{Adequação Funcional} & Inteligência de Borda & Inexistente (Passivo) & TinyML \textit{Driver Coaching} \\
+\textbf{Eficiência de Desempenho} & Utilização CPU (Core 0) & $34{,}5\%$ & $34{,}5\%$ (Isolamento total) \\
+\textbf{Eficiência de Desempenho} & Utilização Global do SoC & $34{,}5\%$ (1 núcleo) & $40{,}0\%$ (Dual-core balanceado) \\
+\textbf{Latência de Resposta} & Tempo Inferência Local & Remota ($> 200$~ms) & Borda ($\le 25{,}0$~ms) \\
+\textbf{Confiabilidade} & Dependência da Nuvem & Crítica para análise & Nula (Operação \textit{offline}) \\
+\textbf{Manutenibilidade} & Acoplamento Arquitetural & Rígido (Monolítico) & Modular (\textit{Wrappers} CAvA) \\
+\bottomrule
+\end{tabularx}
+\end{table}

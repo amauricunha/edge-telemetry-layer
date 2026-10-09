@@ -1,0 +1,60 @@
+\subsection{Rastreabilidade entre Requisitos de Sistema (SRS) e FRETish}
+A especificação dos requisitos de engenharia do sistema de telemetria (\textit{System Requirements Specification} -- SRS) foi integralmente formalizada na gramática FRETish. A Tabela~\ref{tab:srs_fret} apresenta a matriz de rastreabilidade exaustiva entre os requisitos de sistema (\texttt{REQ-SYS-01} a \texttt{REQ-SYS-30}), os 9 componentes arquiteturais de software e emulação HIL, os identificadores formais no FRET e o resultado de realizabilidade obtido no provador formal Kind~2 / Z3.
+
+\input{sections/Tabelas/tab_srs_fret.tex}
+
+\subsection{Rastreabilidade com os Critérios de Aceitação da Dissertação (AC-01 a AC-08)}
+A engenharia de requisitos do coletor vincula rigorosamente os critérios de aceitação empíricos da dissertação aos contratos matemáticos do sistema, conforme sumarizado na Tabela~\ref{tab:rastreabilidade_ac}.
+
+\input{sections/Tabelas/tab_rastreabilidade.tex}
+
+\subsection{Metodologia Baseada em Sheridan, Becker et al. (RefSQ 2025)}
+A formalização em FRETish seguiu as diretrizes e lições aprendidas documentadas pelo grupo de pesquisa do Prof.~Dr.~Leandro Buss Becker (UFSC) na conferência RefSQ~2025 \cite{sheridan2025}. A experiência prática de desenvolvimento revelou que a formalização de requisitos não constitui mera tradução textual, mas um processo evolutivo de refinamento de engenharia:
+\begin{enumerate}
+    \item \textbf{Tentativa Ingênua Inicial (Monolítica):} Em um primeiro momento, concentraram-se mais de 40 requisitos em um único componente monolítico (\texttt{esp32s3\_collector}). Prazos físicos longos foram declarados explicitamente na sintaxe temporal (ex.: temporização de $128\text{ ms}$ no Bus-Off como \texttt{shall after} \allowbreak \texttt{128 MILLISECOND} e \textit{timeout} de rede de $10\text{ s}$). O compilador Lustre realizou o desenrolamento (\textit{unrolling}) discreto de cada milissegundo em variáveis de estado interno, gerando um modelo com mais de 20.000 linhas ($\approx 1{,}5\text{ MB}$). O provador formal SMT Kind~2 esgotou a memória RAM do sistema operacional (\textit{Out-of-Memory}), retornando \texttt{UNKNOWN / Timeout} após 15 minutos;
+    \item \textbf{Diagnóstico e Decomposição em Componentes de Software (SW-C):} Apoiando-se no precedente de Becker et al. \cite{sheridan2025} e nas normas NASA-STD-8739.8, a arquitetura foi decomposta em 8 componentes de software especializados (\texttt{esp32\_twai}, \texttt{esp32\_obd}, \texttt{esp32\_logger}, \texttt{esp32\_sd}, \allowbreak \texttt{esp32\_telemetry}, \texttt{esp32\_fsm}, \texttt{esp32\_cmd}, \texttt{esp32\_recovery}) e 1 componente emulador de bancada (\texttt{uno\_ecu\_emulator});
+    \item \textbf{Adoção do NASA Timer Handshake Pattern:} Temporizações físicas longas de processos externos foram desacopladas dos prazos estritos de CPU. O software dispara o temporizador com o predicado (\texttt{immediately satisfy} \allowbreak \texttt{recovery\_timer\_128ms\_start}) e processa em prazo delimitado ($\le 1\text{ ms}$) o recebimento do término (\texttt{upon} \allowbreak \texttt{recovery\_timer\_128ms\_expired});
+    \item \textbf{Garantia Matemática de Realizabilidade:} Com a reestruturação, o modelo Lustre compilado reduziu-se a 5~KB. A verificação formal monolítica e composicional no Kind~2 / Z3 convergiu em menos de \textbf{0{,}41~segundos}, alcançando \textbf{100\% de aprovação (\texttt{Realizable: True})} para todos os 48 requisitos formais, sem inconsistências lógicas ou \textit{deadlocks}.
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphicssafe{width=\linewidth}{fret_dashboard.png}{Dashboard do FRET comprovando 48 requisitos e 100\% formalizados.}
+        \caption{Painel geral do NASA FRET (48 requisitos em 9 componentes).}
+        \label{fig:fret_dashboard}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphicssafe{width=\linewidth}{fret_realizability.png}{Tela do FRET executando Realizability Checking via Kind 2.}
+        \caption{Verificação de Realizabilidade via Kind~2 / SMT.}
+        \label{fig:fret_realizability}
+    \end{subfigure}
+    \caption{Evidências de formalização e verificação de realizabilidade no NASA FRET.}
+    \label{fig:fret_evidencias}
+\end{figure}
+
+\subsection{Estrutura e Amostra de Sentenças FRETish}
+Cada sentença formalizada em FRETish decompõe-se rigorosamente em cinco cláusulas semânticas: \textbf{Scope} (fronteira operacional), \textbf{Condition} (gatilho de ativação), \textbf{Component} (agente responsável), \textbf{Timing} (restrição temporal estrita) e \textbf{Response} (predicado lógico pós-condição). O catálogo completo reúne 48 requisitos; a Listagem~\ref{lst:fret_amostra} ilustra as sentenças representativas dos componentes críticos.
+
+\begin{lstlisting}[language=FRETish, caption={Amostra de sentenças representativas codificadas em FRETish.}, label={lst:fret_amostra}]
+-- REQ_CAN_002: Ingestao deterministica na ISR de recepcao TWAI [AC-01]
+in active_session upon can_frame_arrived the esp32_twai shall within 2 MILLISECOND satisfy frame_timestamp_captured
+
+-- REQ_OBD_001: Disparo de polling ciclico SAE J1979 a 10 Hz [AC-02]
+in active_session upon obd_poll_timer_100ms_tick the esp32_obd shall within 1 MILLISECOND satisfy obd_request_transmitted & current_pid_rotated
+
+-- REQ_LOG_001: Formatacao CSV em buffer estatico de SRAM [AC-04, AC-05]
+in active_session upon telemetry_sample_ready the esp32_logger shall within 1 MILLISECOND satisfy csv_line_formatted & no_heap_allocation
+
+-- REQ_FSM_001: Comutacao automatica para MicroSD em caso de perda de Wi-Fi [AC-06]
+in active_session upon wifi_disconnected the esp32_fsm shall within 5 MILLISECOND satisfy fallback_to_sd_active
+
+-- REQ_REC_002: Handshake do temporizador ISO 11898 de 128 ms para Bus-Off [AC-07]
+in bus_off_state upon bus_off_detected the esp32_recovery shall immediately satisfy recovery_timer_128ms_start
+\end{lstlisting}
+
+\subsection{Prontidão para Runtime Verification (RV) com R2U2 e Lógica MLTL}
+Conforme destacado na metodologia de Becker et al. \cite{sheridan2025}, a formalização em FRETish viabilizou a exportação direta de contratos temporais para Verificação em Tempo de Execução (\textit{Runtime Verification} -- RV) através do motor R2U2 (\textit{Realizable, Responsive, Unobtrusive Unit}). Todos os 48 requisitos geraram fórmulas compiladas em Lógica Temporal de Tempo de Missão (\textit{Mission-time Linear Temporal Logic} -- MLTL) com janelas delimitadas de clock, permitindo que oráculos dinâmicos monitorem o barramento CAN em bancada sem sobrecarga computacional.

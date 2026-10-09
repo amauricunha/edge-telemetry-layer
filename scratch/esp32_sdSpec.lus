@@ -1,0 +1,72 @@
+
+--Historically
+node H(X:bool) returns (Y:bool);
+let
+    Y = X -> (X and (pre Y));
+tel
+
+--Y since inclusive X
+node SI(X,Y: bool) returns (Z:bool);
+let
+Z = Y and (X or (false -> pre Z));
+tel
+
+--Y since X
+node S(X,Y: bool) returns (Z:bool);
+let
+Z = X or (Y and (false -> pre Z));
+tel
+
+--Y triggered X
+node T(X,Y: bool) returns(Z:bool);
+let
+Z = (X and (Y or (true -> pre Z)));
+tel
+
+--Once
+node O(X:bool) returns (Y:bool);
+let
+ Y = X or (false -> pre Y);
+tel
+
+node YtoPre(X:bool) returns (Y:bool);
+let
+    Y = false -> pre X;
+tel
+
+node ZtoPre(X:bool) returns (Y:bool);
+let
+    Y = true -> pre X;
+tel
+
+
+node imported esp32_sdSpec( __benchmark_completion:boolean ; __boot_trigger:boolean ; __mcal_spi_sd_up:boolean ; __new_file_opened:boolean ; __sd_card_inserted:boolean ; __session_duration_reached:boolean ; __session_rotate_command:boolean ) returns ( __fat32_filesystem_mounted:boolean ; __header_and_boot_lines_written:boolean ; __session_file_rotated_atomically:boolean ; __session_stopped_and_flushed:boolean ; __total_dataset_samples:integer );
+(*@contract
+
+var __FTP : bool = true -> false;
+
+var __active_session : boolean = true;
+var __boot_mode : boolean = true -> false;
+
+(* Req text: upon benchmark_completion the esp32_sd shall satisfy total_dataset_samples >= 72000 *)
+var __REQ_SD_005 : bool = (H(not (__benchmark_completion)) or not (SI((__benchmark_completion and ZtoPre(not (__benchmark_completion))),not ((__total_dataset_samples >= 72000)))));
+
+(* Req text: in boot_mode upon boot_trigger & mcal_spi_sd_up & sd_card_inserted the esp32_sd shall within 10 MILLISECOND satisfy fat32_filesystem_mounted *)
+var __REQ_SD_001 : bool = (H(((not (__boot_mode) and YtoPre(__boot_mode)) => YtoPre(SI((__boot_mode and ZtoPre(not (__boot_mode))),(OT(10, 10, ((((__boot_trigger and __mcal_spi_sd_up) and __sd_card_inserted) and (YtoPre(not (((__boot_trigger and __mcal_spi_sd_up) and __sd_card_inserted))) or (__boot_mode and ZtoPre(not (__boot_mode))))) and not (__fat32_filesystem_mounted))) => OT(9, 0, ((__boot_mode and ZtoPre(not (__boot_mode))) or __fat32_filesystem_mounted))))))) and (SI((__boot_mode and ZtoPre(not (__boot_mode))),not ((not (__boot_mode) and YtoPre(__boot_mode)))) => SI((__boot_mode and ZtoPre(not (__boot_mode))),(OT(10, 10, ((((__boot_trigger and __mcal_spi_sd_up) and __sd_card_inserted) and (YtoPre(not (((__boot_trigger and __mcal_spi_sd_up) and __sd_card_inserted))) or (__boot_mode and ZtoPre(not (__boot_mode))))) and not (__fat32_filesystem_mounted))) => OT(9, 0, ((__boot_mode and ZtoPre(not (__boot_mode))) or __fat32_filesystem_mounted))))));
+
+(* Req text: upon session_rotate_command the esp32_sd shall within 10 MILLISECOND satisfy session_file_rotated_atomically *)
+var __REQ_SD_002 : bool = H((OT(10, 10, ((__session_rotate_command and ZtoPre(not (__session_rotate_command))) and not (__session_file_rotated_atomically))) => OT(9, 0, (ZtoPre(false) or __session_file_rotated_atomically))));
+
+(* Req text: upon new_file_opened the esp32_sd shall immediately satisfy header_and_boot_lines_written *)
+var __REQ_SD_003 : bool = H(((__new_file_opened and ZtoPre(not (__new_file_opened))) => __header_and_boot_lines_written));
+
+(* Req text: in active_session upon session_duration_reached the esp32_sd shall within 10 MILLISECOND satisfy session_stopped_and_flushed *)
+var __REQ_SD_004 : bool = (H(((not (__active_session) and YtoPre(__active_session)) => YtoPre(SI((__active_session and ZtoPre(not (__active_session))),(OT(10, 10, ((__session_duration_reached and (YtoPre(not (__session_duration_reached)) or (__active_session and ZtoPre(not (__active_session))))) and not (__session_stopped_and_flushed))) => OT(9, 0, ((__active_session and ZtoPre(not (__active_session))) or __session_stopped_and_flushed))))))) and (SI((__active_session and ZtoPre(not (__active_session))),not ((not (__active_session) and YtoPre(__active_session)))) => SI((__active_session and ZtoPre(not (__active_session))),(OT(10, 10, ((__session_duration_reached and (YtoPre(not (__session_duration_reached)) or (__active_session and ZtoPre(not (__active_session))))) and not (__session_stopped_and_flushed))) => OT(9, 0, ((__active_session and ZtoPre(not (__active_session))) or __session_stopped_and_flushed))))));
+
+guarantee __REQ_SD_005;
+guarantee __REQ_SD_001;
+guarantee __REQ_SD_002;
+guarantee __REQ_SD_003;
+guarantee __REQ_SD_004;
+
+*)

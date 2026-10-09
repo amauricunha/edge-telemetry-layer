@@ -1,0 +1,60 @@
+%%%%%%%%%%%%%%%%% Usar LuaLaTeX (compilador) %%%%%%%%%%%%%%%%%
+\documentclass[
+    a4paper,        % Tamanho do papel
+    12pt,           % Tamanho da fonte
+    openany,        % Capítulos começam na próxima página
+    oneside         % para impressão em somente frente. Oposto a twoside(frente e verso - ORIGINAL)
+]{article}
+
+\usepackage{import}
+\usepackage{preamble}  % importa pacotes e comandos (preamble.sty)
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+%«««««««««««««««««««««««««««««««««««««««««««««««««««««««««««««
+\begin{document}
+
+%___________________________Capa____________________________
+
+\import{./}{capa.tex}
+
+%_________________________Sumários__________________________
+
+{\hypersetup{linkcolor=black} % Links do sumário ficam pretos
+\tableofcontents   % Sumário
+\clearpage}
+
+%__________________________Seções____________________________
+% Introdução _________________________________________________
+\section{Introdução}                 \label{sec:introducao}
+\import{sections/}{1_Introdução.tex}
+\clearpage
+
+% Desenvolvimento _______________________________________________
+\section{Formalização e Verificação de Requisitos no FRET} \label{sec:fret}
+\import{sections/}{2_FRET.tex}
+\clearpage
+
+\section{Modelagem Arquitetural em AADL e Análise de Evolução} \label{sec:aadl}
+\import{sections/}{3_AADL.tex}
+\clearpage
+
+% Conclusão _________________________________________________
+\section{Conclusão}                 \label{sec:conclusao}
+\import{sections/}{4_Conclusão.tex}
+\clearpage
+
+%_________________________Anexos / CÓDIGOS___________________
+\clearpage
+\section*{Anexos: Especificações Formais AADL}
+\addcontentsline{toc}{section}{Anexos: Especificações Formais AADL}
+\import{sections/}{0_Codigos.tex}
+\pagebreak
+
+%_______________________Bibliografia_________________________
+
+\bibliographystyle{ieeetr}
+\bibliography{bib}
+
+\end{document}
