@@ -1,0 +1,189 @@
+A etapa de modelagem arquitetural do sistema de telemetria na borda (\textit{Edge Telemetry System}) foi realizada no ambiente OSATE (\textit{Open Source AADL Tool Environment}), utilizando a linguagem AADL (\textit{Architecture Analysis \& Design Language}) em conformidade com o padrão internacional SAE AS5506B \cite{sae2017aadl,feiler2012}. O objetivo desta fase foi traduzir as especificações e variáveis formalizadas no FRET (\textit{Formal Requirements Elicitation Tool}) em uma arquitetura de software e hardware modular, fortemente tipada, orientada a fluxo de dados e passível de verificação analítica formal de tempo real.
+
+% -----------------------------------------------------------------------------
+\subsection{Da Decomposição Lógica no FRET à Arquitetura Executável no AADL}
+\label{subsec:fret_to_aadl}
+
+A transição da especificação de requisitos formais do FRET para o modelo arquitetural AADL seguiu uma regra de mapeamento direta entre os artefatos lógicos e os elementos sintáticos do AADL:
+\begin{itemize}
+    \item \textbf{Variáveis de Entrada e Saída (\textit{Input/Output}):} As variáveis declaradas no FRET foram traduzidas em portas lógicas tipadas (\textit{features}) nas interfaces dos componentes. Variáveis de entrada tornaram-se \texttt{in event data port} e variáveis de saída tornaram-se \texttt{out event data port}, utilizando os tipos estruturados do pacote \texttt{Data\_Types\_Pkg}: \texttt{CAN\_Frame\_Data}, \texttt{Diagnostic\_Packet\_Data} e \texttt{CSV\_Payload\_Data};
+    \item \textbf{Requisitos de Comunicação e Meio Físico:} Acesso aos canais compartilhados de comunicação foi modelado por conexões de barramento, especificadas via \texttt{requires bus access CAN\_Bus} e \texttt{requires bus access SPI\_Bus};
+    \item \textbf{Encapsulamento por Responsabilidade:} Cada grupo funcional de requisitos do FRET foi inicialmente mapeado em um subsistema lógico, garantindo alta coesão e baixo acoplamento:
+    \begin{enumerate}
+        \item \textbf{\texttt{Uno\_ECU\_Emulator}:} Emula a ECU veicular em bancada HIL (ATmega328P), atualizando o modelo dinâmico do motor e emitindo mensagens periódicas DBC e respostas OBD-II via barramento CAN a 50~ms;
+        \item \textbf{\texttt{ESP32\_TWAI}:} Camada de driver de abstração de hardware (MCAL) responsável pela recepção assíncrona, marcação temporal (\textit{timestamping}) e conversão de grandezas de engenharia de quadros CAN;
+        \item \textbf{\texttt{ESP32\_OBD}:} Camada de aplicação responsável pela solicitação cíclica (\textit{polling}) de PIDs de diagnóstico OBD-II a 10~Hz via escalonamento \textit{round-robin};
+        \item \textbf{\texttt{ESP32\_Logger}:} Realiza a serialização determinística das grandezas em formato tabular CSV (11 colunas) e o gerenciamento de buffer estático na SRAM;
+        \item \textbf{\texttt{ESP32\_SD}:} Camada BSW responsável pelo gerenciamento do sistema de arquivos FAT32, rotação atômica de arquivos de sessão e gravação em cartão MicroSD via SPI;
+        \item \textbf{\texttt{ESP32\_Telemetry}:} Gerencia a pilha TCP/IP (Wi-Fi) e a publicação de pacotes compactos de telemetria via protocolo MQTT;
+        \item \textbf{\texttt{ESP32\_FSM}:} Máquina de estados responsável pela supervisão da conectividade e pela comutação automática de transição para gravação \textit{offline} (\textit{SD Fallback}) sob queda de rede;
+        \item \textbf{\texttt{ESP32\_CMD}:} Processa comandos remotos recebidos via MQTT para intercalação e \textit{replay} de quadros customizados no barramento CAN.
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Refinamento para Análise Temporal no OSATE (Padrão SAE AS5506B)}
+No padrão AADL, blocos genéricos do tipo \texttt{system} funcionam como agregadores conceituais, mas \textbf{não possuem semântica de escalonamento temporal}. Para habilitar as ferramentas analíticas do OSATE (\textit{Check Schedulability} e \textit{Check Flow Latency}), a especificação de software deve ser estritamente refinada em \textbf{tarefas periódicas (\texttt{thread}) abrigadas em um processo protegido (\texttt{process})} e vinculadas a um \textbf{processador de hardware (\texttt{processor})} via propriedades de amarração (\texttt{Actual\_Processor\_Binding}). 
+
+Dessa forma, os 7 subsistemas internos do ESP32-S3 foram integrados e operacionalizados no processo \texttt{Telemetry\_Process}, materializados em quatro threads de tempo real executadas sob o escalonador preemptivo da CPU:
+\begin{equation*}
+\begin{matrix}
+\text{Recepção TWAI (MCAL)} & \longrightarrow & \textbf{\texttt{Task\_CAN\_RX}} & (T = 5\text{ ms}, C = 0{,}8\text{ ms}, P = 10) \\
+\text{Agregação e Buffer (Logger)} & \longrightarrow & \textbf{\texttt{Task\_Logger}} & (T = 20\text{ ms}, C = 1{,}5\text{ ms}, P = 8) \\
+\text{Despacho MicroSD / MQTT} & \longrightarrow & \textbf{\texttt{Task\_TX\_Dispatch}} & (T = 50\text{ ms}, C = 3{,}0\text{ ms}, P = 6) \\
+\text{Polling Diagnóstico (OBD)} & \longrightarrow & \textbf{\texttt{Task\_OBD\_Poller}} & (T = 100\text{ ms}, C = 5{,}0\text{ ms}, P = 4)
+\end{matrix}
+\end{equation*}
+
+% -----------------------------------------------------------------------------
+\subsection{Plataforma de Execução e Modelação AADL (Pilar 2)}
+\label{subsec:pilar2_detalhe}
+
+A arquitetura física e lógica foi formalizada no modelo \texttt{EdgeTelemetryLayer.aadl}:
+\begin{itemize}
+    \item \textbf{Processador (\texttt{processor ESP32S3\_Processor}):} Opera a 240~MHz sob o protocolo estático preemptivo \texttt{POSIX\_1003\_HIGHEST\_PRIORITY\_FIRST\_PROTOCOL}, com capacidade de processamento declarada de 240{,}0~MIPS (\texttt{SEI::MIPSCapacity => 240.0 MIPS;});
+    \item \textbf{Barramentos Físicos (\texttt{bus}):}
+    \begin{itemize}
+        \item \texttt{CAN\_Bus}: Barramento automotivo diferencial a 500~kbps ($\text{Transmission\_Time} \to \text{Fixed: } 10\ \mu\text{s} .. 20\ \mu\text{s}$, $\text{PerByte: } 16\ \mu\text{s}$);
+        \item \texttt{SPI\_Bus}: Barramento serial síncrono a 20~MHz ($\text{PerByte: } 1\ \mu\text{s}$).
+    \end{itemize}
+    \item \textbf{Dispositivos Periféricos (\textit{devices}):}
+    \begin{itemize}
+        \item \texttt{CAN\_Transceiver}: transceptor CAN (origem dos fluxos de dados do barramento);
+        \item \texttt{MicroSD\_Device}: módulo de memória SPI (destino de persistência dos registros);
+        \item \texttt{WiFi\_Device}: interface de rádio (destino de telemetria remota via MQTT);
+        \item \texttt{Uno\_ECU\_Emulator\_Device}: estimulador HIL modelado como periférico para delimitar a fronteira de teste.
+    \end{itemize}
+    \item \textbf{Semânticas de Conexão Contrastadas:} O modelo disponibiliza tanto a implementação \texttt{immediate\_impl} (síncrona, com encadeamento de despacho na mesma janela temporal) quanto a \texttt{delayed\_impl} (com retenção amostral desacoplada nas fronteiras de ciclo das tarefas).
+\end{itemize}
+
+\begin{lstlisting}[language=AADL, caption={Estrutura da implementação raiz do sistema no OSATE.}, label={lst:aadl_system_impl}]
+system implementation EdgeTelemetry_System.immediate_impl
+  subcomponents
+    cpu             : processor Processors_Pkg::ESP32S3_Processor.impl;
+    can_bus         : bus Buses_Pkg::CAN_Bus.impl;
+    spi_bus         : bus Buses_Pkg::SPI_Bus.impl;
+    can_transceiver : device CAN_Devices_Pkg::CAN_Transceiver.impl;
+    sd_card         : device Storage_Devices_Pkg::MicroSD_Device.impl;
+    wifi_module     : device Comm_Devices_Pkg::WiFi_Device.impl;
+    sw_telemetry    : process Software_Processes_Pkg::Telemetry_Process.immediate_impl;
+  connections
+    b_can_cpu   : bus access can_bus <-> cpu.can_bus_access;
+    b_spi_sd    : bus access spi_bus <-> sd_card.spi_conn;
+    p_can_to_sw : port can_transceiver.can_rx_frame -> sw_telemetry.can_raw_in;
+    p_sw_to_sd  : port sw_telemetry.sd_stream_out -> sd_card.file_stream_in;
+    p_sw_to_wifi: port sw_telemetry.mqtt_stream_out -> wifi_module.mqtt_stream_in;
+  flows
+    end_to_end_can_to_sd: end to end flow 
+      can_transceiver.f_source -> p_can_to_sw -> sw_telemetry.f_can_to_sd -> p_sw_to_sd -> sd_card.f_sink;
+  properties
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_can_rx;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_logger;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_tx_dispatch;
+    Actual_Processor_Binding => (reference (cpu)) applies to sw_telemetry.th_obd_poller;
+    Actual_Connection_Binding => (reference (can_bus)) applies to p_can_to_sw;
+    Actual_Connection_Binding => (reference (spi_bus)) applies to p_sw_to_sd;
+end EdgeTelemetry_System.immediate_impl;
+\end{lstlisting}
+
+% -----------------------------------------------------------------------------
+\subsection{Análises Estáticas e Temporais no OSATE (Pilar 3)}
+\label{subsec:pilar3_detalhe}
+
+\subsubsection{Análise de Escalonabilidade (Check Schedulability)}
+A viabilidade temporal sob prioridades fixas Rate-Monotonic foi comprovada analiticamente e no OSATE:
+\begin{enumerate}
+    \item \textbf{Taxa de Utilização da CPU ($U$):}
+    \begin{equation}
+    U = \sum_{i=1}^{4} \frac{C_i}{T_i} = \frac{0{,}8}{5{,}0} + \frac{1{,}5}{20{,}0} + \frac{3{,}0}{50{,}0} + \frac{5{,}0}{100{,}0} = 0{,}160 + 0{,}075 + 0{,}060 + 0{,}050 = \mathbf{34{,}5\%}
+    \end{equation}
+    Pelo limite assintótico de Liu \& Layland \cite{liulayland1973}, $U_{LL}(4) = 4(2^{1/4}-1) \approx 75{,}68\%$. Como $U = 34{,}5\% \le 75{,}68\%$, o sistema é \textbf{incondicionalmente escalonável}, atendendo com ampla folga ao critério de projeto [AC-08] ($U \le 40{,}0\%$);
+    \item \textbf{Tempo de Resposta no Pior Caso (WCRT):} Pela formulação recorrente de Joseph \& Pandya \cite{josephpandya1986}:
+    \begin{itemize}
+        \item \texttt{Task\_CAN\_RX}: $R_1 = 0{,}80\text{ ms} \le D_1 (5{,}0\text{ ms})$ (Folga: $84{,}0\%$);
+        \item \texttt{Task\_Logger}: $R_2 = 1{,}50 + \lceil 1{,}5/5{,}0 \rceil \times 0{,}80 = 2{,}30\text{ ms} \le D_2 (20{,}0\text{ ms})$ (Folga: $88{,}5\%$);
+        \item \texttt{Task\_TX\_Dispatch}: $R_3 = 6{,}10\text{ ms} \le D_3 (50{,}0\text{ ms})$ (Folga: $87{,}8\%$);
+        \item \texttt{Task\_OBD\_Poller}: Convergiu em $R_4 = 11{,}90\text{ ms} \le D_4 (100{,}0\text{ ms})$ (Folga: $88{,}1\%$).
+    \end{itemize}
+\end{enumerate}
+
+O relatório oficial gerado pelo comando \textit{Schedule Bound Threads} do OSATE confirmou que todas as tarefas cumprem seus prazos limites (\texttt{schedulability: true}), com utilização de $34{,}5\%$, conforme consolidado na Tabela~\ref{tab:schedulability_consolidada}.
+
+\input{sections/Tabelas/tab_schedulability.tex}
+
+\subsubsection{Análise de Latência Ponta a Ponta (Check Flow Latency)}
+A execução da ferramenta analítica de latência sobre os modelos instanciados evidenciou o impacto decisivo da semântica de comunicação entre threads:
+\begin{itemize}
+    \item \textbf{Modo Imediato (\texttt{immediate}):} Latência máxima de $\mathbf{60{,}898\text{ ms}}$ no fluxo CAN $\to$ MicroSD e $\mathbf{60{,}576\text{ ms}}$ no fluxo CAN $\to$ MQTT, dominadas primariamente pelo atraso físico de escrita Flash NAND do cartão (50~ms);
+    \item \textbf{Modo Atrasado (\texttt{delayed}):} Latência máxima acumulada de $\mathbf{160{,}898\text{ ms}}$ e $\mathbf{160{,}576\text{ ms}}$, decorrente da retenção forçada dos dados nas fronteiras periódicas de amostragem ($5 + 20 + 50 + 50 + \text{jitter}$).
+\end{itemize}
+
+O modo imediato proporciona uma redução temporal absoluta de mais de $100\text{ ms}$ (\textbf{ganho de 62{,}1\%}), assegurando o cumprimento integral do critério de \textit{throughput} [AC-04] ($\ge 200\text{ pacotes/s}$).
+
+\input{sections/Tabelas/tab_latencia.tex}
+
+% -----------------------------------------------------------------------------
+\subsection{Avaliação de Evolução Arquitetural (Framework CAvA) e TinyML (Pilar 4)}
+\label{subsec:pilar4_detalhe}
+
+O Pilar 4 aplicou as quatro fases metodológicas do framework CAvA (\textit{Component/Architecture Variability and Evolution approach}) de Sales \& Becker \cite{sales2018cava}.
+
+\subsubsection{Cenário A: Avaliação Automatizada na Ferramenta DevCompatibility}
+O modelo AADL foi submetido à ferramenta \texttt{DevCompatibility} (bancada AEW / ProVANT):
+\begin{enumerate}
+    \item \textbf{Substituição do Periférico de Comunicação:} O componente \texttt{WiFi\_Device} (50~ms) foi selecionado para substituição por um modem celular \texttt{Cellular\_LTE\_Device} (100~ms) para frotas sem cobertura local (Figura~\ref{fig:devcomp_select});
+    \item \textbf{Detecção de Incompatibilidade de Interface:} O analisador detectou que o novo dispositivo expunha portas incompatíveis (\texttt{cellular\_stream\_in}), rompendo a conexão original de saída (Figura~\ref{fig:devcomp_conn});
+    \item \textbf{Síntese Automática de Adaptador (\textit{Wrapper Process}):} A ferramenta sintetizou o processo \texttt{wrapper\_coaching\_stream\_in\_to\_mqtt\_stream\_out}, restabelecendo o fluxo sem alterar o código base da telemetria (Figura~\ref{fig:devcomp_wrapper});
+    \item \textbf{Ranqueamento de Trade-offs:} Gerou-se a matriz de avaliação segundo a ISO/IEC 25010 \cite{iso25010}, demonstrando o impacto em latência e cobertura de sinal (Figura~\ref{fig:devcomp_ranking}).
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphicssafe{width=\linewidth}{devcompatibility_02_select.png}{Seleção do componente wifi_module no DevCompatibility.}
+        \caption{Seleção do componente alvo no assistente.}
+        \label{fig:devcomp_select}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphicssafe{width=\linewidth}{devcompatibility_04_conn.png}{Identificação de quebra de conexões no DevCompatibility.}
+        \caption{Detecção de incompatibilidade de portas.}
+        \label{fig:devcomp_conn}
+    \end{subfigure}
+    \\[0.3cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphicssafe{width=\linewidth}{devcompatibility_05_wrapper.png}{AADL resultante com processo wrapper gerado.}
+        \caption{Síntese automática do processo \textit{wrapper}.}
+        \label{fig:devcomp_wrapper}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphicssafe{width=\linewidth}{devcompatibility_06_ranking.png}{Trade-off ranking no DevCompatibility.}
+        \caption{Ranqueamento de fatores de qualidade ISO 25010.}
+        \label{fig:devcomp_ranking}
+    \end{subfigure}
+    \caption{Evidências de avaliação e síntese de adaptadores na ferramenta DevCompatibility.}
+    \label{fig:devcomp_evidencias}
+\end{figure}
+
+\subsubsection{Cenário B: Inteligência de Borda para Driver Coaching (TinyML Dual-Core)}
+O segundo cenário de evolução transformou o coletor em um gateway inteligente dotado de assistência ao motorista (\textit{Driver Coaching}) via TinyML \cite{warden2019tinyml}.
+\begin{itemize}
+    \item \textbf{Isolamento Temporal em Arquitetura Dual-Core:} Utilizou-se o processador \texttt{ESP32S3\_DualCore\_Processor} (480~MIPS no total), segregando os núcleos físicos:
+    \begin{itemize}
+        \item \textbf{Core 0 (\texttt{cpu.core0}):} Executa exclusivamente as 4 tarefas de tempo real estrito de telemetria ($U_{\text{Core0}} = 34{,}5\%$);
+        \item \textbf{Core 1 (\texttt{cpu.core1}):} Executa o processo \texttt{TinyML\_Process}, composto por:
+        \begin{itemize}
+            \item \texttt{th\_adapter}: adaptador tensorial ($T=20\text{ ms}$, $C=0{,}5\text{ ms}$);
+            \item \texttt{th\_extractor}: extrator em janela temporal de 2~s ($T=500\text{ ms}$, $C=2{,}0\text{ ms}$);
+            \item \texttt{th\_inference}: inferência neural quantizada INT8 ($T=1000\text{ ms}$, $C=25{,}0\text{ ms}$);
+            \item \texttt{th\_coach}: gerador de recomendações de condução ($T=1000\text{ ms}$, $C=1{,}0\text{ ms}$).
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Escalonabilidade Global Comprovada no OSATE:} A carga computacional adicionada no Core 1 é de apenas $U_{\text{Core1}} = 5{,}5\%$. A taxa média global do SoC é de $20{,}0\%$ por núcleo (ou $40{,}0\%$ em base normalizada de um núcleo), cumprindo com exatidão o critério [AC-08] ($\le 40{,}0\%$) e assegurando que o processamento neural pesado jamais cause preempção ou perda de quadros na ingestão de 200~Hz.
+\end{itemize}
+
+\input{sections/Tabelas/tab_iso25010.tex}

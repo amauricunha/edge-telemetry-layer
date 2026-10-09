@@ -1,0 +1,16 @@
+O avanço dos Veículos Definidos por Software (\textit{Software-Defined Vehicles} -- SDV) e dos sistemas de transporte inteligentes impõe requisitos rigorosos de determinismo temporal, confiabilidade e integridade de dados na borda da computação veicular (\textit{Edge Computing}). O objeto de estudo deste trabalho prático é a engenharia reversa e a certificação formal da camada \textbf{Edge Telemetry Layer}, concebida para atuar como gateway embarcado de alto desempenho conectado à rede CAN automotiva.
+
+A arquitetura do firmware foi desenvolvida em linguagem Rust (\textit{no\_std}) sobre o executor assíncrono cooperativo/preemptivo \textit{Embassy}, sendo inspirada na divisão em camadas do padrão automotivo AUTOSAR (\textit{Microcontroller Abstraction Layer} -- MCAL, \textit{Basic Software} -- BSW, \textit{Runtime Environment} -- RTE e Camada de Aplicação). As principais funções desempenhadas pelo sistema compreendem:
+\begin{enumerate}
+    \item \textbf{Ingestão Contínua CAN (500~kbps):} Captura de quadros em barramento diferencial ISO~11898 com resolução de estampa temporal em microssegundos via controlador nativo TWAI do microcontrolador Espressif ESP32-S3;
+    \item \textbf{Diagnóstico Ativo OBD-II (ISO 15765-4):} Consulta periódica cíclica a 10~Hz (\textit{polling} funcional) de Parâmetros de Diagnóstico (\textit{PIDs}) essenciais (RPM, velocidade, temperatura, carga do motor) via identificadores padrão \texttt{0x7DF} e resposta em \texttt{0x7E8};
+    \item \textbf{Serialização Tabular e Bufferização Resiliente:} Formatação determinística de linhas CSV em memória SRAM estática (buffer de 4096~bytes) sem alocação dinâmica de \textit{heap}, eliminando riscos de fragmentação de memória;
+    \item \textbf{Persistência Segura em Armazenamento Local:} Gravação em lote em cartão MicroSD formatado em FAT32 sobre barramento SPI síncrono, dotado de mecanismo de recuperação atômica de falhas de energia;
+    \item \textbf{Transmissão Remota IoT:} Envio periódico de pacotes de telemetria a corretores MQTT na nuvem via interface Wi-Fi / LTE.
+\end{enumerate}
+
+Para conduzir a especificação, modelagem e verificação formal deste sistema crítico sob a perspectiva de Engenharia de Sistemas Baseada em Modelos (\textit{Model-Based Systems Engineering} -- MBSE), o trabalho foi estruturado nos quatro pilares preconizados no plano da disciplina:
+\begin{itemize}
+    \item \textbf{Pilar 1 (Seção~\ref{sec:fret}):} Formalização matemática e verificação de realizabilidade dos requisitos de engenharia na ferramenta NASA FRET;
+    \item \textbf{Pilar 2, 3 e 4 (Seção~\ref{sec:aadl}):} Modelagem arquitetural em AADL no OSATE~2, análises temporais de tempo real (escalonabilidade e latência) e avaliação de evolução arquitetural com CAvA e Inteligência de Borda (TinyML).
+\end{itemize}

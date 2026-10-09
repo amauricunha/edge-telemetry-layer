@@ -1,0 +1,180 @@
+%%%%%%%%%%%%%%%%% Usar LuaLaTeX (compilador) %%%%%%%%%%%%%%%%%
+
+\ProvidesPackage{preamble}             % Arquivo vira um pacote
+
+%______________________ Formatação ___________________________
+%\usepackage[utf8]{inputenc}            % Necessário apenas para o pdfLaTeX
+\usepackage[T1]{fontenc}               % Habilita acentuação e símbolos
+\usepackage[                           % Define as margens
+    lmargin=3cm, % left margin
+    tmargin=3cm, % top margin
+    rmargin=2cm, % right margin
+    bmargin=2cm  % bottom margin
+    ]{geometry}
+\usepackage[onehalfspacing]{setspace}
+%\usepackage[doublespacing]{setspace}  % Espaçamento das linhas
+\usepackage[english, brazilian]{babel} % Faz a hifenização correta no final da linha e algumas traduções
+\usepackage{natbib}
+
+\usepackage{chngcntr}             % Deixa o número das imagens, tabelas e equações de acordo com a seção
+    \counterwithin{figure}{section}
+    \counterwithin{table}{section}
+    \counterwithin{equation}{section}
+    %\setcounter{figure}{0}       % usar para resetar o número da imagem dentro da seção
+
+\newcommand{\co}[1]{}                 % \co{ texto } faz comentários em blocos
+
+%_________________________ Fonte ___________________________
+
+\usepackage{fontspec}
+
+    \setromanfont{linuxlibertineo}         % Fonte principal (serif)
+    %[UprightFont = *-Regular, Scale=0.9]
+    
+    \setsansfont{opensans}                 % Fonte secundária (sans serif)
+    [UprightFont = *-Regular, Scale=0.9]
+    %\renewcommand\familydefault{\sfdefault}  % sans se torna a fonte principal
+    
+    \setmonofont{firacode}            % Fonte para códigos (mono)
+    %[UprightFont = *-Light, Color=0019D4, Scale=0.8]   % azul
+    %[UprightFont = *-Light, Color=000000, Scale=0.9]  % preto
+
+\usepackage[font=small]{caption}      % Tamanho das legendas
+\usepackage{subcaption}               % Habilita sublegendas
+%\usepackage{emoji}                    % Habilita emojis (opcional)
+
+\usepackage{sectsty}                  % Altera a fonte dos títulos das seções
+
+%________________________ Essenciais ___________________________
+
+\usepackage{
+    graphicx,                     % Habilita imagens
+    pgfplots,                     % Utilizado para plotagem de gráficos
+    xcolor,                       % Habilita trocar cor do texto
+    comment,                      % Para escrever em forma de comentário
+    enumitem,                     % Permite controle customizado de listas e margens
+    float,                        % Permite um melhor posicionamento de gráficos, figuras, tabelas, etc.
+    multirow, multicol,           % Para formatar tabelas
+    tabularx, booktabs,           % Formatação avançada de tabelas
+    array, makecell,              % Formatação flexível de células e quebra controlada
+    microtype,                    % Ajuste microtipográfico para eliminar overfull hbox
+    indentfirst                   % Indenta o primeiro parágrafo de cada seção
+    }
+
+\usepackage[most]{tcolorbox}      % Caixas de destaque estilizadas
+\definecolor{ufscblue}{RGB}{0,51,102} % Azul institucional UFSC
+
+\usepackage[htt]{hyphenat}        % Permite hifenização em fontes com largura fixa (\texttt)
+\emergencystretch 3em             % Previne estritamente que palavras e códigos transbordem a margem direita
+
+\graphicspath{{sections/Imagens/}{images/}{./}}
+    
+\usepackage{tikz}                 %  Recursos para gráficos, diagramas, etc.
+    \usetikzlibrary{fadings}
+    \usetikzlibrary{patterns}
+    \usetikzlibrary{shadows.blur}
+    \usetikzlibrary{shapes}
+
+\usepackage{svg}                  % Permite importar imagens .svg
+\usepackage{pgf}                  % Permite importar imagens .pgf
+\pgfplotsset{width=8cm,compat=1.9}
+
+\usepackage{datetime}             % Automatiza a data na capa
+    \newdateformat{monthyeardate}{\monthname[\THEMONTH] \THEYEAR \THEDAY}
+
+\usepackage{hyperref}             % Adiciona links
+    \hypersetup{ 
+        colorlinks=true,
+        linkcolor=black,
+        filecolor=purple,
+        citecolor=black,
+        urlcolor=teal,
+        pdfpagemode=FullScreen,
+        }
+    
+\usepackage[brazilian,capitalize,nameinlink]{cleveref} % Habilita suporte universal a \Cref e \cref
+
+\usepackage{blindtext}
+\usepackage{lipsum}               % Spama texto em latim
+
+%________________________ Códigos ___________________________
+
+\usepackage{listings}             % Para diferenciar códigos no pdf
+
+    \definecolor{codegreen}{rgb}{0,0.6,0}
+    \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+    \definecolor{codeblue}{RGB}{0,98,105}
+    \definecolor{codered}{RGB}{255,3,62}
+    \definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{brown},
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    tabsize=2,
+    breaklines=true,
+    breakatwhitespace=false,
+    title=\lstname,
+    backgroundcolor=\color{gray!10},
+    rulecolor=\color{black},
+}
+
+% Sintaxe AADL
+\lstdefinelanguage{AADL}{
+  keywords={package, public, private, with, renames, all, end,
+            system, implementation, processor, virtual, bus, device, process, thread,
+            subcomponents, connections, flows, properties, features, access,
+            requires, provides, port, event, data, in, out, flow, source, sink, path,
+            applies, to, reference, dispatch_protocol, period, compute_execution_time,
+            deadline, priority, scheduling_protocol, priority_range},
+  sensitive=false,
+  morecomment=[l]{--},
+  morestring=[b]"
+}
+
+% Sintaxe FRETish
+\lstdefinelanguage{FRETish}{
+  keywords={in, upon, when, while, where, the, shall, immediately, within, after, until, satisfy, always, never, eventually},
+  sensitive=false,
+  morecomment=[l]{--},
+  morestring=[b]"
+}
+
+%______________________ Matemática ___________________________
+
+\usepackage{amsmath,amsthm,amsfonts,amssymb,dsfont,mathtools}
+\usepackage{wasysym,marvosym,upgreek,esint}
+
+\usepackage{siunitx}
+\usepackage{array}
+\usepackage{mathdots}
+\usepackage{yhmath}
+\usepackage{cancel}
+\usepackage{physics}
+\usepackage{extarrows}
+
+\AtBeginDocument{\RenewCommandCopy\qty\SI}
+
+% --- Comando Seguro para Inclusão de Imagem ---
+\newcommand{\includegraphicssafe}[3]{%
+  \IfFileExists{#2}{%
+    \includegraphics[#1]{#2}%
+  }{%
+    \IfFileExists{sections/Imagens/#2}{%
+      \includegraphics[#1]{sections/Imagens/#2}%
+    }{%
+      \begin{center}
+        \fbox{\parbox{0.9\linewidth}{\centering \textbf{[Imagem: #2]}\\\small #3}}
+      \end{center}
+    }%
+  }%
+}

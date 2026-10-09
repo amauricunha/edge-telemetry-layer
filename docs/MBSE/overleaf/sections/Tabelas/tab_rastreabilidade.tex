@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Matriz de Rastreabilidade: Critérios de Aceitação da Dissertação vs. Requisitos FRET.}
+\label{tab:rastreabilidade_ac}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{} c >{\raggedright\arraybackslash}p{6.6cm} >{\raggedright\arraybackslash}p{4.5cm} >{\raggedright\arraybackslash}p{2.6cm} @{}}
+\toprule
+\textbf{Critério} & \textbf{Descrição do Alvo de Engenharia} & \textbf{Requisitos FRETish} & \textbf{Componente} \\
+\midrule
+\textbf{[AC-01]} & Taxa de recepção e perda de tráfego CAN $\le 1{,}0\%$ a 500~kbps & \texttt{REQ\_CAN\_001, 002, 005} & \texttt{esp32\_twai} \\
+\textbf{[AC-02]} & \textit{Polling} ativo cíclico e latência média OBD-II $< 10{,}0$~ms & \texttt{REQ\_OBD\_001, 002}, \newline \texttt{REQ\_EMU\_006} & \texttt{esp32\_obd}, \newline \texttt{uno\_ecu} \\
+\textbf{[AC-03]} & Estabilidade temporal e Jitter de resposta OBD-II $< 3{,}0$~ms & \texttt{REQ\_EMU\_005, 008} & \texttt{uno\_ecu\_emulator} \\
+\textbf{[AC-04]} & Integridade da serialização CSV e \textit{Throughput} $\ge 200$~pkt/s & \texttt{REQ\_LOG\_001, 003}, \newline \texttt{REQ\_COM\_002} & \texttt{esp32\_logger}, \newline \texttt{telemetry} \\
+\textbf{[AC-05]} & Consumo estático de memória SRAM $< 200{,}0$~KB & \texttt{REQ\_LOG\_008, 009} & \texttt{esp32\_logger} \\
+\textbf{[AC-06]} & \textit{Fallback} offline no MicroSD sob falha de rede $\le 5{,}0$~ms & \texttt{REQ\_FSM\_001, 002}, \newline \texttt{REQ\_COM\_003} & \texttt{esp32\_fsm}, \newline \texttt{telemetry} \\
+\textbf{[AC-07]} & Recuperação automática de Bus-Off com espera de 128~ms (ISO~11898) & \texttt{REQ\_REC\_001} a \texttt{005} & \texttt{esp32\_recovery} \\
+\textbf{[AC-08]} & Gravação contínua no SD $\ge 72.000$~amostras em ensaio de 1 hora & \texttt{REQ\_SD\_001, 004, 005} & \texttt{esp32\_sd} \\
+\bottomrule
+\end{tabular}
+\end{table}

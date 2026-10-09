@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Resultados Formais de Escalonabilidade no OSATE (\textit{Schedule Bound Threads}).}
+\label{tab:schedulability_consolidada}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{} >{\raggedright\arraybackslash}p{3.5cm} ccccc c @{}}
+\toprule
+\textbf{Tarefa (\textit{Thread})} & \textbf{Período ($T_i$)} & \textbf{WCET ($C_i$)} & \textbf{Prio.} & \textbf{Prazo ($D_i$)} & \textbf{Resp. ($R_i$)} & \textbf{Status OSATE} \\
+\midrule
+\texttt{Task\_CAN\_RX}      & $5{,}0$~ms   & $0{,}80$~ms & 10 & $5{,}0$~ms   & $\mathbf{0{,}80}$~ms  & \textbf{true (Pass)} \\
+\texttt{Task\_Logger}      & $20{,}0$~ms  & $1{,}50$~ms & 8  & $20{,}0$~ms  & $\mathbf{2{,}30}$~ms  & \textbf{true (Pass)} \\
+\texttt{Task\_TX\_Dispatch} & $50{,}0$~ms  & $3{,}00$~ms & 6  & $50{,}0$~ms  & $\mathbf{6{,}10}$~ms  & \textbf{true (Pass)} \\
+\texttt{Task\_OBD\_Poller}  & $100{,}0$~ms & $5{,}00$~ms & 4  & $100{,}0$~ms & $\mathbf{11{,}90}$~ms & \textbf{true (Pass)} \\
+\midrule
+\multicolumn{7}{@{}l}{\textbf{Utilização Global da CPU:} $U = 34{,}5\% \le 75{,}68\%$ (Critério [AC-08] atendido: $U \le 40{,}0\%$)} \\
+\bottomrule
+\end{tabular}
+\end{table}

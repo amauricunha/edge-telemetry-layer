@@ -1,0 +1,9 @@
+A aplicação integrada dos quatro pilares metodológicos de Engenharia de Sistemas Baseada em Modelos (MBSE) demonstrou a eficácia prática e o rigor científico da abordagem para o projeto \textbf{Edge Telemetry Layer}.
+
+No \textbf{Pilar~1}, a superação das limitações de explosão de estados via decomposição em Componentes de Software e a aplicação do \textit{NASA Timer Handshake Pattern} asseguraram a comprovação de realizabilidade matemática de 100\% dos 48 requisitos formais no FRET, validando com sucesso as diretrizes de Sheridan, Becker et al. (RefSQ 2025). 
+
+No \textbf{Pilar~2}, o modelo arquitetural em AADL estruturou o hardware e o software em conformidade com o padrão SAE AS5506B, estabelecendo uma ponte conceitual sólida entre os subsistemas lógicos do FRET e as tarefas periódicas do RTOS no OSATE~2.
+
+No \textbf{Pilar~3}, as análises temporais comprovaram a suficiência do escalonamento preemptivo Rate-Monotonic ($U = 34{,}5\% \le 75{,}68\%$, folga de resposta $> 88\%$) e atestaram o ganho de 62{,}1\% em latência ponta a ponta proporcionado pela semântica de conexões imediatas, atendendo integralmente aos critérios de vazão e determinismo da aplicação.
+
+Por fim, no \textbf{Pilar~4}, o framework CAvA viabilizou tanto a evolução automatizada de periféricos na ferramenta \texttt{DevCompatibility} quanto a extensão arquitetural para Inteligência Artificial de Borda (\textit{TinyML Driver Coaching}) sobre o processador dual-core assimétrico do ESP32-S3. A alocação da inferência neural no Core 1 e da telemetria crítica no Core 0 resultou em uma taxa global de CPU de 40{,}0\%, demonstrando que a evolução funcional de alto valor agregado foi alcançada com estrita preservação do determinismo temporal de tempo real.
