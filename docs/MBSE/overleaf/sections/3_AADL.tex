@@ -25,14 +25,12 @@ A transição da especificação de requisitos formais do FRET para o modelo arq
 No padrão AADL, blocos genéricos do tipo \texttt{system} funcionam como agregadores conceituais, mas \textbf{não possuem semântica de escalonamento temporal}. Para habilitar as ferramentas analíticas do OSATE (\textit{Check Schedulability} e \textit{Check Flow Latency}), a especificação de software deve ser estritamente refinada em \textbf{tarefas periódicas (\texttt{thread}) abrigadas em um processo protegido (\texttt{process})} e vinculadas a um \textbf{processador de hardware (\texttt{processor})} via propriedades de amarração (\texttt{Actual\_Processor\_Binding}). 
 
 Dessa forma, os 7 subsistemas internos do ESP32-S3 foram integrados e operacionalizados no processo \texttt{Telemetry\_Process}, materializados em quatro threads de tempo real executadas sob o escalonador preemptivo da CPU:
-\begin{equation*}
-\begin{matrix}
-\text{Recepção TWAI (MCAL)} & \longrightarrow & \textbf{\texttt{Task\_CAN\_RX}} & (T = 5\text{ ms}, C = 0{,}8\text{ ms}, P = 10) \\
-\text{Agregação e Buffer (Logger)} & \longrightarrow & \textbf{\texttt{Task\_Logger}} & (T = 20\text{ ms}, C = 1{,}5\text{ ms}, P = 8) \\
-\text{Despacho MicroSD / MQTT} & \longrightarrow & \textbf{\texttt{Task\_TX\_Dispatch}} & (T = 50\text{ ms}, C = 3{,}0\text{ ms}, P = 6) \\
-\text{Polling Diagnóstico (OBD)} & \longrightarrow & \textbf{\texttt{Task\_OBD\_Poller}} & (T = 100\text{ ms}, C = 5{,}0\text{ ms}, P = 4)
-\end{matrix}
-\end{equation*}
+\begin{align*}
+\text{Recepção TWAI (MCAL)} &\longrightarrow \textbf{\texttt{Task\_CAN\_RX}}\ (T = 5\text{ ms},\, C = 0{,}8\text{ ms},\, P = 10) \\
+\text{Agregação/Buffer (Logger)} &\longrightarrow \textbf{\texttt{Task\_Logger}}\ (T = 20\text{ ms},\, C = 1{,}5\text{ ms},\, P = 8) \\
+\text{Despacho MicroSD/MQTT} &\longrightarrow \textbf{\texttt{Task\_TX\_Dispatch}}\ (T = 50\text{ ms},\, C = 3{,}0\text{ ms},\, P = 6) \\
+\text{Polling Diagnóstico (OBD)} &\longrightarrow \textbf{\texttt{Task\_OBD\_Poller}}\ (T = 100\text{ ms},\, C = 5{,}0\text{ ms},\, P = 4)
+\end{align*}
 
 % -----------------------------------------------------------------------------
 \subsection{Plataforma de Execução e Modelação AADL (Pilar 2)}
@@ -43,8 +41,8 @@ A arquitetura física e lógica foi formalizada no modelo \texttt{EdgeTelemetryL
     \item \textbf{Processador (\texttt{processor ESP32S3\_Processor}):} Opera a 240~MHz sob o protocolo estático preemptivo \texttt{POSIX\_1003\_HIGHEST\_PRIORITY\_FIRST\_PROTOCOL}, com capacidade de processamento declarada de 240{,}0~MIPS (\texttt{SEI::MIPSCapacity => 240.0 MIPS;});
     \item \textbf{Barramentos Físicos (\texttt{bus}):}
     \begin{itemize}
-        \item \texttt{CAN\_Bus}: Barramento automotivo diferencial a 500~kbps ($\text{Transmission\_Time} \to \text{Fixed: } 10\ \mu\text{s} .. 20\ \mu\text{s}$, $\text{PerByte: } 16\ \mu\text{s}$);
-        \item \texttt{SPI\_Bus}: Barramento serial síncrono a 20~MHz ($\text{PerByte: } 1\ \mu\text{s}$).
+        \item \texttt{CAN\_Bus}: Barramento diferencial a 500~kbps com tempo de transmissão fixo de $10\ \mu\text{s} .. 20\ \mu\text{s}$ e $16\ \mu\text{s}$ por byte;
+        \item \texttt{SPI\_Bus}: Barramento serial síncrono a 20~MHz com transmissão de $1\ \mu\text{s}$ por byte.
     \end{itemize}
     \item \textbf{Dispositivos Periféricos (\textit{devices}):}
     \begin{itemize}

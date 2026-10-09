@@ -3,7 +3,7 @@
 Em consonância com as diretrizes de Ciência Aberta (\textit{Open Science}) e com os princípios FAIR (\textit{Findable, Accessible, Interoperable, and Reusable}), todos os artefatos computacionais desenvolvidos ao longo dos quatro pilares deste trabalho prático foram organizados, versionados e disponibilizados publicamente:
 
 \begin{tcolorbox}[colback=blue!5!white,colframe=ufscblue,title=\textbf{Pacote de Reprodutibilidade Científica e Modelos MBSE}]
-\small
+\small\raggedright
 \begin{itemize}[leftmargin=1.2em]
     \item \textbf{Repositório do Código-Fonte:} \url{https://github.com/amauricunha/edge-telemetry-layer}
     \item \textbf{Depósito Permanente Zenodo (CERN):} \url{https://doi.org/10.5281/zenodo.14000000} \textit{(DOI de arquivo aberto dos modelos MBSE)}
@@ -19,7 +19,7 @@ Em consonância com as diretrizes de Ciência Aberta (\textit{Open Science}) e c
 \end{tcolorbox}
 
 % -----------------------------------------------------------------------------
-\subsection*{A. Código AADL Completo do Sistema de Telemetria (\texttt{EdgeTelemetryLayer.aadl})}
+\subsection*{A. Modelo Arquitetural AADL (\texttt{EdgeTelemetryLayer.aadl})}
 
 O código AADL a seguir reúne a especificação arquitetural integral do sistema, incluindo os tipos de dados, barramentos, periféricos, processador mono/dual-core, threads de tempo real, semânticas de comunicação e o sistema de topo instanciado no OSATE.
 
@@ -354,9 +354,9 @@ end EdgeTelemetry_Pkg;
 A seguir apresentam-se todas as 48 sentenças formalizadas no NASA FRET, agrupadas por componente de software (SW-C) e de emulação HIL:
 
 \begin{lstlisting}[language=FRETish, caption={Catálogo das 48 sentenças formalizadas na gramática FRETish.}]
--- =========================================================================
+-- =========================================================
 -- 1. Componente: uno_ecu_emulator (8 Requisitos - Emulador HIL)
--- =========================================================================
+-- =========================================================
 REQ_EMU_001: in boot_mode upon boot_trigger & mcp2515_hardware_up the uno_ecu_emulator shall within 10 MILLISECOND satisfy can_bus_operational & active_profile = 2
 REQ_EMU_002: in active_session upon profile_cmd_0x010_received the uno_ecu_emulator shall within 10 MILLISECOND satisfy active_profile = commanded_profile
 REQ_EMU_003: in active_session when active_profile >= 1 upon timer1_50ms_tick the uno_ecu_emulator shall within 1 MILLISECOND satisfy physics_model_updated & speed_kmh >= 0.0 & rpm >= 0.0 & throttle_pct >= 0.0 & load_pct >= 0.0 & maf_g_s >= 0.0 & coolant_temp_c >= -40.0
@@ -366,9 +366,9 @@ REQ_EMU_006: in active_session when can_bus_operational upon obd_request_0x7df_r
 REQ_EMU_007: in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy mean_obd_latency_ms < 10.0
 REQ_EMU_008: in active_session when obd_benchmark_running the uno_ecu_emulator shall always satisfy latency_jitter_std_ms < 3.0
 
--- =========================================================================
+-- =========================================================
 -- 2. Componente: esp32_twai (6 Requisitos - Driver MCAL CAN)
--- =========================================================================
+-- =========================================================
 REQ_CAN_001: in boot_mode upon boot_trigger & mcal_twai_up the esp32_twai shall within 50 MILLISECOND satisfy twai_async_enabled
 REQ_CAN_002: in active_session upon can_frame_arrived the esp32_twai shall within 2 MILLISECOND satisfy frame_timestamp_captured
 REQ_CAN_003: in active_session when raw_can_frame_ready the esp32_twai shall within 1 MILLISECOND satisfy engineering_values_scaled
@@ -376,17 +376,17 @@ REQ_CAN_004: in active_session when engineering_values_scaled the esp32_twai sha
 REQ_CAN_005: in active_session when can_bus_healthy the esp32_twai shall always satisfy frame_loss_percentage <= 1.0
 REQ_CAN_006: in active_session upon rte_channel_overflow the esp32_twai shall within 1 MILLISECOND satisfy overflow_logged_and_dropped
 
--- =========================================================================
+-- =========================================================
 -- 3. Componente: esp32_obd (4 Requisitos - Aplicacao de Polling OBD-II)
--- =========================================================================
+-- =========================================================
 REQ_OBD_001: in active_session upon obd_poll_timer_100ms_tick the esp32_obd shall within 1 MILLISECOND satisfy obd_request_transmitted & current_pid_rotated
 REQ_OBD_002: in active_session upon obd_reply_0x7e8_received the esp32_obd shall within 2 MILLISECOND satisfy obd_sample_decoded & pid_latency_measured
 REQ_OBD_003: in active_session upon obd_timeout_50ms_elapsed the esp32_obd shall immediately satisfy obd_timeout_recorded
 REQ_OBD_004: in active_session upon can_cmd_received_in_queue the esp32_obd shall within 10 MILLISECOND satisfy can_cmd_interleaved
 
--- =========================================================================
+-- =========================================================
 -- 4. Componente: esp32_logger (9 Requisitos - Formatacao CSV e Buffer)
--- =========================================================================
+-- =========================================================
 REQ_LOG_001: in active_session upon telemetry_sample_ready the esp32_logger shall within 1 MILLISECOND satisfy csv_line_formatted
 REQ_LOG_002: in active_session when csv_line_formatted the esp32_logger shall immediately satisfy columns_count_equals_11 & no_null_values
 REQ_LOG_003: in active_session when csv_line_formatted the esp32_logger shall within 1 MILLISECOND satisfy circular_buffer_pushed
@@ -397,41 +397,41 @@ REQ_LOG_007: in active_session when circular_buffer_full the esp32_logger shall 
 REQ_LOG_008: in active_session the esp32_logger shall always satisfy sram_usage_kb < 200.0
 REQ_LOG_009: in active_session the esp32_logger shall always satisfy no_heap_allocation
 
--- =========================================================================
+-- =========================================================
 -- 5. Componente: esp32_sd (5 Requisitos - Persistencia Local FAT32)
--- =========================================================================
+-- =========================================================
 REQ_SD_001: in boot_mode upon boot_trigger the esp32_sd shall within 100 MILLISECOND satisfy fat32_filesystem_mounted
 REQ_SD_002: in active_session upon session_start the esp32_sd shall within 10 MILLISECOND satisfy sequential_file_created
 REQ_SD_003: in active_session upon new_file_opened the esp32_sd shall immediately satisfy header_and_boot_lines_written
 REQ_SD_004: in active_session upon session_duration_reached the esp32_sd shall within 10 MILLISECOND satisfy session_stopped_and_flushed
 REQ_SD_005: in active_session upon periodic_sync_trigger the esp32_sd shall within 5 MILLISECOND satisfy fat_tables_sync_executed
 
--- =========================================================================
+-- =========================================================
 -- 6. Componente: esp32_telemetry (4 Requisitos - Publicacao MQTT / Wi-Fi)
--- =========================================================================
+-- =========================================================
 REQ_COM_001: in boot_mode upon boot_trigger the esp32_telemetry shall within 2000 MILLISECOND satisfy wifi_connected & mqtt_broker_connected
 REQ_COM_002: in active_session upon telemetry_sample_ready the esp32_telemetry shall within 2 MILLISECOND satisfy mqtt_payload_compact_encoded
 REQ_COM_003: in active_session when wifi_disconnected the esp32_telemetry shall within 1 MILLISECOND satisfy offline_queue_enqueued
 REQ_COM_004: in active_session upon dispatch_cycle_50ms the esp32_telemetry shall within 3 MILLISECOND satisfy data_packets_dispatched
 
--- =========================================================================
+-- =========================================================
 -- 7. Componente: esp32_fsm (4 Requisitos - Maquina de Estados e Fallback)
--- =========================================================================
+-- =========================================================
 REQ_FSM_001: in active_session upon wifi_disconnected the esp32_fsm shall within 5 MILLISECOND satisfy fallback_to_sd_active
 REQ_FSM_002: in active_session upon wifi_reconnected the esp32_fsm shall within 10 MILLISECOND satisfy online_streaming_resumed
 REQ_FSM_003: in active_session upon sd_card_error the esp32_fsm shall within 5 MILLISECOND satisfy sd_alarm_flag_set & cloud_only_active
 REQ_FSM_004: in active_session upon critical_power_drop the esp32_fsm shall within 2 MILLISECOND satisfy safe_shutdown_triggered
 
--- =========================================================================
+-- =========================================================
 -- 8. Componente: esp32_cmd (3 Requisitos - Processamento de Comandos Remotos)
--- =========================================================================
+-- =========================================================
 REQ_CMD_001: in active_session upon mqtt_cmd_received the esp32_cmd shall within 5 MILLISECOND satisfy cmd_parsed_and_routed
 REQ_CMD_002: in active_session upon profile_override_cmd the esp32_cmd shall within 2 MILLISECOND satisfy can_frame_0x010_transmitted
 REQ_CMD_003: in active_session upon invalid_cmd_format the esp32_cmd shall immediately satisfy error_telemetry_published
 
--- =========================================================================
+-- =========================================================
 -- 9. Componente: esp32_recovery (5 Requisitos - Auto-recuperacao de Bus-Off)
--- =========================================================================
+-- =========================================================
 REQ_REC_001: in active_session upon bus_off_condition_met the esp32_recovery shall within 10 MILLISECOND satisfy bus_off_state_entered
 REQ_REC_002: in bus_off_state upon bus_off_detected the esp32_recovery shall immediately satisfy recovery_timer_128ms_start
 REQ_REC_003: in bus_off_state upon recovery_timer_128ms_expired the esp32_recovery shall within 1 MILLISECOND satisfy twai_driver_reset_and_started

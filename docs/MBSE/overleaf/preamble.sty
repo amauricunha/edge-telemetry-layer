@@ -64,10 +64,9 @@
 \usepackage[most]{tcolorbox}      % Caixas de destaque estilizadas
 \definecolor{ufscblue}{RGB}{0,51,102} % Azul institucional UFSC
 
-\usepackage[htt]{hyphenat}        % Permite hifenização em fontes com largura fixa (\texttt)
 \emergencystretch 3em             % Previne estritamente que palavras e códigos transbordem a margem direita
 
-\graphicspath{{sections/Imagens/}{images/}{./}}
+\graphicspath{{sections/Imagens/}{Imagens/}{images/}{./}}
     
 \usepackage{tikz}                 %  Recursos para gráficos, diagramas, etc.
     \usetikzlibrary{fadings}
@@ -172,9 +171,17 @@
     \IfFileExists{sections/Imagens/#2}{%
       \includegraphics[#1]{sections/Imagens/#2}%
     }{%
-      \begin{center}
-        \fbox{\parbox{0.9\linewidth}{\centering \textbf{[Imagem: #2]}\\\small #3}}
-      \end{center}
+      \IfFileExists{Imagens/#2}{%
+        \includegraphics[#1]{Imagens/#2}%
+      }{%
+        \IfFileExists{images/#2}{%
+          \includegraphics[#1]{images/#2}%
+        }{%
+          \begin{center}
+            \fbox{\parbox{0.9\linewidth}{\centering \textbf{[Imagem: #2]}\\\small #3}}
+          \end{center}
+        }%
+      }%
     }%
   }%
 }
