@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, dataset, or MBSE architectural models, please cite it using the metadata from this file."
+title: "Edge Telemetry Layer: An Open-Source Embedded Real-Time Telemetry and Hardware-in-the-Loop Architecture for CAN and OBD-II with Formal MBSE Verification"
+abstract: "A low-cost, open-source embedded edge telemetry architecture for automotive CAN and OBD-II diagnostics, implemented in asynchronous no_std Rust (ESP32-S3 / Embassy) and C++ (Arduino HIL ECU emulator), with full-lifecycle Model-Based Systems Engineering (MBSE) formal verification across NASA FRET, AADL (OSATE), and CAvA variability/evolution."
+authors:
+  - family-names: Cunha
+    given-names: Amauri
+    email: dev.cunha@outlook.com
+    affiliation: "Federal University of Santa Catarina (UFSC)"
+version: 0.2.0
+date-released: 2026-10-09
+license: MIT
+repository-code: "https://github.com/amauricunha/edge-telemetry-layer"
+keywords:
+  - "automotive-telemetry"
+  - "can-bus"
+  - "obd-ii"
+  - "embedded-rust"
+  - "esp32-s3"
+  - "embassy-rs"
+  - "hardware-in-the-loop"
+  - "mbse"
+  - "nasa-fret"
+  - "aadl"
+  - "cava"
+  - "tinyml"

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate-datasets:
+    name: Validate Datasets & Metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements.txt
+
+      - name: Validate dataset format and integrity
+        run: |
+          python tools/validate_csv.py dataset/S_0001.CSV
+          python tools/validate_csv.py dataset/S_0003.CSV
+          python tools/validate_csv.py dataset/S_0005.CSV
+
+      - name: Compute empirical criteria (AC-01 to AC-08)
+        run: |
+          python tools/compute_metrics.py dataset/S_0001.CSV dataset/S_0003.CSV dataset/S_0005.CSV
+
+  check-emulator:
+    name: Build Arduino UNO ECU Emulator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python for PlatformIO
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install PlatformIO Core
+        run: pip install platformio
+
+      - name: Build firmware (PlatformIO)
+        run: pio run -d firmware/uno_ecu_emulator
+
+  check-rust-fmt:
+    name: Check Rust Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check formatting (cargo fmt)
+        run: cargo fmt --check --manifest-path firmware/esp32s3_collector/Cargo.toml

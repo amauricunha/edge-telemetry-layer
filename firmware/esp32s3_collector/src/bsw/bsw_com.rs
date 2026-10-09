@@ -3,11 +3,11 @@
 //! Gerencia o estado de rede (D-05), publicação MQTT assíncrona com autenticação e
 //! relatório detalhado de erros de conexão e status do sistema.
 
-use embassy_net::{tcp::TcpSocket, IpAddress, IpEndpoint, Ipv4Address, Stack};
+use embassy_net::{IpAddress, IpEndpoint, Ipv4Address, Stack, tcp::TcpSocket};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Channel;
 use embassy_time::{Duration, Timer};
-use esp_radio::wifi::{sta::StationConfig, Config as WifiConf, WifiController};
+use esp_radio::wifi::{Config as WifiConf, WifiController, sta::StationConfig};
 use portable_atomic::{AtomicBool, AtomicU8, Ordering};
 use rust_mqtt::client::{client::MqttClient, client_config::ClientConfig};
 use rust_mqtt::packet::v5::publish_packet::QualityOfService;
@@ -158,7 +158,8 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
             config_local::MQTT_BROKER_OCTETS[2],
             config_local::MQTT_BROKER_OCTETS[3],
         );
-        let broker_endpoint = IpEndpoint::new(IpAddress::Ipv4(broker_addr), config_local::MQTT_BROKER_PORT);
+        let broker_endpoint =
+            IpEndpoint::new(IpAddress::Ipv4(broker_addr), config_local::MQTT_BROKER_PORT);
 
         if let Err(e) = socket.connect(broker_endpoint).await {
             log::error!("Falha ao conectar TCP: {:?}", e);
@@ -193,10 +194,16 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                 CONN_STATE.store(1, Ordering::Relaxed);
 
                 // Assinar o tópico de comandos
-                if let Err(e) = client.subscribe_to_topic(config_local::MQTT_TOPIC_COMMAND).await {
+                if let Err(e) = client
+                    .subscribe_to_topic(config_local::MQTT_TOPIC_COMMAND)
+                    .await
+                {
                     log::warn!("BSW Com: Erro ao assinar tópico de comando: {:?}", e);
                 } else {
-                    log::info!("BSW Com: Assinado tópico de comandos: {}", config_local::MQTT_TOPIC_COMMAND);
+                    log::info!(
+                        "BSW Com: Assinado tópico de comandos: {}",
+                        config_local::MQTT_TOPIC_COMMAND
+                    );
                 }
 
                 // Esvazia o canal de msgs velhas
@@ -216,43 +223,72 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
 
                                 if s.starts_with("LIST_SESSIONS") || s.starts_with("SESSIONS") {
                                     let files = crate::mcal::spi_sd::list_session_files();
-                                    let curr_fn_guard = crate::mcal::spi_sd::CURRENT_FILENAME.try_lock();
+                                    let curr_fn_guard =
+                                        crate::mcal::spi_sd::CURRENT_FILENAME.try_lock();
                                     let curr_fn = match &curr_fn_guard {
                                         Ok(g) if !g.is_empty() => g.as_str(),
                                         _ => "S_0001.CSV",
                                     };
                                     let mut json: heapless::String<512> = heapless::String::new();
-                                    let _ = core::fmt::write(&mut json, format_args!("{{\"event\":\"SESSION_LIST\",\"total\":{},\"active\":\"{}\",\"files\":[", files.len(), curr_fn));
+                                    let _ = core::fmt::write(
+                                        &mut json,
+                                        format_args!(
+                                            "{{\"event\":\"SESSION_LIST\",\"total\":{},\"active\":\"{}\",\"files\":[",
+                                            files.len(),
+                                            curr_fn
+                                        ),
+                                    );
                                     for (i, f) in files.iter().enumerate() {
-                                        if i > 0 { let _ = core::fmt::write(&mut json, format_args!(",")); }
-                                        let _ = core::fmt::write(&mut json, format_args!("\"{}\"", f.as_str()));
+                                        if i > 0 {
+                                            let _ = core::fmt::write(&mut json, format_args!(","));
+                                        }
+                                        let _ = core::fmt::write(
+                                            &mut json,
+                                            format_args!("\"{}\"", f.as_str()),
+                                        );
                                     }
                                     let _ = core::fmt::write(&mut json, format_args!("]}}"));
-                                    let _ = client.send_message(
-                                        config_local::MQTT_TOPIC_STATUS,
-                                        json.as_bytes(),
-                                        QualityOfService::QoS0,
-                                        false,
-                                    ).await;
-                                    log::info!("BSW Com: Lista de sessões enviada: {}", json.as_str());
-                                } else if s.contains("REPLAY") {
-                                    if crate::types::SESSION_ACTIVE.load(Ordering::Relaxed) {
-                                        log::info!("BSW Com: Finalizando sessão ativa antes de iniciar o Replay...");
-                                        crate::types::SESSION_TIMER_ACTIVE.store(false, Ordering::Relaxed);
-                                        crate::types::SESSION_ACTIVE.store(false, Ordering::Relaxed);
-                                        crate::bsw::bsw_mem::flush_sync();
-                                        let session_id = crate::bsw::bsw_mem::SESSION_ID.load(Ordering::Relaxed);
-                                        let mut status_json: heapless::String<128> = heapless::String::new();
-                                        let _ = core::fmt::write(
-                                            &mut status_json,
-                                            format_args!("{{\"event\":\"SESSION_STOPPED\",\"session_id\":\"S{:04}\"}}", session_id)
-                                        );
-                                        let _ = client.send_message(
+                                    let _ = client
+                                        .send_message(
                                             config_local::MQTT_TOPIC_STATUS,
-                                            status_json.as_bytes(),
+                                            json.as_bytes(),
                                             QualityOfService::QoS0,
                                             false,
-                                        ).await;
+                                        )
+                                        .await;
+                                    log::info!(
+                                        "BSW Com: Lista de sessões enviada: {}",
+                                        json.as_str()
+                                    );
+                                } else if s.contains("REPLAY") {
+                                    if crate::types::SESSION_ACTIVE.load(Ordering::Relaxed) {
+                                        log::info!(
+                                            "BSW Com: Finalizando sessão ativa antes de iniciar o Replay..."
+                                        );
+                                        crate::types::SESSION_TIMER_ACTIVE
+                                            .store(false, Ordering::Relaxed);
+                                        crate::types::SESSION_ACTIVE
+                                            .store(false, Ordering::Relaxed);
+                                        crate::bsw::bsw_mem::flush_sync();
+                                        let session_id =
+                                            crate::bsw::bsw_mem::SESSION_ID.load(Ordering::Relaxed);
+                                        let mut status_json: heapless::String<128> =
+                                            heapless::String::new();
+                                        let _ = core::fmt::write(
+                                            &mut status_json,
+                                            format_args!(
+                                                "{{\"event\":\"SESSION_STOPPED\",\"session_id\":\"S{:04}\"}}",
+                                                session_id
+                                            ),
+                                        );
+                                        let _ = client
+                                            .send_message(
+                                                config_local::MQTT_TOPIC_STATUS,
+                                                status_json.as_bytes(),
+                                                QualityOfService::QoS0,
+                                                false,
+                                            )
+                                            .await;
                                     }
 
                                     let mut target_idx: u16 = 1;
@@ -262,26 +298,44 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                                             target_idx = num;
                                         }
                                     }
-                                    let mut target_fn: heapless::String<16> = heapless::String::new();
-                                    let _ = core::fmt::write(&mut target_fn, format_args!("S_{:04}.CSV", target_idx));
-                                    log::info!("BSW Com: Replay streaming iniciado para '{}'...", target_fn.as_str());
+                                    let mut target_fn: heapless::String<16> =
+                                        heapless::String::new();
+                                    let _ = core::fmt::write(
+                                        &mut target_fn,
+                                        format_args!("S_{:04}.CSV", target_idx),
+                                    );
+                                    log::info!(
+                                        "BSW Com: Replay streaming iniciado para '{}'...",
+                                        target_fn.as_str()
+                                    );
 
                                     let mut total_replayed: u32 = 0;
                                     let mut replay_ok = false;
 
-                                    if let Some(mut reader) = crate::mcal::spi_sd::SessionStreamReader::open(target_fn.as_str()) {
-                                        let chunk_buf = unsafe { &mut *core::ptr::addr_of_mut!(REPLAY_BUF) };
-                                        log::info!("BSW Com: Iniciando loop de transmissão do Replay...");
+                                    if let Some(mut reader) =
+                                        crate::mcal::spi_sd::SessionStreamReader::open(
+                                            target_fn.as_str(),
+                                        )
+                                    {
+                                        let chunk_buf =
+                                            unsafe { &mut *core::ptr::addr_of_mut!(REPLAY_BUF) };
+                                        log::info!(
+                                            "BSW Com: Iniciando loop de transmissão do Replay..."
+                                        );
 
                                         let mut buf_len: usize = 0;
 
                                         loop {
                                             let space = 1536 - buf_len;
                                             let to_read = core::cmp::min(space, 512);
-                                            let n = match reader.read_chunk(&mut chunk_buf[buf_len..buf_len + to_read]) {
+                                            let n = match reader.read_chunk(
+                                                &mut chunk_buf[buf_len..buf_len + to_read],
+                                            ) {
                                                 Ok(bytes) => bytes,
                                                 Err(_) => {
-                                                    log::error!("BSW Com: Erro na leitura do Replay no SD");
+                                                    log::error!(
+                                                        "BSW Com: Erro na leitura do Replay no SD"
+                                                    );
                                                     break;
                                                 }
                                             };
@@ -289,7 +343,9 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                                             buf_len += n;
 
                                             if buf_len == 0 {
-                                                log::info!("BSW Com: Fim do arquivo de Replay atingido (EOF).");
+                                                log::info!(
+                                                    "BSW Com: Fim do arquivo de Replay atingido (EOF)."
+                                                );
                                                 replay_ok = true;
                                                 break;
                                             }
@@ -297,26 +353,38 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                                             // Localizar a última quebra de linha completa
                                             let send_len = if n == 0 {
                                                 buf_len
-                                            } else if let Some(last_nl) = chunk_buf[..buf_len].iter().rposition(|&b| b == b'\n') {
+                                            } else if let Some(last_nl) = chunk_buf[..buf_len]
+                                                .iter()
+                                                .rposition(|&b| b == b'\n')
+                                            {
                                                 last_nl + 1
                                             } else {
                                                 continue;
                                             };
 
                                             if send_len > 0 {
-                                                if let Err(e) = client.send_message(
-                                                    config_local::MQTT_TOPIC_REPLAY,
-                                                    &chunk_buf[..send_len],
-                                                    QualityOfService::QoS0,
-                                                    false,
-                                                ).await {
-                                                    log::error!("BSW Com: Erro ao enviar chunk MQTT: {:?}", e);
+                                                if let Err(e) = client
+                                                    .send_message(
+                                                        config_local::MQTT_TOPIC_REPLAY,
+                                                        &chunk_buf[..send_len],
+                                                        QualityOfService::QoS0,
+                                                        false,
+                                                    )
+                                                    .await
+                                                {
+                                                    log::error!(
+                                                        "BSW Com: Erro ao enviar chunk MQTT: {:?}",
+                                                        e
+                                                    );
                                                     break;
                                                 }
 
                                                 total_replayed += send_len as u32;
                                                 if total_replayed % 20000 < send_len as u32 {
-                                                    log::info!("BSW Com: Replay progresso: {} bytes transmitidos...", total_replayed);
+                                                    log::info!(
+                                                        "BSW Com: Replay progresso: {} bytes transmitidos...",
+                                                        total_replayed
+                                                    );
                                                 }
 
                                                 chunk_buf.copy_within(send_len..buf_len, 0);
@@ -326,7 +394,9 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                                             }
 
                                             if n == 0 && buf_len == 0 {
-                                                log::info!("BSW Com: Fim do arquivo de Replay atingido (EOF).");
+                                                log::info!(
+                                                    "BSW Com: Fim do arquivo de Replay atingido (EOF)."
+                                                );
                                                 replay_ok = true;
                                                 break;
                                             }
@@ -334,39 +404,60 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
 
                                         reader.close();
                                     } else {
-                                        log::error!("BSW Com: Falha ao abrir arquivo '{}' para Replay", target_fn.as_str());
+                                        log::error!(
+                                            "BSW Com: Falha ao abrir arquivo '{}' para Replay",
+                                            target_fn.as_str()
+                                        );
                                     }
 
                                     if replay_ok {
-                                        let mut replay_status: heapless::String<128> = heapless::String::new();
+                                        let mut replay_status: heapless::String<128> =
+                                            heapless::String::new();
                                         let _ = core::fmt::write(
                                             &mut replay_status,
-                                            format_args!("{{\"event\":\"REPLAY_COMPLETE\",\"session\":\"{}\",\"bytes_sent\":{}}}", target_fn.as_str(), total_replayed)
+                                            format_args!(
+                                                "{{\"event\":\"REPLAY_COMPLETE\",\"session\":\"{}\",\"bytes_sent\":{}}}",
+                                                target_fn.as_str(),
+                                                total_replayed
+                                            ),
                                         );
-                                        let _ = client.send_message(
-                                            config_local::MQTT_TOPIC_STATUS,
-                                            replay_status.as_bytes(),
-                                            QualityOfService::QoS0,
-                                            false,
-                                        ).await;
-                                        log::info!("BSW Com: Replay concluído com sucesso ({} bytes transmitidos)!", total_replayed);
+                                        let _ = client
+                                            .send_message(
+                                                config_local::MQTT_TOPIC_STATUS,
+                                                replay_status.as_bytes(),
+                                                QualityOfService::QoS0,
+                                                false,
+                                            )
+                                            .await;
+                                        log::info!(
+                                            "BSW Com: Replay concluído com sucesso ({} bytes transmitidos)!",
+                                            total_replayed
+                                        );
                                     }
                                 } else if s.starts_with("STOP") {
-                                    crate::types::SESSION_TIMER_ACTIVE.store(false, Ordering::Relaxed);
+                                    crate::types::SESSION_TIMER_ACTIVE
+                                        .store(false, Ordering::Relaxed);
                                     crate::types::SESSION_ACTIVE.store(false, Ordering::Relaxed);
                                     crate::bsw::bsw_mem::flush_sync();
-                                    let session_id = crate::bsw::bsw_mem::SESSION_ID.load(Ordering::Relaxed);
-                                    let mut status_json: heapless::String<128> = heapless::String::new();
+                                    let session_id =
+                                        crate::bsw::bsw_mem::SESSION_ID.load(Ordering::Relaxed);
+                                    let mut status_json: heapless::String<128> =
+                                        heapless::String::new();
                                     let _ = core::fmt::write(
                                         &mut status_json,
-                                        format_args!("{{\"event\":\"SESSION_STOPPED\",\"session_id\":\"S{:04}\"}}", session_id)
+                                        format_args!(
+                                            "{{\"event\":\"SESSION_STOPPED\",\"session_id\":\"S{:04}\"}}",
+                                            session_id
+                                        ),
                                     );
-                                    let _ = client.send_message(
-                                        config_local::MQTT_TOPIC_STATUS,
-                                        status_json.as_bytes(),
-                                        QualityOfService::QoS0,
-                                        false,
-                                    ).await;
+                                    let _ = client
+                                        .send_message(
+                                            config_local::MQTT_TOPIC_STATUS,
+                                            status_json.as_bytes(),
+                                            QualityOfService::QoS0,
+                                            false,
+                                        )
+                                        .await;
                                     log::info!("BSW Com: Sessão parada via comando STOP");
                                 } else if s.starts_with("TIME,") {
                                     if let Some(epoch_str) = s.strip_prefix("TIME,") {
@@ -404,25 +495,43 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                                     };
 
                                     if let Some((label, can_code)) = label_opt {
-                                        if let Some(new_session_idx) = crate::bsw::bsw_mem::flush_and_rotate_session(label, duration_min, epoch_opt) {
-                                            let _ = crate::CAN_CMD_CHANNEL.try_send(crate::types::CanFrame::new(0x010, &[can_code]));
-                                            
-                                            let epoch_now = crate::types::get_current_timestamp_ms();
-                                            let mut start_json: heapless::String<200> = heapless::String::new();
+                                        if let Some(new_session_idx) =
+                                            crate::bsw::bsw_mem::flush_and_rotate_session(
+                                                label,
+                                                duration_min,
+                                                epoch_opt,
+                                            )
+                                        {
+                                            let _ = crate::CAN_CMD_CHANNEL.try_send(
+                                                crate::types::CanFrame::new(0x010, &[can_code]),
+                                            );
+
+                                            let epoch_now =
+                                                crate::types::get_current_timestamp_ms();
+                                            let mut start_json: heapless::String<200> =
+                                                heapless::String::new();
                                             let _ = core::fmt::write(
                                                 &mut start_json,
                                                 format_args!(
                                                     "{{\"event\":\"SESSION_START\",\"session_id\":\"S{:04}\",\"mode\":\"{}\",\"duration_min\":{},\"start_epoch_ms\":{}}}",
-                                                    new_session_idx, label.as_str(), duration_min, epoch_now
-                                                )
+                                                    new_session_idx,
+                                                    label.as_str(),
+                                                    duration_min,
+                                                    epoch_now
+                                                ),
                                             );
-                                            let _ = client.send_message(
-                                                config_local::MQTT_TOPIC_STATUS,
-                                                start_json.as_bytes(),
-                                                QualityOfService::QoS0,
-                                                false,
-                                            ).await;
-                                            log::info!("BSW Com: Evento SESSION_START publicado: {}", start_json.as_str());
+                                            let _ = client
+                                                .send_message(
+                                                    config_local::MQTT_TOPIC_STATUS,
+                                                    start_json.as_bytes(),
+                                                    QualityOfService::QoS0,
+                                                    false,
+                                                )
+                                                .await;
+                                            log::info!(
+                                                "BSW Com: Evento SESSION_START publicado: {}",
+                                                start_json.as_str()
+                                            );
                                         }
                                     }
                                 }
@@ -469,16 +578,25 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                         let total_len = (count as usize) * 18;
                         let session_id = crate::bsw::bsw_mem::SESSION_ID.load(Ordering::Relaxed);
                         let mut dynamic_topic: heapless::String<64> = heapless::String::new();
-                        let _ = core::fmt::write(&mut dynamic_topic, format_args!("/telemetry/S{:04}/raw", session_id));
+                        let _ = core::fmt::write(
+                            &mut dynamic_topic,
+                            format_args!("/telemetry/S{:04}/raw", session_id),
+                        );
 
                         // Publicar Lote Binário Dinâmico
-                        if let Err(e) = client.send_message(
-                            dynamic_topic.as_str(),
-                            &batch_slice[2..2 + total_len],
-                            QualityOfService::QoS0,
-                            false,
-                        ).await {
-                            log::error!("BSW Com: Erro ao publicar Lote MQTT: {:?}. Reconectando...", e);
+                        if let Err(e) = client
+                            .send_message(
+                                dynamic_topic.as_str(),
+                                &batch_slice[2..2 + total_len],
+                                QualityOfService::QoS0,
+                                false,
+                            )
+                            .await
+                        {
+                            log::error!(
+                                "BSW Com: Erro ao publicar Lote MQTT: {:?}. Reconectando...",
+                                e
+                            );
                             break;
                         }
 
@@ -503,8 +621,12 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                         let state_str = if is_active { "RECORDING" } else { "STANDBY" };
                         let sd_status = crate::bsw::bsw_mem::SD_OK.load(Ordering::Relaxed);
                         let wifi_status = WIFI_OK.load(Ordering::Relaxed);
-                        let frames = crate::app::logger::LOGGER_STATS.frames_received.load(Ordering::Relaxed);
-                        let lost = crate::app::logger::LOGGER_STATS.frames_lost.load(Ordering::Relaxed);
+                        let frames = crate::app::logger::LOGGER_STATS
+                            .frames_received
+                            .load(Ordering::Relaxed);
+                        let lost = crate::app::logger::LOGGER_STATS
+                            .frames_lost
+                            .load(Ordering::Relaxed);
 
                         let session_id = crate::bsw::bsw_mem::SESSION_ID.load(Ordering::Relaxed);
                         let uptime_ms = embassy_time::Instant::now().as_millis();
@@ -513,20 +635,37 @@ pub async fn task_wifi(mut controller: WifiController<'static>, stack: Stack<'st
                             &mut status_json,
                             format_args!(
                                 "{{\"state\":\"{}\",\"session_id\":\"S{:04}\",\"recording\":{},\"sd_ok\":{},\"wifi_ok\":{},\"frames_received\":{},\"lost\":{},\"uptime_ms\":{}}}",
-                                state_str, session_id, is_active, sd_status, wifi_status, frames, lost, uptime_ms
+                                state_str,
+                                session_id,
+                                is_active,
+                                sd_status,
+                                wifi_status,
+                                frames,
+                                lost,
+                                uptime_ms
                             ),
                         );
 
-                        if let Err(e) = client.send_message(
-                            config_local::MQTT_TOPIC_STATUS,
-                            status_json.as_bytes(),
-                            QualityOfService::QoS0,
-                            false,
-                        ).await {
-                            log::error!("BSW Com: Falha ao publicar status MQTT ({:?}). Forçando reconexão...", e);
+                        if let Err(e) = client
+                            .send_message(
+                                config_local::MQTT_TOPIC_STATUS,
+                                status_json.as_bytes(),
+                                QualityOfService::QoS0,
+                                false,
+                            )
+                            .await
+                        {
+                            log::error!(
+                                "BSW Com: Falha ao publicar status MQTT ({:?}). Forçando reconexão...",
+                                e
+                            );
                             break;
                         } else {
-                            log::info!("BSW Status (MQTT): publicado em '{}' -> {}", config_local::MQTT_TOPIC_STATUS, status_json);
+                            log::info!(
+                                "BSW Status (MQTT): publicado em '{}' -> {}",
+                                config_local::MQTT_TOPIC_STATUS,
+                                status_json
+                            );
                         }
                         last_status_publish = embassy_time::Instant::now();
                     }
@@ -558,12 +697,19 @@ pub async fn task_status_publisher() {
         if CONN_STATE.load(Ordering::Relaxed) == 1 {
             let wifi_status = WIFI_OK.load(Ordering::Relaxed);
             let sd_status = crate::bsw::bsw_mem::SD_OK.load(Ordering::Relaxed);
-            let frames = crate::app::logger::LOGGER_STATS.frames_received.load(Ordering::Relaxed);
-            let lost = crate::app::logger::LOGGER_STATS.frames_lost.load(Ordering::Relaxed);
+            let frames = crate::app::logger::LOGGER_STATS
+                .frames_received
+                .load(Ordering::Relaxed);
+            let lost = crate::app::logger::LOGGER_STATS
+                .frames_lost
+                .load(Ordering::Relaxed);
 
             log::info!(
                 "BSW Status (30s): sd_ok={}, wifi_ok={}, frames_received={}, lost={}",
-                sd_status, wifi_status, frames, lost
+                sd_status,
+                wifi_status,
+                frames,
+                lost
             );
         }
     }

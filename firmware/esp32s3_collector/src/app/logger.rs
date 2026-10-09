@@ -7,7 +7,7 @@ use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Receiver;
 use embassy_sync::mutex::Mutex;
 use heapless::{String, Vec};
-use portable_atomic::{AtomicU32, AtomicU64, AtomicU8, Ordering};
+use portable_atomic::{AtomicU8, AtomicU32, AtomicU64, Ordering};
 
 use crate::app::csv_writer;
 use crate::bsw::bsw_com::{self, CONN_STATE};
@@ -48,8 +48,7 @@ pub static LOGGER_STATS: LoggerStats = LoggerStats::new();
 
 /// Buffer de backlog de fallback na memória (16 KB = 50 frames × 320 B) (D-04).
 /// Mantido em dimensão compatível com a SRAM interna para preservar a pilha de execução.
-static BACKLOG_PSRAM: Mutex<CriticalSectionRawMutex, Vec<String<320>, 50>> =
-    Mutex::new(Vec::new());
+static BACKLOG_PSRAM: Mutex<CriticalSectionRawMutex, Vec<String<320>, 50>> = Mutex::new(Vec::new());
 
 pub fn get_backlog_psram_bytes() -> usize {
     BACKLOG_PSRAM.try_lock().map(|g| g.len() * 320).unwrap_or(0)
@@ -58,7 +57,12 @@ pub fn get_backlog_psram_bytes() -> usize {
 /// Task Embassy principal de logging e gerenciamento de fallback.
 #[embassy_executor::task]
 pub async fn task_logger(
-    receiver: Receiver<'static, CriticalSectionRawMutex, TelemetryFrame, { config::CHANNEL_CAPACITY }>,
+    receiver: Receiver<
+        'static,
+        CriticalSectionRawMutex,
+        TelemetryFrame,
+        { config::CHANNEL_CAPACITY },
+    >,
 ) {
     log::info!("APP Logger: task_logger iniciada (Processamento CSV, SD e MQTT)");
 
@@ -69,7 +73,7 @@ pub async fn task_logger(
     } else {
         log::warn!("APP Logger: Não foi possível gravar o header CSV (SD indisponível)");
     }
-    
+
     // Injetar linha BOOT com metadados do firmware e hardware (Vector ASC style)
     let boot_line = csv_writer::serialize_boot(0, &SessionLabel::Normal);
     let _ = bsw_mem::push_line(&boot_line);
@@ -77,7 +81,9 @@ pub async fn task_logger(
     loop {
         let frame = receiver.receive().await;
         LOGGER_STATS.frames_received.fetch_add(1, Ordering::Relaxed);
-        LOGGER_STATS.last_frame_ts_ms.store(frame.timestamp_ms, Ordering::Relaxed);
+        LOGGER_STATS
+            .last_frame_ts_ms
+            .store(frame.timestamp_ms, Ordering::Relaxed);
 
         // 0. Monitorar Expiração de Sessão Temporizada
         if crate::types::SESSION_TIMER_ACTIVE.load(Ordering::Relaxed) {
@@ -96,7 +102,8 @@ pub async fn task_logger(
                 bsw_mem::flush_sync();
                 log::warn!(
                     "APP Logger: Temporizador de sessão expirou ({} ms = {} min). Gravação finalizada e pausada.",
-                    duration_ms, duration_ms / 60_000
+                    duration_ms,
+                    duration_ms / 60_000
                 );
             }
         }
@@ -130,21 +137,19 @@ pub async fn task_logger(
         // Emitir DIAG quando Wi-Fi reconectar
         if state == 1 && last_notified != 1 {
             LAST_CONN_NOTIFIED.store(1, Ordering::Relaxed);
-            let backlog_count = BACKLOG_PSRAM.try_lock()
-                .map(|g| g.len())
-                .unwrap_or(0);
+            let backlog_count = BACKLOG_PSRAM.try_lock().map(|g| g.len()).unwrap_or(0);
             let mut diag_msg: String<64> = String::new();
             let _ = core::fmt::write(
                 &mut diag_msg,
                 format_args!("WIFI_RECONNECTED backlog={}", backlog_count),
             );
-            let diag = csv_writer::serialize_diag(
-                frame.timestamp_ms,
-                &SessionLabel::Normal,
-                &diag_msg,
-            );
+            let diag =
+                csv_writer::serialize_diag(frame.timestamp_ms, &SessionLabel::Normal, &diag_msg);
             let _ = bsw_mem::push_line(&diag);
-            log::info!("APP Logger: WIFI_RECONNECTED — Backlog={} frames para descarregar", backlog_count);
+            log::info!(
+                "APP Logger: WIFI_RECONNECTED — Backlog={} frames para descarregar",
+                backlog_count
+            );
         }
 
         let _mqtt_success = false;

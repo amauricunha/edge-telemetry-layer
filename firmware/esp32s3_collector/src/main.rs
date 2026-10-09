@@ -42,12 +42,12 @@ use embassy_sync::channel::Channel;
 use embassy_time::{Duration, Instant, Timer};
 
 use embassy_net::{Config as NetConfig, StackResources};
-use esp_radio::wifi::{ControllerConfig, Interface, WifiController};
 use esp_hal::rng::Rng;
+use esp_radio::wifi::{ControllerConfig, Interface, WifiController};
 
-use esp_hal::twai::{self, BaudRate, TwaiConfiguration, TwaiMode};
-use esp_hal::timer::timg::TimerGroup;
 use esp_hal::interrupt::software::SoftwareInterruptControl;
+use esp_hal::timer::timg::TimerGroup;
+use esp_hal::twai::{self, BaudRate, TwaiConfiguration, TwaiMode};
 
 // Necessário para o panic handler e logging via UART
 use esp_backtrace as _;
@@ -62,13 +62,17 @@ use crate::types::TelemetryFrame;
 
 /// Channel bounded compartilhado entre tasks.
 /// Capacidade 32: ao ritmo de 20 frames/s do UNO R3, suporta 1,6 s de atraso.
-static TELEMETRY_CHANNEL: Channel<CriticalSectionRawMutex, TelemetryFrame, { config::CHANNEL_CAPACITY }> =
-    Channel::new();
+static TELEMETRY_CHANNEL: Channel<
+    CriticalSectionRawMutex,
+    TelemetryFrame,
+    { config::CHANNEL_CAPACITY },
+> = Channel::new();
 
 // =============================================================================
 // RTE — Channel de Comandos CAN (Ex: Alterar Modo no Uno)
 // =============================================================================
-pub static CAN_CMD_CHANNEL: Channel<CriticalSectionRawMutex, crate::types::CanFrame, 5> = Channel::new();
+pub static CAN_CMD_CHANNEL: Channel<CriticalSectionRawMutex, crate::types::CanFrame, 5> =
+    Channel::new();
 
 // =============================================================================
 // Timestamp de último envio OBD (para cálculo de latência)
@@ -80,8 +84,7 @@ pub(crate) static LAST_OBD_SEND_TICKS: portable_atomic::AtomicU64 =
     portable_atomic::AtomicU64::new(0);
 
 /// PID da última solicitação OBD-II enviada.
-pub(crate) static LAST_OBD_PID: portable_atomic::AtomicU8 =
-    portable_atomic::AtomicU8::new(0);
+pub(crate) static LAST_OBD_PID: portable_atomic::AtomicU8 = portable_atomic::AtomicU8::new(0);
 
 /// Flag indicando se a resposta para o último envio OBD-II foi recebida.
 pub(crate) static LAST_OBD_RESPONSE_RECEIVED: portable_atomic::AtomicBool =
@@ -114,9 +117,7 @@ async fn task_net_stack(mut runner: embassy_net::Runner<'static, Interface>) {
 
 /// Task Embassy que lê frames CAN do barramento e publica no channel.
 #[embassy_executor::task]
-async fn task_can_rx(
-    mut rx: esp_hal::twai::TwaiRx<'static, esp_hal::Async>,
-) {
+async fn task_can_rx(mut rx: esp_hal::twai::TwaiRx<'static, esp_hal::Async>) {
     let sender = TELEMETRY_CHANNEL.sender();
     let mut overflow_count: u32 = 0;
     let mut dbc_frame_count: u32 = 0;
@@ -125,7 +126,9 @@ async fn task_can_rx(
     log::info!("CAN RX: task iniciada — aguardando frames no barramento");
 
     loop {
-        match embassy_futures::select::select(mcal_twai::twai_recv(&mut rx), BUS_OFF_SIGNAL.wait()).await {
+        match embassy_futures::select::select(mcal_twai::twai_recv(&mut rx), BUS_OFF_SIGNAL.wait())
+            .await
+        {
             embassy_futures::select::Either::First(Ok(can_frame)) => {
                 let now_ticks = Instant::now().as_ticks();
                 let timestamp_ms = crate::types::get_current_timestamp_ms();
@@ -141,7 +144,9 @@ async fn task_can_rx(
                         0.0
                     };
 
-                    if let Some(tf) = app::can_decoder::parse_obd_response(&can_frame, timestamp_ms, latency_ms) {
+                    if let Some(tf) =
+                        app::can_decoder::parse_obd_response(&can_frame, timestamp_ms, latency_ms)
+                    {
                         obd_frame_count += 1;
                         LAST_OBD_RESPONSE_RECEIVED.store(true, portable_atomic::Ordering::Relaxed);
 
@@ -198,7 +203,8 @@ async fn task_can_rx(
             embassy_futures::select::Either::First(Err(e)) => {
                 log::error!("CAN RX: erro de recepção — {:?}", e);
                 // Sinalizar possível Bus-Off para task_watchdog processar (AC-07)
-                crate::bsw::bsw_diag::BUS_OFF_DETECTED.store(true, portable_atomic::Ordering::Relaxed);
+                crate::bsw::bsw_diag::BUS_OFF_DETECTED
+                    .store(true, portable_atomic::Ordering::Relaxed);
                 Timer::after(Duration::from_millis(10)).await;
             }
             embassy_futures::select::Either::Second(_) => {
@@ -218,7 +224,7 @@ async fn task_can_rx(
 async fn main(spawner: Spawner) {
     // 58KB é o valor de equilíbrio perfeito: dá 16KB de folga ao esp-radio sem estourar o linker de release
     esp_alloc::heap_allocator!(size: 58 * 1024);
-    
+
     // Inicializar periféricos do ESP32-S3
     let peripherals = esp_hal::init(esp_hal::Config::default());
 
@@ -253,16 +259,18 @@ async fn main(spawner: Spawner) {
 
     // Aceitar todos os IDs — filtragem feita em software
     twai_config.set_filter(
-        const { twai::filter::SingleStandardFilter::new(
-            b"xxxxxxxxxxx",
-            b"x",
-            [b"xxxxxxxx", b"xxxxxxxx"],
-        ) },
+        const {
+            twai::filter::SingleStandardFilter::new(
+                b"xxxxxxxxxxx",
+                b"x",
+                [b"xxxxxxxx", b"xxxxxxxx"],
+            )
+        },
     );
 
     // Converter para modo assíncrono e iniciar
     let twai = twai_config.into_async().start();
-    
+
     // Dividir em TX e RX para ownership segura em tasks separadas
     let (twai_rx, twai_tx) = twai.split();
 
@@ -273,7 +281,9 @@ async fn main(spawner: Spawner) {
     // Pinos: CS=GPIO10, MOSI=GPIO11, CLK=GPIO12, MISO=GPIO13
     // init_and_probe chama bsw_mem::set_sd_present(true/false) internamente
     // -------------------------------------------------------------------------
-    log::info!("SPI SD: inicializando barramento SPI2 (CS=GPIO10, MOSI=GPIO11, CLK=GPIO12, MISO=GPIO13)...");
+    log::info!(
+        "SPI SD: inicializando barramento SPI2 (CS=GPIO10, MOSI=GPIO11, CLK=GPIO12, MISO=GPIO13)..."
+    );
     mcal::spi_sd::init_and_probe(
         peripherals.SPI2,
         peripherals.GPIO10,
@@ -291,11 +301,12 @@ async fn main(spawner: Spawner) {
 
     let wifi_controller = WifiController::new(peripherals.WIFI, ControllerConfig::default())
         .expect("Falha ao inicializar WifiController");
-    
+
     let wifi_interface = Interface::station();
     let net_config = NetConfig::dhcpv4(Default::default());
 
-    static STACK_RESOURCES: static_cell::StaticCell<StackResources<3>> = static_cell::StaticCell::new();
+    static STACK_RESOURCES: static_cell::StaticCell<StackResources<3>> =
+        static_cell::StaticCell::new();
     let (stack, runner) = embassy_net::new(
         wifi_interface,
         net_config,

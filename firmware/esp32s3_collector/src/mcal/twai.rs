@@ -24,18 +24,14 @@ pub async fn twai_send(
     frame: &CanFrame,
 ) -> Result<(), CanError> {
     let esp_frame = can_frame_to_esp_frame(frame).ok_or(CanError::TxFailed)?;
-    tx.transmit_async(&esp_frame)
-        .await
-        .map_err(|e| {
-            log::error!("TWAI tx error: {:?}", e);
-            CanError::TxFailed
-        })
+    tx.transmit_async(&esp_frame).await.map_err(|e| {
+        log::error!("TWAI tx error: {:?}", e);
+        CanError::TxFailed
+    })
 }
 
 /// Recebe um frame CAN pelo receptor TWAI de forma assíncrona.
-pub async fn twai_recv(
-    rx: &mut TwaiRx<'static, esp_hal::Async>,
-) -> Result<CanFrame, CanError> {
+pub async fn twai_recv(rx: &mut TwaiRx<'static, esp_hal::Async>) -> Result<CanFrame, CanError> {
     let esp_frame = rx.receive_async().await.map_err(|e| {
         log::error!("TWAI rx error: {:?}", e);
         CanError::HalError
@@ -58,13 +54,13 @@ pub async fn twai_recv(
 /// pode causar corrupção de estado no Waker do executor.
 pub unsafe fn twai_recover_unsafe() {
     let twai = unsafe { &*esp_hal::peripherals::TWAI0::PTR };
-    
+
     // Entrar no modo de reset
     twai.mode().modify(|_, w| w.reset_mode().set_bit());
-    
+
     // Pequeno delay via compiler fence para hardware estabilizar
     core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
-    
+
     // Sair do modo de reset
     twai.mode().modify(|_, w| w.reset_mode().clear_bit());
 }

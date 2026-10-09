@@ -27,6 +27,7 @@ docs/MBSE/FRET_docs/
 .agents/
 .gemini/
 skills-lock.json
+scratch/
 
 # ==========================================
 # Sistema Operacional, IDEs e Editores

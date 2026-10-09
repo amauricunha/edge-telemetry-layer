@@ -76,15 +76,23 @@ impl HeapTracker {
 
     /// Registra uma amostra de heap_free.
     fn sample(&mut self, heap_free: usize) {
-        if heap_free < self.min { self.min = heap_free; }
-        if heap_free > self.max { self.max = heap_free; }
+        if heap_free < self.min {
+            self.min = heap_free;
+        }
+        if heap_free > self.max {
+            self.max = heap_free;
+        }
         self.sum += heap_free;
         self.samples += 1;
     }
 
     /// Retorna a média do heap_free na janela.
     fn avg(&self) -> usize {
-        if self.samples > 0 { self.sum / self.samples as usize } else { 0 }
+        if self.samples > 0 {
+            self.sum / self.samples as usize
+        } else {
+            0
+        }
     }
 
     /// Reseta para a próxima janela de 60 s.
@@ -146,9 +154,10 @@ pub async fn task_watchdog() {
 
             log::error!(
                 "BSW Diag: *** BUS-OFF DETECTADO (evento #{}) — ts={}ms ***",
-                count, ts_ms
+                count,
+                ts_ms
             );
-            
+
             // 1. Sinalizar pausa cooperativa para as tasks CAN (RTE)
             crate::BUS_OFF_SIGNAL.signal(());
             log::warn!("BSW Diag: BUS_OFF_SIGNAL emitido. Tasks CAN pausando...");
@@ -171,7 +180,10 @@ pub async fn task_watchdog() {
             let mut diag_line: heapless::String<128> = heapless::String::new();
             let _ = core::fmt::write(
                 &mut diag_line,
-                format_args!("{},DIAG,0x000,,,,,,,,NOR,BUS_OFF_RECOVERED_latency_ms=128\n", ts_ms),
+                format_args!(
+                    "{},DIAG,0x000,,,,,,,,NOR,BUS_OFF_RECOVERED_latency_ms=128\n",
+                    ts_ms
+                ),
             );
             let _ = bsw_mem::push_line(diag_line.as_str());
         }
@@ -239,7 +251,11 @@ pub async fn task_watchdog() {
             let bus_off_total = BUS_OFF_COUNT.load(Ordering::Relaxed);
             let sd_write_off = bsw_mem::SD_WRITE_OFFSET.load(Ordering::Relaxed);
 
-            let heap_min = if heap_tracker.min == usize::MAX { 0 } else { heap_tracker.min };
+            let heap_min = if heap_tracker.min == usize::MAX {
+                0
+            } else {
+                heap_tracker.min
+            };
             let heap_max = heap_tracker.max;
             let heap_avg = heap_tracker.avg();
             let heap_free = esp_alloc::HEAP.free();
@@ -249,8 +265,20 @@ pub async fn task_watchdog() {
             // Log para UART (terminal serial)
             log::info!(
                 "BSW Diag: HEARTBEAT up={}s rx={} sd={} mqtt={} lost={} ovf={} bo={} hf={} hmin={} hmax={} havg={} hu={} sdwr={} psram={}",
-                uptime_s, frames_rx, frames_sd, frames_mqtt, lost, overflow, bus_off_total,
-                heap_free, heap_min, heap_max, heap_avg, heap_used, sd_write_off, psram_used,
+                uptime_s,
+                frames_rx,
+                frames_sd,
+                frames_mqtt,
+                lost,
+                overflow,
+                bus_off_total,
+                heap_free,
+                heap_min,
+                heap_max,
+                heap_avg,
+                heap_used,
+                sd_write_off,
+                psram_used,
             );
 
             // Gravar linha DIAG,HEARTBEAT no SD Card apenas se a sessão estiver ativa
@@ -260,10 +288,21 @@ pub async fn task_watchdog() {
                     &mut hb_line,
                     format_args!(
                         "{},DIAG,0x000,,,,,,,,NOR,HEARTBEAT up={} rx={} sd={} mqtt={} lost={} ovf={} bo={} hf={} hmin={} hmax={} havg={} hu={} sdwr={} psram={}\n",
-                        ts_ms, uptime_s, frames_rx, frames_sd, frames_mqtt,
-                        lost, overflow, bus_off_total,
-                        heap_free, heap_min, heap_max, heap_avg, heap_used,
-                        sd_write_off, psram_used,
+                        ts_ms,
+                        uptime_s,
+                        frames_rx,
+                        frames_sd,
+                        frames_mqtt,
+                        lost,
+                        overflow,
+                        bus_off_total,
+                        heap_free,
+                        heap_min,
+                        heap_max,
+                        heap_avg,
+                        heap_used,
+                        sd_write_off,
+                        psram_used,
                     ),
                 );
                 let _ = bsw_mem::push_line(hb_line.as_str());

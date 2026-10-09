@@ -15,11 +15,13 @@ use alloc::boxed::Box;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::mutex::Mutex;
 use embedded_hal_bus::spi::{ExclusiveDevice, NoDelay};
-use embedded_sdmmc::{RawDirectory, RawVolume, SdCard, TimeSource, Timestamp, VolumeIdx, VolumeManager};
+use embedded_sdmmc::{
+    RawDirectory, RawVolume, SdCard, TimeSource, Timestamp, VolumeIdx, VolumeManager,
+};
 use esp_hal::delay::Delay;
 use esp_hal::gpio::{Level, Output, OutputConfig};
-use esp_hal::spi::master::{Config as SpiConfig, Spi};
 use esp_hal::spi::Mode as SpiMode;
+use esp_hal::spi::master::{Config as SpiConfig, Spi};
 use esp_hal::time::Rate;
 
 use portable_atomic::Ordering;
@@ -45,8 +47,12 @@ impl TimeSource for DummyTimeSource {
 pub struct NoCs;
 
 impl embedded_hal::digital::OutputPin for NoCs {
-    fn set_high(&mut self) -> Result<(), Self::Error> { Ok(()) }
-    fn set_low(&mut self) -> Result<(), Self::Error> { Ok(()) }
+    fn set_high(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    fn set_low(&mut self) -> Result<(), Self::Error> {
+        Ok(())
+    }
 }
 
 impl embedded_hal::digital::ErrorType for NoCs {
@@ -68,7 +74,8 @@ pub struct SdStorage {
 }
 
 pub static SD_STORAGE: Mutex<CriticalSectionRawMutex, Option<SdStorage>> = Mutex::new(None);
-pub static CURRENT_FILENAME: Mutex<CriticalSectionRawMutex, heapless::String<16>> = Mutex::new(heapless::String::new());
+pub static CURRENT_FILENAME: Mutex<CriticalSectionRawMutex, heapless::String<16>> =
+    Mutex::new(heapless::String::new());
 
 /// Inicializa o barramento SPI2 físico e detecta o cartão SD.
 pub fn init_and_probe(
@@ -84,10 +91,7 @@ pub fn init_and_probe(
             .with_frequency(Rate::from_mhz(15))
             .with_mode(SpiMode::_0),
     ) {
-        Ok(spi) => spi
-            .with_mosi(gpio11)
-            .with_sck(gpio12)
-            .with_miso(gpio13),
+        Ok(spi) => spi.with_mosi(gpio11).with_sck(gpio12).with_miso(gpio13),
         Err(e) => {
             log::error!("[MCAL SPI] Falha ao inicializar barramento SPI2: {:?}", e);
             crate::bsw::bsw_mem::set_sd_present(false);
@@ -125,13 +129,21 @@ pub fn init_and_probe(
 
                     // Inicializar a sessão ativa no SD Storage estático (sem ocupar stack local)
                     if let Some(session_idx) = rotate_session_file() {
-                        log::info!("[MCAL SPI] Cartão SD detectado e montado! Sessão ativa: 'S_{:04}'.", session_idx);
+                        log::info!(
+                            "[MCAL SPI] Cartão SD detectado e montado! Sessão ativa: 'S_{:04}'.",
+                            session_idx
+                        );
                     } else {
-                        log::warn!("[MCAL SPI] Cartão SD montado, mas falha ao inicializar arquivo de sessão.");
+                        log::warn!(
+                            "[MCAL SPI] Cartão SD montado, mas falha ao inicializar arquivo de sessão."
+                        );
                     }
                 }
                 Err(e) => {
-                    log::error!("[MCAL SPI] Erro ao abrir diretório raiz do SD Card: {:?}", e);
+                    log::error!(
+                        "[MCAL SPI] Erro ao abrir diretório raiz do SD Card: {:?}",
+                        e
+                    );
                     crate::bsw::bsw_mem::set_sd_present(false);
                 }
             }
@@ -154,13 +166,20 @@ pub fn write_sector_blocking(bytes: &[u8]) -> Result<(), ()> {
     let storage = guard.as_mut().ok_or(())?;
 
     let fn_guard = CURRENT_FILENAME.try_lock().map_err(|_| ())?;
-    let filename = if fn_guard.is_empty() { "S_0001.CSV" } else { fn_guard.as_str() };
+    let filename = if fn_guard.is_empty() {
+        "S_0001.CSV"
+    } else {
+        fn_guard.as_str()
+    };
 
-    let file = storage.volume_mgr.open_file_in_dir(
-        storage.root_dir,
-        filename,
-        embedded_sdmmc::Mode::ReadWriteCreateOrAppend,
-    ).map_err(|_| ())?;
+    let file = storage
+        .volume_mgr
+        .open_file_in_dir(
+            storage.root_dir,
+            filename,
+            embedded_sdmmc::Mode::ReadWriteCreateOrAppend,
+        )
+        .map_err(|_| ())?;
 
     let _ = storage.volume_mgr.write(file, bytes);
     let _ = storage.volume_mgr.close_file(file);
@@ -174,20 +193,28 @@ pub fn wipe_all_sessions() {
         Ok(g) => g,
         Err(_) => return,
     };
-    
+
     if let Some(storage) = guard.as_mut() {
         log::warn!("[MCAL SPI] Iniciando WIPE do Cartão SD (Isso pode levar alguns segundos)...");
         let mut session_filename: heapless::String<16> = heapless::String::new();
         let mut deleted_count = 0;
-        
+
         for id in 1..=9999 {
             session_filename.clear();
             let _ = core::fmt::write(&mut session_filename, format_args!("S_{:04}.CSV", id));
-            
+
             // Verifica se o arquivo existe e deleta
-            if let Ok(file) = storage.volume_mgr.open_file_in_dir(storage.root_dir, session_filename.as_str(), embedded_sdmmc::Mode::ReadOnly) {
+            if let Ok(file) = storage.volume_mgr.open_file_in_dir(
+                storage.root_dir,
+                session_filename.as_str(),
+                embedded_sdmmc::Mode::ReadOnly,
+            ) {
                 let _ = storage.volume_mgr.close_file(file);
-                if storage.volume_mgr.delete_file_in_dir(storage.root_dir, session_filename.as_str()).is_ok() {
+                if storage
+                    .volume_mgr
+                    .delete_file_in_dir(storage.root_dir, session_filename.as_str())
+                    .is_ok()
+                {
                     deleted_count += 1;
                 }
             } else {
@@ -195,20 +222,23 @@ pub fn wipe_all_sessions() {
                 break;
             }
         }
-        
-        log::warn!("[MCAL SPI] WIPE Concluído: {} arquivos removidos.", deleted_count);
-        
+
+        log::warn!(
+            "[MCAL SPI] WIPE Concluído: {} arquivos removidos.",
+            deleted_count
+        );
+
         // Esvaziar buffers de memória pendentes para não recriar arquivos deletados
         crate::bsw::bsw_mem::clear_buffer();
-        
+
         // Reiniciar contadores para S_0001
         crate::bsw::bsw_mem::SESSION_ID.store(1, Ordering::Relaxed);
         crate::bsw::bsw_mem::SD_WRITE_OFFSET.store(0, Ordering::Relaxed);
-        
+
         if let Ok(mut fn_guard) = CURRENT_FILENAME.try_lock() {
             fn_guard.clear();
         }
-        
+
         log::info!("[MCAL SPI] Reset completo: próxima sessão será iniciada em S_0001.CSV.");
     }
 }
@@ -219,7 +249,7 @@ pub fn rotate_session_file() -> Option<u16> {
         Ok(g) => g,
         Err(_) => return None,
     };
-    
+
     if let Some(storage) = guard.as_mut() {
         let mut session_idx: u16 = 1;
         let mut session_filename: heapless::String<16> = heapless::String::new();
@@ -227,7 +257,11 @@ pub fn rotate_session_file() -> Option<u16> {
         for id in 1..=9999 {
             session_filename.clear();
             let _ = core::fmt::write(&mut session_filename, format_args!("S_{:04}.CSV", id));
-            let is_free = match storage.volume_mgr.open_file_in_dir(storage.root_dir, session_filename.as_str(), embedded_sdmmc::Mode::ReadOnly) {
+            let is_free = match storage.volume_mgr.open_file_in_dir(
+                storage.root_dir,
+                session_filename.as_str(),
+                embedded_sdmmc::Mode::ReadOnly,
+            ) {
                 Ok(f) => {
                     let _ = storage.volume_mgr.close_file(f);
                     false
@@ -246,7 +280,7 @@ pub fn rotate_session_file() -> Option<u16> {
             embedded_sdmmc::Mode::ReadWriteCreateOrAppend,
         ) {
             let _ = storage.volume_mgr.close_file(file);
-            
+
             crate::bsw::bsw_mem::SESSION_ID.store(session_idx, Ordering::Relaxed);
             crate::bsw::bsw_mem::SD_WRITE_OFFSET.store(0, Ordering::Relaxed);
 
@@ -256,7 +290,8 @@ pub fn rotate_session_file() -> Option<u16> {
 
             log::info!(
                 "[MCAL SPI] Rotação de SD Card! Nova sessão 'S_{:04}' aberta no arquivo '{}'.",
-                session_idx, session_filename
+                session_idx,
+                session_filename
             );
             return Some(session_idx);
         }
@@ -277,7 +312,11 @@ pub fn list_session_files() -> heapless::Vec<heapless::String<16>, 32> {
         for id in 1..=9999 {
             session_filename.clear();
             let _ = core::fmt::write(&mut session_filename, format_args!("S_{:04}.CSV", id));
-            if let Ok(file) = storage.volume_mgr.open_file_in_dir(storage.root_dir, session_filename.as_str(), embedded_sdmmc::Mode::ReadOnly) {
+            if let Ok(file) = storage.volume_mgr.open_file_in_dir(
+                storage.root_dir,
+                session_filename.as_str(),
+                embedded_sdmmc::Mode::ReadOnly,
+            ) {
                 let _ = storage.volume_mgr.close_file(file);
                 if list.push(session_filename.clone()).is_err() {
                     break;
@@ -302,7 +341,10 @@ impl SessionStreamReader {
     pub fn open(session_filename: &str) -> Option<Self> {
         let mut guard = SD_STORAGE.try_lock().ok()?;
         let storage = guard.as_mut()?;
-        let file_size = match storage.volume_mgr.find_directory_entry(storage.root_dir, session_filename) {
+        let file_size = match storage
+            .volume_mgr
+            .find_directory_entry(storage.root_dir, session_filename)
+        {
             Ok(entry) => entry.size,
             Err(_) => 0,
         };
@@ -312,11 +354,19 @@ impl SessionStreamReader {
             embedded_sdmmc::Mode::ReadOnly,
         ) {
             Ok(file) => {
-                log::info!("[MCAL SPI] Arquivo '{}' aberto para streaming (Tamanho: {} bytes).", session_filename, file_size);
+                log::info!(
+                    "[MCAL SPI] Arquivo '{}' aberto para streaming (Tamanho: {} bytes).",
+                    session_filename,
+                    file_size
+                );
                 Some(Self { file })
             }
             Err(e) => {
-                log::error!("[MCAL SPI] Falha ao abrir '{}' para streaming: {:?}", session_filename, e);
+                log::error!(
+                    "[MCAL SPI] Falha ao abrir '{}' para streaming: {:?}",
+                    session_filename,
+                    e
+                );
                 None
             }
         }
@@ -339,4 +389,3 @@ impl SessionStreamReader {
         }
     }
 }
-

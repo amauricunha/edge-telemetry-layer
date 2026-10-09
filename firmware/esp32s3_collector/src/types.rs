@@ -29,7 +29,7 @@ impl core::fmt::Display for DataSource {
     }
 }
 
-use portable_atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
+use portable_atomic::{AtomicBool, AtomicU8, AtomicU64, Ordering};
 
 /// Base Unix Epoch em milissegundos (ex: 1724498400000). 0 se não sincronizado.
 pub static EPOCH_BASE_MS: AtomicU64 = AtomicU64::new(0);
@@ -54,7 +54,11 @@ pub fn sync_epoch_time(epoch_ms: u64) {
     let now_uptime = embassy_time::Instant::now().as_millis();
     EPOCH_BASE_MS.store(epoch_ms, Ordering::Relaxed);
     SYNC_UPTIME_MS.store(now_uptime, Ordering::Relaxed);
-    log::info!("BSW Time: Epoch sincronizado em {} ms (uptime = {} ms)", epoch_ms, now_uptime);
+    log::info!(
+        "BSW Time: Epoch sincronizado em {} ms (uptime = {} ms)",
+        epoch_ms,
+        now_uptime
+    );
 }
 
 /// Retorna o timestamp atual em milissegundos (absoluto se sincronizado ou relativo ao boot).
@@ -78,12 +82,16 @@ pub fn start_session_timer(duration_minutes: u32, epoch_opt: Option<u64>) {
     let now_uptime = embassy_time::Instant::now().as_millis();
     SESSION_START_MS.store(now_uptime, Ordering::Relaxed);
     SESSION_ACTIVE.store(true, Ordering::Relaxed);
-    
+
     if duration_minutes > 0 {
         let dur_ms = (duration_minutes as u64) * 60_000;
         SESSION_DURATION_MS.store(dur_ms, Ordering::Relaxed);
         SESSION_TIMER_ACTIVE.store(true, Ordering::Relaxed);
-        log::info!("BSW Session: Sessão iniciada com temporizador de {} min ({} ms)", duration_minutes, dur_ms);
+        log::info!(
+            "BSW Session: Sessão iniciada com temporizador de {} min ({} ms)",
+            duration_minutes,
+            dur_ms
+        );
     } else {
         SESSION_DURATION_MS.store(0, Ordering::Relaxed);
         SESSION_TIMER_ACTIVE.store(false, Ordering::Relaxed);
@@ -251,11 +259,13 @@ pub struct BinaryFrame {
 
 impl From<&TelemetryFrame> for BinaryFrame {
     fn from(frame: &TelemetryFrame) -> Self {
-        let val1 = frame.speed_kmh
+        let val1 = frame
+            .speed_kmh
             .or(frame.throttle_pct)
             .or(frame.maf_g_s)
             .unwrap_or(0.0);
-        let val2 = frame.rpm
+        let val2 = frame
+            .rpm
             .or(frame.engine_load_pct)
             .or(frame.coolant_temp_c)
             .unwrap_or(0.0);

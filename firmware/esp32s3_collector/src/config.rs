@@ -18,8 +18,8 @@ pub const CAN_ID_THROTTLE_LOAD: u32 = 0x200;
 pub const CAN_ID_COOLANT_TEMP: u32 = 0x300;
 
 /// CAN IDs do protocolo OBD-II (ISO 15765-4).
-pub const OBD_REQUEST_ID: u32 = 0x7DF;   // Solicitação funcional broadcast
-pub const OBD_RESPONSE_ID: u32 = 0x7E8;  // Resposta da ECU (endereço físico)
+pub const OBD_REQUEST_ID: u32 = 0x7DF; // Solicitação funcional broadcast
+pub const OBD_RESPONSE_ID: u32 = 0x7E8; // Resposta da ECU (endereço físico)
 
 /// CAN ID para comando de perfil de condução (ESP32 → UNO R3).
 pub const PROFILE_CMD_ID: u32 = 0x010;
@@ -80,4 +80,3 @@ pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MQTT_TOPIC_RAW: &str = "/telemetry/raw";
 pub const MQTT_TOPIC_STATUS: &str = "/system/status";
 pub const MQTT_TOPIC_REPLAY: &str = "/telemetry/replay";
-

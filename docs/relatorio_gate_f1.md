@@ -1,6 +1,6 @@
 # Relatório Gate F1 — Edge Telemetry Layer
 
-**Data de geração:** 2026-09-11 18:05  
+**Data de geração:** 2026-10-09 16:07  
 **Arquivos analisados:** S_0001.CSV, S_0003.CSV, S_0005.CSV  
 **Fase:** F1 — Bancada CAN + OBD-II  
 

@@ -50,24 +50,14 @@ pub fn serialize(frame: &TelemetryFrame) -> String<320> {
 /// Serializa um evento de diagnóstico do sistema (DIAG) no formato CSV de 11 colunas.
 pub fn serialize_diag(timestamp_ms: u64, label: &SessionLabel, _msg: &str) -> String<128> {
     let mut s: String<128> = String::new();
-    let _ = write!(
-        s,
-        "{},DIAG,0x000,,,,,,{},\n",
-        timestamp_ms,
-        label.as_str()
-    );
+    let _ = write!(s, "{},DIAG,0x000,,,,,,{},\n", timestamp_ms, label.as_str());
     s
 }
 
 /// Serializa a linha de BOOT contendo os metadados do firmware e hardware
 pub fn serialize_boot(timestamp_ms: u64, label: &SessionLabel) -> String<128> {
     let mut s: String<128> = String::new();
-    let _ = write!(
-        s,
-        "{},DIAG,0x000,,,,,,{},\n",
-        timestamp_ms,
-        label.as_str()
-    );
+    let _ = write!(s, "{},DIAG,0x000,,,,,,{},\n", timestamp_ms, label.as_str());
     s
 }
 
@@ -76,10 +66,18 @@ pub fn serialize_boot(timestamp_ms: u64, label: &SessionLabel) -> String<128> {
 fn write_opt_f32(s: &mut String<320>, val: Option<f32>, decimals: u8) {
     if let Some(v) = val {
         match decimals {
-            0 => { let _ = write!(s, "{:.0}", v); }
-            1 => { let _ = write!(s, "{:.1}", v); }
-            2 => { let _ = write!(s, "{:.2}", v); }
-            _ => { let _ = write!(s, "{:.3}", v); }
+            0 => {
+                let _ = write!(s, "{:.0}", v);
+            }
+            1 => {
+                let _ = write!(s, "{:.1}", v);
+            }
+            2 => {
+                let _ = write!(s, "{:.2}", v);
+            }
+            _ => {
+                let _ = write!(s, "{:.3}", v);
+            }
         }
     }
 }
@@ -121,6 +119,9 @@ mod tests {
     fn test_serialize_diag() {
         let label = SessionLabel::Normal;
         let diag = serialize_diag(3000, &label, "WIFI_DISCONNECTED");
-        assert_eq!(diag.as_str(), "3000,DIAG,0x000,,,,,,,,NOR,WIFI_DISCONNECTED\n");
+        assert_eq!(
+            diag.as_str(),
+            "3000,DIAG,0x000,,,,,,,,NOR,WIFI_DISCONNECTED\n"
+        );
     }
 }

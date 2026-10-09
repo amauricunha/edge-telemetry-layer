@@ -28,9 +28,7 @@ use crate::types::CanFrame;
 ///
 /// Registra timestamp e PID de cada envio para cálculo de latência.
 #[embassy_executor::task]
-pub async fn task_obd_poller(
-    mut tx: esp_hal::twai::TwaiTx<'static, esp_hal::Async>,
-) {
+pub async fn task_obd_poller(mut tx: esp_hal::twai::TwaiTx<'static, esp_hal::Async>) {
     let mut pid_index: usize = 0;
 
     log::info!(
@@ -59,8 +57,10 @@ pub async fn task_obd_poller(
                 // Enviar solicitação via MCAL com timeout de 10ms para evitar travamento em caso de erro físico no barramento
                 match embassy_time::with_timeout(
                     Duration::from_millis(10),
-                    twai::twai_send(&mut tx, &request_frame)
-                ).await {
+                    twai::twai_send(&mut tx, &request_frame),
+                )
+                .await
+                {
                     Ok(Ok(())) => {
                         log::debug!("OBD TX: PID={:#04x}", pid);
                     }
@@ -68,15 +68,20 @@ pub async fn task_obd_poller(
                         log::error!("OBD Poller: Falha no twai_send: {:?}", e);
                     }
                     Err(_) => {
-                        log::warn!("OBD Poller: Timeout enviando requisição para PID {:#04x}", pid);
+                        log::warn!(
+                            "OBD Poller: Timeout enviando requisição para PID {:#04x}",
+                            pid
+                        );
                     }
                 }
 
                 // Aguardar o tempo limite do timeout (50 ms) ouvindo fila de comandos (multiplexação RTE)
                 match embassy_time::with_timeout(
                     Duration::from_millis(config::OBD_TIMEOUT_MS),
-                    crate::CAN_CMD_CHANNEL.receive()
-                ).await {
+                    crate::CAN_CMD_CHANNEL.receive(),
+                )
+                .await
+                {
                     Ok(cmd_frame) => {
                         process_can_cmd(&mut tx, cmd_frame).await;
                     }
@@ -89,12 +94,15 @@ pub async fn task_obd_poller(
                 }
 
                 // Aguardar o tempo restante para completar o intervalo total de 100 ms ouvindo fila de comandos
-                let remaining_ms = config::OBD_POLL_INTERVAL_MS.saturating_sub(config::OBD_TIMEOUT_MS);
+                let remaining_ms =
+                    config::OBD_POLL_INTERVAL_MS.saturating_sub(config::OBD_TIMEOUT_MS);
                 if remaining_ms > 0 {
                     match embassy_time::with_timeout(
                         Duration::from_millis(remaining_ms),
-                        crate::CAN_CMD_CHANNEL.receive()
-                    ).await {
+                        crate::CAN_CMD_CHANNEL.receive(),
+                    )
+                    .await
+                    {
                         Ok(cmd_frame) => {
                             process_can_cmd(&mut tx, cmd_frame).await;
                         }
@@ -105,8 +113,10 @@ pub async fn task_obd_poller(
                 // Avançar para o próximo PID
                 pid_index = (pid_index + 1) % config::OBD_PIDS.len();
             },
-            crate::BUS_OFF_SIGNAL.wait()
-        ).await {
+            crate::BUS_OFF_SIGNAL.wait(),
+        )
+        .await
+        {
             embassy_futures::select::Either::First(_) => {}
             embassy_futures::select::Either::Second(_) => {
                 log::warn!("OBD Poller pausado cooperativamente — aguardando Bus-Off recovery");
@@ -118,12 +128,17 @@ pub async fn task_obd_poller(
 }
 
 /// Helper para enviar o comando CAN lido do RTE.
-async fn process_can_cmd(tx: &mut esp_hal::twai::TwaiTx<'static, esp_hal::Async>, cmd_frame: CanFrame) {
-    log::info!("OBD Poller: Comando CAN recebido da fila RTE, enviando (ID: {:#x})", cmd_frame.id);
-    match embassy_time::with_timeout(
-        Duration::from_millis(10),
-        twai::twai_send(tx, &cmd_frame)
-    ).await {
+async fn process_can_cmd(
+    tx: &mut esp_hal::twai::TwaiTx<'static, esp_hal::Async>,
+    cmd_frame: CanFrame,
+) {
+    log::info!(
+        "OBD Poller: Comando CAN recebido da fila RTE, enviando (ID: {:#x})",
+        cmd_frame.id
+    );
+    match embassy_time::with_timeout(Duration::from_millis(10), twai::twai_send(tx, &cmd_frame))
+        .await
+    {
         Ok(Ok(())) => {
             log::info!("OBD Poller: Comando CAN enviado com sucesso");
         }

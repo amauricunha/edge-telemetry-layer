@@ -1,0 +1,27 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Windows-specific scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.ico binary
+*.zip binary
+*.tar.gz binary
+
+# GitHub Linguist Overrides (prevent docs/data from skewing language stats)
+# Ensures GitHub Language Bar correctly highlights Rust and C++
+docs/** linguist-documentation
+docs/MBSE/overleaf/** linguist-documentation
+dataset/** linguist-documentation
+dataset/*.CSV linguist-documentation
+*.csv linguist-documentation
+*.CSV linguist-documentation
+*.dbc linguist-documentation
+*.json linguist-documentation

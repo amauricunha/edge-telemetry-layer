@@ -93,7 +93,10 @@ pub fn flush_sync() {
         }
         if write_success {
             SD_WRITE_OFFSET.fetch_add(len as u32, Ordering::Relaxed);
-            log::info!("BSW Mem: Flush síncrono de {} bytes concluído no arquivo atual.", len);
+            log::info!(
+                "BSW Mem: Flush síncrono de {} bytes concluído no arquivo atual.",
+                len
+            );
         }
     }
 }
@@ -125,12 +128,13 @@ pub fn flush_and_rotate_session(
 
     log::info!(
         "BSW Mem: Nova sessão S_{:04} ({}) iniciada atomicamente (Duração: {} min).",
-        new_session_idx, label.as_str(), duration_min
+        new_session_idx,
+        label.as_str(),
+        duration_min
     );
 
     Some(new_session_idx)
 }
-
 
 /// Task Embassy de flush periódico para o SD Card (a cada 2 s ou imediatamente ao atingir 3.5 KB).
 #[embassy_executor::task]
@@ -138,11 +142,8 @@ pub async fn task_sd_writer() {
     log::info!("BSW Mem: task_sd_writer iniciada (Flush a cada 2s ou imed. em 3.5 KB)");
 
     loop {
-        embassy_futures::select::select(
-            Timer::after(Duration::from_secs(2)),
-            FLUSH_SIGNAL.wait(),
-        )
-        .await;
+        embassy_futures::select::select(Timer::after(Duration::from_secs(2)), FLUSH_SIGNAL.wait())
+            .await;
 
         if !SD_OK.load(Ordering::Relaxed) {
             continue;
@@ -178,7 +179,11 @@ pub async fn task_sd_writer() {
                     Ok(g) if !g.is_empty() => g.as_str(),
                     _ => "S_0001.CSV",
                 };
-                log::info!("BSW Mem: Flush de {} bytes GRAVADO COM SUCESSO no arquivo {} do SD Card!", len, fn_str);
+                log::info!(
+                    "BSW Mem: Flush de {} bytes GRAVADO COM SUCESSO no arquivo {} do SD Card!",
+                    len,
+                    fn_str
+                );
             } else {
                 log::error!("BSW Mem: Falha ao escrever {} bytes no SD Card!", len);
             }

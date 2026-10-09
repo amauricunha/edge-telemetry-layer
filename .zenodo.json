@@ -1,0 +1,34 @@
+{
+  "title": "Edge Telemetry Layer: An Open-Source Embedded Real-Time Telemetry and Hardware-in-the-Loop Architecture for CAN and OBD-II with Formal MBSE Verification",
+  "description": "An open-source embedded edge telemetry architecture for automotive CAN and OBD-II diagnostics. Features an asynchronous memory-safe firmware for ESP32-S3 in no_std Rust (Embassy RTOS), a C++ Hardware-in-the-Loop (HIL) ECU emulator, reproducible bench datasets (FAT32 SD and MQTT), and full Model-Based Systems Engineering (MBSE) formal specifications in NASA FRET, SAE AS5506B AADL (OSATE), and CAvA evolution analysis.",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Cunha, Amauri",
+      "affiliation": "Federal University of Santa Catarina (UFSC)"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "automotive-telemetry",
+    "can-bus",
+    "obd-ii",
+    "embedded-rust",
+    "esp32-s3",
+    "embassy-rs",
+    "hardware-in-the-loop",
+    "model-based-systems-engineering",
+    "nasa-fret",
+    "aadl",
+    "cava",
+    "tinyml"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/amauricunha/edge-telemetry-layer",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}

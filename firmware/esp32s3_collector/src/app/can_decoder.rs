@@ -59,13 +59,13 @@ pub fn parse_obd_response(
     let b = if frame.dlc > 4 { frame.data[4] } else { 0 };
 
     let virtual_id = match pid {
-        0x0D => 0x701,  // speed
-        0x0C => 0x702,  // rpm
-        0x11 => 0x703,  // throttle
-        0x04 => 0x704,  // engine load
-        0x10 => 0x705,  // maf
-        0x05 => 0x706,  // coolant
-        _    => return None,
+        0x0D => 0x701, // speed
+        0x0C => 0x702, // rpm
+        0x11 => 0x703, // throttle
+        0x04 => 0x704, // engine load
+        0x10 => 0x705, // maf
+        0x05 => 0x706, // coolant
+        _ => return None,
     };
 
     let mut tf = TelemetryFrame::new(timestamp_ms, DataSource::ObdPid, virtual_id);
