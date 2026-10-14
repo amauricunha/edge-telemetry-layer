@@ -714,7 +714,7 @@ platform  = atmelavr
 board     = uno
 framework = arduino
 lib_deps  =
-    coryjfowler/MCP_CAN_lib @ ^1.5.0
+    coryjfowler/mcp_can @ ^1.5.0
 ```
 
 ### 10.2 Firmware ESP32-S3 (Rust)
